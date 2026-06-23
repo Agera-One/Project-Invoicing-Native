@@ -4,16 +4,25 @@ require_once '../../connection.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $email = $_POST['email'];
-    $phone = $_POST['phone'];
+    $phone  = $_POST['phone'];
     $address = $_POST['address'];
+    
+    $checkEmail = "SELECT email FROM customer WHERE email='$email'";
+    $result = mysqli_query($conn, $checkEmail);
 
-    $sql = "INSERT INTO customer (name, email, phone, address) VALUES ('$name', '$email', '$phone', '$address');";
-
-    if (mysqli_query($conn, $sql)) {
-        header("Location: customer.php");
-        exit();
+    if (mysqli_num_rows($result) > 0) {
+        echo '<script>alert("Email already exists. Please use a different email.")</script>';
+        echo '<script>window.location.href = "customer-add.php";</script>';
+        exit;
     } else {
-        echo "Error: " . mysqli_error($conn);
+        $sql = "INSERT INTO customer (name, email, phone, address) VALUES ('$name', '$email', '$phone', '$address');";
+    
+        if (mysqli_query($conn, $sql)) {
+            header("Location: customer.php");
+            exit();
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
     }
 }
 
@@ -40,19 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="mb-3">
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input name="name" type="text" class="form-control">
+                        <input name="name" type="text" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input name="email" type="email" class="form-control">
+                        <input name="email" type="email" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Phone</label>
-                        <input name="phone" type="text" class="form-control">
+                        <input name="phone" type="text" class="form-control" required>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Address</label>
-                        <input name="address" type="text" class="form-control">
+                        <input name="address" type="text" class="form-control" required>
                     </div>
                 </div>
                 <div class="card-footer">
