@@ -35,21 +35,21 @@ $result = mysqli_query($conn, $sql);
             </thead>
             <tbody>
                 <?php while ($items = mysqli_fetch_assoc($result)): ?>
-                <tr>
-                    <th scope="row"><?= $items['id'] ?></th>
-                    <td><?= $items['ref_no'] ?></td>
-                    <td><?= $items['name'] ?></td>
-                    <td><?= $items['price'] ?></td>
-                    <td>
-                        <a class="btn btn-sm btn-success" href="index-edit.php?id=<?= $items['id'] ?>">
-                            Edit
-                        </a>
-                        <a class="btn btn-sm btn-danger" href="index-delete.php?id=<?= $items['id'] ?>"
-                            onclick="return confirm('Are you sure you want to delete this product?');">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
+                    <tr>
+                        <th scope="row"><?= $items['id'] ?></th>
+                        <td><?= $items['ref_no'] ?></td>
+                        <td><?= $items['name'] ?></td>
+                        <td>Rp<?= number_format($items['price'], 2, ',', '.') ?></td>
+                        <td>
+                            <a class="btn btn-sm btn-success" href="index-edit.php?id=<?= $items['id'] ?>">
+                                Edit
+                            </a>
+                            <a class="btn btn-sm btn-danger" href="index-delete.php?id=<?= $items['id'] ?>"
+                                onclick="return confirm('Are you sure you want to delete this product?');">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
                 <?php endwhile; ?>
             </tbody>
         </table>
