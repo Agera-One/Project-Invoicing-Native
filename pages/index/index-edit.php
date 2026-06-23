@@ -11,6 +11,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $price = $_POST['price'];
 
+    if (!is_numeric($price)) {
+        echo '<script>alert("The price must be a number.")</script>';
+        echo '<script>window.location.href = "index.php";</script>';
+        exit;
+    }
+
+    if ($price < 0) {
+        echo '<script>alert("The price must not be negative.")</script>';
+        echo '<script>window.location.href = "index.php";</script>';
+        exit;
+    }
+
     $sql = "UPDATE item SET ref_no='$ref_no', name='$name', price='$price' WHERE id=$id";
 
     if (mysqli_query($conn, $sql)) {
