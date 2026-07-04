@@ -1,0 +1,18 @@
+{
+    "name": "ageraone/invoicing-wevelope",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Ageraone\\InvoicingWevelope\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Agera-One",
+            "email": "182347485+Agera-One@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "catfan/medoo": "^2.4"
+    }
+}
