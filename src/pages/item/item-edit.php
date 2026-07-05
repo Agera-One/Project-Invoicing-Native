@@ -3,21 +3,28 @@ require_once '../../connection.php';
 
 $id = $_GET['id'];
 
-$items = $database->select('item', '*', [
+$item = $database->get('item', '*', [
     'id' => $id
 ]);
 
-foreach ($items as $item);
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ref_no = $_POST['ref_no'];
     $name = $_POST['name'];
     $price = $_POST['price'];
 
-    if ($price < 0) {
-        echo '<script>alert("The price must not be negative.")</script>';
-        echo '<script>window.location.href = "item.php";</script>';
-        exit;
+    $check_ref_no = count($database->select('item', 'ref_no', [
+        'AND' => [
+            'ref_no' => $ref_no,
+            'id[!]' => $id
+        ]
+    ]));
+
+    if ($price < 1) {
+        echo '<script>alert("The minimum price is 1.")</script>';
+    } elseif ($check_ref_no > 0) {
+        echo '<script>alert("Reference number already exists. Please use a different reference number.")</script>';
     } else {
         $items = $database->update('item', [
             'ref_no' => $ref_no,

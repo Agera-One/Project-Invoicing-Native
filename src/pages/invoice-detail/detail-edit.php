@@ -5,30 +5,43 @@ $id = $_GET['id'];
 $item_id = $_GET['item_id'];
 $invoice_id = $_GET['invoice_id'];
 
-$details = $database->select('invoice_detail', '*', [
+$detail = $database->get('invoice_detail', '*', [
     'id' => $id
 ]);
-
-foreach ($details as $detail);
 
 $items =  $database->select('item', '*');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $invoice_id = $_POST['invoice_id'];
     $item_id = $_POST['item_id'];
-    $quantity = $_POST['quantity'];
-    $unit_price = $_POST['unit_price'];
+    $quantity = (int)$_POST['quantity'];
+    $unit_price = (int)$_POST['unit_price'];
+    $amount = 0;
 
-    if ($quantity < 0) {
-        echo '<script>alert("The quantity must not be negative.")</script>';
-    } elseif ($unit_price < 0) {
-        echo '<script>alert("The price must not be negative.")</script>';
+    if (empty($unit_price)) {
+        $units_price = $database->get('item', 'price', [
+            'id' => $item_id
+        ]);
+
+        if ($units_price) {
+            $unit_price = $units_price;
+            $amount = $quantity * $unit_price;
+        }
+    }
+
+    if ($quantity < 1) {
+        echo '<script>alert("The minimum quantity is 1.")</script>';
+    } elseif ($unit_price < 1) {
+        echo '<script>alert("The minimum price is 1.")</script>';
     } else {
+        $amount = $quantity * $unit_price;
+
         $invoices = $database->update('invoice_detail', [
             'invoice_id' => $invoice_id,
             'item_id' => $item_id,
             'quantity' => $quantity,
-            'unit_price' => $unit_price
+            'unit_price' => $unit_price,
+            'amount' => $amount
         ], [
             'id' => $id
         ]);

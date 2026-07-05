@@ -8,11 +8,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone  = $_POST['phone']; 
     $address = $_POST['address'];
 
-    $check_email = count($database->select('item', 'email', [
+    $check_email = count($database->select('customer', 'email', [
         'email' => $email,
     ]));
 
-    $check_phone = count($database->select('item', 'phone', [
+    $check_phone = count($database->select('customer', 'phone', [
         'phone' => $phone,
     ]));
 
@@ -20,6 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<script>alert("Email already exists. Please use a different email.")</script>';
     } elseif ($check_phone > 0) {
         echo '<script>alert("phone already exists. Please use a different phone.")</script>';
+    } elseif (strlen($name) > 255) {
+        echo '<script>alert("Maximum name length is 255 characters.")</script>';
+    } elseif (strlen($email) > 50) {
+        echo '<script>alert("Maximum email length is 50 characters.")</script>';
+    } elseif (strlen($phone) > 20) {
+        echo '<script>alert("Maximum phone length is 20 characters.")</script>';
     } else {
         $items = $database->insert('customer', [
             'name' => $name,

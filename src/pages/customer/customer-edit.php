@@ -3,11 +3,9 @@ require_once '../../connection.php';
 
 $id = $_GET['id'];
 
-$customers = $database->select('customer', '*', [
+$customer = $database->get('customer', '*', [
     'id' => $id
 ]);
-
-foreach ($customers as $customer);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
@@ -15,18 +13,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = $_POST['phone'];
     $address = $_POST['address'];
 
-    $customers = $database->update('customer', [
+    $check_email = count($database->select('customer', 'email', [
+        'AND' => [
             'email' => $email,
-            'name' => $name,
-            'phone' => $phone,
-            'address' => $address
-        ], [
-            'id' => $id
+            'id[!]' => $id
         ]
-    );
+    ]));
 
-    header("Location: customer.php");
-    exit();
+    $check_phone = count($database->select('customer', 'phone', [
+        'AND' => [
+            'phone' => $phone,
+            'id[!]' => $id
+        ]
+    ]));
+
+    if ($check_email > 0) {
+        echo '<script>alert("Email already exists. Please use a different email.")</script>';
+    } elseif ($check_phone > 0) {
+        echo '<script>alert("phone already exists. Please use a different phone.")</script>';
+    } elseif (strlen($name) > 255) {
+        echo '<script>alert("Maximum name length is 255 characters.")</script>';
+    } elseif (strlen($email) > 50) {
+        echo '<script>alert("Maximum email length is 50 characters.")</script>';
+    } elseif (strlen($phone) > 20) {
+        echo '<script>alert("Maximum phone length is 20 characters.")</script>';
+    } else {
+        $customers = $database->update('customer', [
+                'email' => $email,
+                'name' => $name,
+                'phone' => $phone,
+                'address' => $address
+            ], [
+                'id' => $id
+            ]
+        );
+
+        header("Location: customer.php");
+        exit();
+    }
+
 }
 
 ?>

@@ -7,11 +7,9 @@ $id = $_GET['id'];
 $customer_id = $_GET['customer_id'];
 $invoice_id = $_GET['invoice_id'];
 
-$payments = $database->select('payment', '*', [
+$payment = $database->get('payment', '*', [
     'id' => $id
 ]);
-
-foreach ($payments as $payment);
 
 $invoices = $database->select('invoice', [
     '[><]customer' => ['customer_id' => 'id'],
@@ -35,8 +33,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date = $_POST['date'];
         $amount = $_POST['amount'];
 
+        $check_code = count($database->select('payment', 'payment_code', [
+            'AND' => [
+                'payment_code' => $payment_code,
+                'id[!]' => $id
+            ]
+        ]));
+
         if (strlen($payment_code) > 10) {
-            echo '<script>alert("The payment code must not be negative.")</script>';
+            echo '<script>alert("The maximum payment code is 10 character.")</script>';
+        } elseif ($check_code > 0) {
+            echo '<script>alert("Code payment already exists. Please use a different code payment.")</script>';
         } else {
             $payments = $database->update('payment', [
                 'customer_id' => $customer_id,

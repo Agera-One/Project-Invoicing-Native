@@ -11,7 +11,7 @@ $invoices = $database->select('invoice', [
     'invoice.invoice_code',
     'invoice.customer_id',
     'customer.name(customer_name)',
-    'total_due' => Medoo::raw('SUM(<invoice_detail.amount>)')
+    'total_bill' => Medoo::raw('SUM(<invoice_detail.amount>)')
 ], [
     'GROUP' => [
         'invoice.id',
@@ -33,30 +33,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $amount = (int)$_POST['amount']; // Cast ke integer agar kalkulasi akurat
 
         if (strlen($payment_code) > 10) {
-            echo '<script>alert("The payment code must not be negative.")</script>';
+            echo '<script>alert("The maximum payment code is 10 character.")</script>';
         } else {
             $check_code = $database->count('payment', ['payment_code' => $payment_code]);
 
             if ($check_code > 0) {
                 echo '<script>alert("Code payment already exists. Please use a different code payment.")</script>';
             } else {
-
-                // --- KODE VALIDASI SISA TAGIHAN ---
-
                 // 1. Ambil Total Tagihan Awal (Total Due) dari invoice_detail
-                $total_due_query = $database->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
-                $total_due = array_sum($total_due_query) ?? 0;
+                $total_bill_query = $database->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
+                $total_bill = array_sum($total_bill_query) ?? 0;
 
                 // 2. Ambil Total yang sudah pernah dibayar sebelumnya untuk invoice ini
                 $total_paid_query = $database->select('payment', 'amount', ['invoice_id' => $invoice_id]);
                 $total_already_paid = array_sum($total_paid_query) ?? 0;
 
                 // 3. Hitung Sisa Tagihan Riil
-                $remaining_bill = $total_due - $total_already_paid;
+                $remaining_bill = $total_bill - $total_already_paid;
 
                 // 4. Validasi: Jika jumlah input baru melebihi sisa tagihan
                 if ($amount > $remaining_bill) {
-                    echo '<script>alert("Gagal! Jumlah pembayaran (Rp ' . number_format($amount, 0, ',', '.') . ') melebihi sisa tagihan yang harus dibayar (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
+                    echo '<script>alert("Failed! Payment amount (Rp ' . number_format($amount, 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
                 } else {
                     // Jika lolos pengecekan, baru simpan ke database
                     $payments = $database->insert('payment', [
@@ -102,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="" disabled selected>Select invoice</option>
                             <?php foreach ($invoices as $invoice): ?>
                                 <option value="<?= $invoice['customer_id'] . '-' . $invoice['id']; ?>">
-                                    <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] . ' (Rp' . number_format($invoice['total_due'], 0, ',', '.') . ')'; ?>
+                                    <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] . ' (Rp' . number_format($invoice['total_bill'], 0, ',', '.') . ')'; ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>

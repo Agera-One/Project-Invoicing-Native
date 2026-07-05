@@ -8,7 +8,7 @@ $active_page = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
 
-$rows = count($database->select("item", "*"));
+$rows = count($database->select("customer", "*"));
 $total_page = ceil($rows / $limit);
 
 $customers = $database->select('customer', '*', [

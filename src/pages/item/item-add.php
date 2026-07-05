@@ -8,8 +8,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (strlen($ref_no) > 8) {
         echo '<script>alert("Maximum reference number length is 8 characters.")</script>';
-    } elseif ($price < 0) {
-        echo '<script>alert("The price must not be negative.")</script>';
+    } elseif ($price < 1) {
+        echo '<script>alert("The minimum price is 1.")</script>';
+    } elseif (strlen($name) > 255) {
+        echo '<script>alert("Maximum name length is 255 characters.")</script>';
     } else {
         $check_ref_no = count($database->select('item', 'ref_no', [
             'ref_no' => $ref_no

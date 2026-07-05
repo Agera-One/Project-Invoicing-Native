@@ -24,10 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
     $due_date = $_POST['due_date'];
 
+    $check_invoice_code = count($database->select('invoice', 'invoice_code', [
+        'AND' => [
+            'invoice_code' => $invoice_code,
+            'id[!]' => $id
+        ]
+    ]));
+
     if (strlen($invoice_code) > 10) {
         echo '<script>alert("The invoice code is limited to a maximum of 10 characters")</script>';
     } elseif ($due_date < $date) {
         echo '<script>alert("The due date must not be earlier than the invoice date")</script>';
+    } elseif ($check_invoice_code > 0) {
+        echo '<script>alert("Invoice code already exists. Please use a different invoice code.")</script>';
     } else {
         $invoices = $database->update('invoice', [
             'customer_id' => $customer_id,

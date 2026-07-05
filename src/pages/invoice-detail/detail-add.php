@@ -22,13 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $amount = $quantity * $unit_price;
         }
     }
-    
-    if ($quantity < 0) {
-        echo '<script>alert("The quantity must not be negative.")</script>';
-    } elseif ($unit_price < 0) {
-        echo '<script>alert("The price must not be negative.")</script>';
+
+    if ($quantity < 1) {
+        echo '<script>alert("The minimum quantity is 1.")</script>';
+    } elseif ($unit_price < 1) {
+        echo '<script>alert("The minimum price is 1.")</script>';
     } else {
         $amount = $quantity * $unit_price;
+        
         $invoice_details = $database->insert('invoice_detail', [
             'invoice_id' => $invoice_id,
             'item_id' => $item_id,
@@ -69,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <select name="item_id" class="form-select" aria-label="Default select example" required>
                             <option value="" disabled selected>Select item name</option>
                             <?php foreach ($items as $item): ?>
-                                <option value="<?= $item['id']; ?>">
+                                <option value="<?= $item['id']; ?>" <?= ($item_id == $item['id']) ? 'selected' : ''; ?>>
                                     <?= $item['name'] . ' = Rp' . number_format($item['price'], 2, ',', '.'); ?>
                                 </option>
                             <?php endforeach; ?>

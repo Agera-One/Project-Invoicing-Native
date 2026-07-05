@@ -95,6 +95,7 @@ if (isset($_POST['search'])) {
                                         <th scope="col">Phone</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Position</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col" class="pe-4" width="160">Action</th>
                                     </tr>
                                 </thead>
@@ -106,6 +107,7 @@ if (isset($_POST['search'])) {
                                             <td><?= $user['phone'] ?></td>
                                             <td><?= $user['email'] ?></td>
                                             <td><?= $user['position'] ?></td>
+                                            <?= ($user['status'] == 'active') ? '<td><span class="badge text-bg-success"> Active </span></td>' : '<td><span class="badge text-bg-danger"> Inactive </span></td>'; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
                                                     <a class="btn btn-sm btn-success px-3" href="user-edit.php?id=<?= $user['id'] ?>">Edit</a>
