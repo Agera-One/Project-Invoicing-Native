@@ -90,7 +90,7 @@
 
 <aside class="app-sidebar shadow-sm">
     <div class="sidebar-brand">
-        <span class="brand-text">ADMINLTE 4</span>
+        <span class="brand-text">RED HAT</span>
     </div>
 
     <div class="sidebar-wrapper">
@@ -101,6 +101,13 @@
                 aria-label="Main navigation"
                 data-accordion="true"
                 id="navigation">
+
+                <li class="nav-item" data-group="barang">
+                    <a href="../dashboard/dashboard.php" class="nav-link">
+                        <i class="nav-icon bi bi-box-seam"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
 
                 <li class="nav-item" data-group="barang">
                     <a href="../item/item.php" class="nav-link">

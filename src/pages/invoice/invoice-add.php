@@ -1,5 +1,6 @@
 <?php
 require_once '../../connection.php';
+include '../../components/scripts.php';
 
 $customer_id = '';
 $customers = $database->select('customer', ['id', 'name']);
@@ -48,46 +49,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
-<body>
-    <div class="card card-primary card-outline mb-4">
-        <div class="card-header">
-            <div class="card-title">Add New Invoice</div>
-        </div>
-        <form action="" method="POST">
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="mb-3">
-                        <label class="form-label">Code Invoice</label>
-                        <input value="<?= $invoice_code ?? ''; ?>" name="invoice_code" type="text" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Customer Name</label>
-                        <select name="customer_id" class="form-select" aria-label="Default select example" required>
-                            <option value="" disabled selected>Select customer name</option>
-                            <?php foreach ($customers as $customer): ?>
-                                <option value="<?= $customer['id']; ?>" <?= ($customer_id == $customer['id']) ? 'selected' : ''; ?>>
-                                    <?= $customer['name']; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Date</label>
-                        <input value="<?= $date ?? ''; ?>" name="date" type="date" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Due Date</label>
-                        <input value="<?= $due_date ?? ''; ?>" name="due_date" type="date" class="form-control" required>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <a href="invoice.php" class="btn btn-danger">Cancel</a>
-                </div>
-        </form>
-    </div>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?php include '../../components/sidebar.php'; ?>
 
-    <script src="../../../assets//admin-lte/dist/js/adminlte.js"></script>
+        <main class="app-main py-4">
+            <div class="container-fluid px-4">
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header">
+                        <div class="card-title">Add New Invoice</div>
+                    </div>
+                    <form action="" method="POST">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Code Invoice</label>
+                                    <input value="<?= $invoice_code ?? ''; ?>" name="invoice_code" type="text" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Customer Name</label>
+                                    <select name="customer_id" class="form-select" aria-label="Default select example" required>
+                                        <option value="" disabled selected>Select customer name</option>
+                                        <?php foreach ($customers as $customer): ?>
+                                            <option value="<?= $customer['id']; ?>" <?= ($customer_id == $customer['id']) ? 'selected' : ''; ?>>
+                                                <?= $customer['name']; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Date</label>
+                                    <input value="<?= $date ?? ''; ?>" name="date" type="date" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Due Date</label>
+                                    <input value="<?= $due_date ?? ''; ?>" name="due_date" type="date" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success">Save</button>
+                                <a href="invoice.php" class="btn btn-danger">Cancel</a>
+                            </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

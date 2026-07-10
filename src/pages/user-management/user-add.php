@@ -1,5 +1,6 @@
 <?php
 require_once '../../connection.php';
+include '../../components/scripts.php';
 
 $status = '';
 
@@ -65,46 +66,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
-<body>
-    <div class="card card-primary card-outline mb-4">
-        <div class="card-header">
-            <div class="card-title">Add New User</div>
-        </div>
-        <form action="" method="POST">
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Name</label>
-                    <input value="<?= $name ?? ''; ?>" name="name" type="text" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Phone</label>
-                    <input value="<?= $phone ?? ''; ?>" name="phone" type="tel" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Email</label>
-                    <input value="<?= $email ?? ''; ?>" name="email" type="email" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="exampleInputPassword1" class="form-label">Position</label>
-                    <input value="<?= $position ?? ''; ?>" name="position" type="text" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Status User</label>
-                    <select name="status" class="form-select" aria-label="Default select example" required>
-                        <option value="" disabled selected>Select status user</option>
-                        <option value="active" <?= ($status == 'active') ? 'selected' : ''; ?>>Active</option>
-                        <option value="inactive" <?= ($status == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-footer">
-                <button type="submit" class="btn btn-success">Save</button>
-                <a href="user.php" class="btn btn-danger">Cancel</a>
-            </div>
-        </form>
-    </div>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?php include '../../components/sidebar.php'; ?>
 
-    <script src="../../../assets//admin-lte/dist/js/adminlte.js"></script>
+        <main class="app-main py-4">
+            <div class="container-fluid px-4">
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header">
+                        <div class="card-title">Add New User</div>
+                    </div>
+                    <form action="" method="POST">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Name</label>
+                                <input value="<?= $name ?? ''; ?>" name="name" type="text" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Phone</label>
+                                <input value="<?= $phone ?? ''; ?>" name="phone" type="tel" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Email</label>
+                                <input value="<?= $email ?? ''; ?>" name="email" type="email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Position</label>
+                                <input value="<?= $position ?? ''; ?>" name="position" type="text" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Status User</label>
+                                <select name="status" class="form-select" aria-label="Default select example" required>
+                                    <option value="" disabled selected>Select status user</option>
+                                    <option value="active" <?= ($status == 'active') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="inactive" <?= ($status == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <a href="user.php" class="btn btn-danger">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

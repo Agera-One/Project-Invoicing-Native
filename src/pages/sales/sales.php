@@ -1,5 +1,6 @@
 <?php
 require_once '../../connection.php';
+include '../../components/scripts.php';
 
 use Medoo\Medoo;
 
@@ -13,6 +14,7 @@ $top_products = $database->select('item', [
     ]
 ], [
     'item.name(item_name)',
+    'invoice_detail.unit_price',
     'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
     'total_revenue' => Medoo::raw('SUM(<invoice_detail.unit_price> * <invoice_detail.quantity>)')
 ], [
@@ -23,16 +25,6 @@ $top_products = $database->select('item', [
     'LIMIT' => 5
 ]);
 
-// $sql_best_seller = "SELECT 
-//         i.name AS item_name,
-//         SUM(di.quantity) AS total_unit_sold,
-//         SUM(di.unit_price * di.quantity) AS total_revenue
-//     FROM item i
-//     JOIN invoice_detail di
-//     ON i.id = di.item_id
-//     GROUP BY item_name
-//     ORDER BY total_unit_sold DESC
-//     LIMIT 5;";
 
 if ($period === 'daily') {
     $omsets = $database->select('invoice', [
@@ -52,17 +44,6 @@ if ($period === 'daily') {
         'LIMIT' => 7
     ]);
 
-    // $sql_omsets = "SELECT 
-    //                 DATE_FORMAT(i.date, '%W, %d %M %Y') AS period,
-    //                 COUNT(DISTINCT i.id) AS total_invoice,
-    //                 SUM(di.quantity) AS total_unit_sold,
-    //                 SUM(di.unit_price * di.quantity) AS total_revenue
-    //             FROM invoice i
-    //             JOIN invoice_detail di
-    //             ON i.id = di.invoice_id
-    //             GROUP BY i.date
-    //             ORDER BY i.date DESC
-    //             LIMIT 7;";
 
 } elseif ($period === 'weekly') {
     $omsets = $database->select('invoice', [
@@ -83,18 +64,6 @@ if ($period === 'daily') {
         'LIMIT' => 5
     ]);
 
-    // $sql_omsets = "SELECT 
-    //                 YEARWEEK(i.date, 1) AS period_code,
-    //                 CONCAT('Week ', WEEK(MIN(i.date), 1), ' (', DATE_FORMAT(MIN(i.date), '%M'), ')') AS period,
-    //                 COUNT(DISTINCT i.id) AS total_invoice,
-    //                 SUM(di.quantity) AS total_unit_sold,
-    //                 SUM(di.unit_price * di.quantity) AS total_revenue
-    //             FROM invoice i
-    //             JOIN invoice_detail di
-    //             ON i.id = di.invoice_id
-    //             GROUP BY YEARWEEK(i.date, 1)
-    //             ORDER BY period_code DESC
-    //             LIMIT 5;";
 } else {
     $omsets = $database->select('invoice', [
         '[><]invoice_detail' => [
@@ -113,16 +82,6 @@ if ($period === 'daily') {
         'LIMIT' => 6
     ]);
 
-    // $sql_omsets = "SELECT 
-    //                 DATE_FORMAT(i.date, '%Y-%m') AS period,
-    //                 COUNT(DISTINCT i.id) AS total_invoice,
-    //                 SUM(di.quantity) AS total_unit_sold,
-    //                 SUM(di.unit_price * di.quantity) AS total_revenue
-    //             FROM invoice i
-    //             JOIN invoice_detail di
-    //             ON i.id = di.invoice_id
-    //             GROUP BY DATE_FORMAT(i.date, '%Y-%m')
-    //             ORDER BY period DESC;";
 }
 ?>
 
@@ -142,7 +101,7 @@ if ($period === 'daily') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../layouts/sidebar.php'; ?>
+        <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -212,6 +171,7 @@ if ($period === 'daily') {
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
                                         <th scope="col">Item Name</th>
+                                        <th scope="col">Units Price</th>
                                         <th scope="col">Units Sold</th>
                                         <th scope="col" class="pe-4">Revenue</th>
                                     </tr>
@@ -221,6 +181,7 @@ if ($period === 'daily') {
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= $number_top_product++ ?></th>
                                             <td class="fw-medium"><?= $top_product['item_name'] ?></td>
+                                            <td>Rp<?= number_format($top_product['unit_price'], 0, ',', '.') ?></td>
                                             <td><?= $top_product['total_unit_sold'] ?></td>
                                             <td class="pe-4">Rp<?= number_format($top_product['total_revenue'], 2, ',', '.') ?></td>
                                         </tr>
@@ -234,61 +195,6 @@ if ($period === 'daily') {
             </div>
         </main>
     </div>
-
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
-    <script>
-        (() => {
-            'use strict';
-            const STORAGE_KEY = 'lte-theme';
-            const getStoredTheme = () => localStorage.getItem(STORAGE_KEY);
-            const setStoredTheme = (theme) => localStorage.setItem(STORAGE_KEY, theme);
-            const prefersDark = () => globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-            const getPreferredTheme = () => {
-                const stored = getStoredTheme();
-                if (stored) return stored;
-                return prefersDark() ? 'dark' : 'light';
-            };
-            const setTheme = (theme) => {
-                const resolved = theme === 'auto' ? (prefersDark() ? 'dark' : 'light') : theme;
-                document.documentElement.setAttribute('data-bs-theme', resolved);
-            };
-            setTheme(getPreferredTheme());
-            const showActiveTheme = (theme) => {
-                document.querySelectorAll('[data-bs-theme-value]').forEach((el) => {
-                    el.classList.remove('active');
-                    el.setAttribute('aria-pressed', 'false');
-                    const check = el.querySelector('.bi-check-lg');
-                    if (check) check.classList.add('d-none');
-                });
-                const active = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-                if (active) {
-                    active.classList.add('active');
-                    active.setAttribute('aria-pressed', 'true');
-                    const check = active.querySelector('.bi-check-lg');
-                    if (check) check.classList.remove('d-none');
-                }
-                document.querySelectorAll('[data-lte-theme-icon]').forEach((icon) => {
-                    icon.classList.toggle('d-none', icon.dataset.lteThemeIcon !== theme);
-                });
-            };
-            globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                const stored = getStoredTheme();
-                if (!stored || stored === 'auto') setTheme(getPreferredTheme());
-            });
-            document.addEventListener('DOMContentLoaded', () => {
-                showActiveTheme(getPreferredTheme());
-                document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
-                    toggle.addEventListener('click', () => {
-                        const theme = toggle.getAttribute('data-bs-theme-value');
-                        setStoredTheme(theme);
-                        setTheme(theme);
-                        showActiveTheme(theme);
-                    });
-                });
-            });
-        })();
-    </script>
 </body>
 
 </html>

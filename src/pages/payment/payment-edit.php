@@ -1,5 +1,6 @@
 <?php
 require_once '../../connection.php';
+include '../../components/scripts.php';
 
 use Medoo\Medoo;
 
@@ -74,45 +75,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
-<body>
-    <div class="card card-primary card-outline mb-4">
-        <div class="card-header">
-            <div class="card-title">Edit Payment</div>
-        </div>
-        <form action="" method="POST">
-            <div class="card-body">
-                <div class="mb-3">
-                    <div class="mb-3">
-                        <label class="form-label">Invoice</label>
-                        <select name="invoice_data" class="form-select" aria-label="Default select example" required>
-                            <?php foreach ($invoices as $invoice): ?>
-                                <option value="<?= $invoice['customer_id'] . '-' . $invoice['id']; ?>" <?= ($invoice_id == $invoice['id']) ? 'selected' : ''; ?>>
-                                    <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] . ' (Rp' . number_format($invoice['total_due'], 0, ',', '.') . ')'; ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Payment Code</label>
-                        <input value="<?= $payment['payment_code'] ?? ''; ?>" name="payment_code" type="text" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Payment Date</label>
-                        <input value="<?= $payment['date'] ?? ''; ?>" name="date" type="date" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Amount Paid</label>
-                        <input value="<?= $payment['amount'] ?? ''; ?>" name="amount" type="number" class="form-control" required>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <a href="payment.php" class="btn btn-danger">Cancel</a>
-                </div>
-        </form>
-    </div>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?php include '../../components/sidebar.php'; ?>
 
-    <script src="../../../assets//admin-lte/dist/js/adminlte.js"></script>
+        <main class="app-main py-4">
+            <div class="container-fluid px-4">
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header">
+                        <div class="card-title">Edit Payment</div>
+                    </div>
+                    <form action="" method="POST">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="mb-3">
+                                    <label class="form-label">Invoice</label>
+                                    <select name="invoice_data" class="form-select" aria-label="Default select example" required>
+                                        <?php foreach ($invoices as $invoice): ?>
+                                            <option value="<?= $invoice['customer_id'] . '-' . $invoice['id']; ?>" <?= ($invoice_id == $invoice['id']) ? 'selected' : ''; ?>>
+                                                <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] . ' (Rp' . number_format($invoice['total_due'], 0, ',', '.') . ')'; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Payment Code</label>
+                                    <input value="<?= $payment['payment_code'] ?? ''; ?>" name="payment_code" type="text" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Payment Date</label>
+                                    <input value="<?= $payment['date'] ?? ''; ?>" name="date" type="date" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Amount Paid</label>
+                                    <input value="<?= $payment['amount'] ?? ''; ?>" name="amount" type="number" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <button type="submit" class="btn btn-success">Save</button>
+                                <a href="payment.php" class="btn btn-danger">Cancel</a>
+                            </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 
 </html>

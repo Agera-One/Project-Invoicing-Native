@@ -1,8 +1,7 @@
 <?php
+require_once '../../connection.php';
 
 use Medoo\Medoo;
-
-require_once '../../connection.php';
 
 $limit = 10;
 $active_page = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -13,7 +12,8 @@ $total_page = ceil($rows / $limit);
 
 $invoices = $database->select('invoice', [
     '[><]customer' => ['customer_id' => 'id'],
-    '[>]invoice_detail' => ['id' => 'invoice_id']
+    '[>]invoice_detail' => ['id' => 'invoice_id'],
+    '[>]payment' => ['id' => 'invoice_id'],
 ], [
     'invoice.id',
     'invoice.customer_id',
@@ -21,7 +21,8 @@ $invoices = $database->select('invoice', [
     'invoice.date',
     'invoice.due_date',
     'customer.name(customer_name)',
-    'total_bill' => Medoo::raw('SUM(<invoice_detail.amount>)')
+    'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
+    'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ], [
     'GROUP' => [
         'invoice.id',
@@ -37,29 +38,61 @@ $invoices = $database->select('invoice', [
     'LIMIT' => [$offset, $limit]
 ]);
 
-if (isset($_POST['search'])) {
-    $search = $_POST['search'];
+if (isset($_GET['search'])) {
+    $keyword = $_GET['keyword'];
+    $date_from = $_GET['date_from'];
+    $date_to   = $_GET['date_to'];
 
-    $invoices = $database->select('invoice', [
-        '[><]customer' => ['customer_id' => 'id']
-    ], [
+    $where = [];
+
+    if ($keyword !== '') {
+        $where['OR'] = [
+            'invoice.invoice_code[~]' => $keyword,
+            'customer.name[~]' => $keyword
+        ];
+    }
+
+    if (!empty($date_from) && !empty($date_to)) {
+        $where['invoice.date[<>]'] = [$date_from, $date_to];
+    } elseif (!empty($date_from)) {
+        $where['invoice.date[>=]'] = $date_from;
+    } elseif (!empty($date_to)) {
+        $where['invoice.date[<=]'] = $date_to;
+    }
+
+    $where['GROUP'] = [
         'invoice.id',
-        'invoice.invoice_code',
         'invoice.customer_id',
+        'invoice.invoice_code',
         'invoice.date',
-        'invoice.due_date',
-        'customer.name(customer_name)'
-    ], [
-        'OR' => [
-            'invoice.invoice_code[~]' => $search,
-            'customer.name[~]' => $search,
-            'invoice.date[~]' => $search,
-            'invoice.due_date[~]' => $search
+        'customer.name'
+    ];
+
+    $where['ORDER'] = [
+        'invoice.id' => 'DESC'
+    ];
+
+    $where['LIMIT'] = [$offset, $limit];
+
+    $invoices = $database->select(
+        'invoice',
+        [
+            '[><]customer' => ['customer_id' => 'id'],
+            '[>]invoice_detail' => ['id' => 'invoice_id'],
+            '[>]payment' => ['id' => 'invoice_id'],
         ],
-        'ORDER' => [
-            'invoice.id' => 'DESC'
+        [
+            'invoice.id',
+            'invoice.customer_id',
+            'invoice.invoice_code',
+            'invoice.date',
+            'invoice.due_date',
+            'customer.name(customer_name)',
+            'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
+            'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)'),
         ],
-    ]);
+        $where
+    );
 }
 ?>
 
@@ -79,7 +112,7 @@ if (isset($_POST['search'])) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../layouts/sidebar.php'; ?>
+        <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -88,23 +121,50 @@ if (isset($_POST['search'])) {
                     <p class="text-muted small m-0">Track customer billing orders and histories</p>
                 </div>
 
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+                <div class="flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
                         <a href="invoice-add.php" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Invoice
                         </a>
                     </div>
 
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <form action="" method="POST" class="m-0">
-                            <div class="input-group">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off">
+                    <form action="" method="GET">
+                        <div class="row g-2 my-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Keyword</label>
+                                <input
+                                    type="text"
+                                    name="keyword"
+                                    class="form-control"
+                                    placeholder="Search for customers and invoice codes..."
+                                    value="<?= $_GET['keyword'] ?? '' ?>">
                             </div>
-                        </form>
-                    </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date From</label>
+                                <input
+                                    type="date"
+                                    name="date_from"
+                                    class="form-control"
+                                    value="<?= $_GET['date_from'] ?? ''; ?>">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Date To</label>
+                                <input
+                                    type="date"
+                                    name="date_to"
+                                    class="form-control"
+                                    value="<?= $_GET['date_to'] ?? ''; ?>">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end gap-2">
+                                <button id="btn-search" type="submit" class="btn btn-md btn-primary w-100" name="search">
+                                    <i class="bi bi-search me-1"></i>Search
+                                </button>
+                                <a href="invoice.php" class="btn btn-outline-secondary w-100">
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="card shadow-sm border-0">
@@ -119,11 +179,15 @@ if (isset($_POST['search'])) {
                                         <th scope="col">Date</th>
                                         <th scope="col">Due Date</th>
                                         <th scope="col">Total Bill</th>
+                                        <th scope="col" class="text-center">Status</th>
                                         <th scope="col" class="pe-4" width="200">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($invoices as $invoice): ?>
+                                    <?php foreach ($invoices as $invoice):
+                                        $item_count = $database->count('invoice_detail', [
+                                            'invoice_id' => $invoice['id']
+                                        ]); ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
                                             <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
@@ -131,6 +195,15 @@ if (isset($_POST['search'])) {
                                             <td><?= $invoice['date'] ?></td>
                                             <td><?= $invoice['due_date'] ?></td>
                                             <td>Rp<?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
+                                            <?php if ($item_count == 0): ?>
+                                                <td class="text-center"><span class="badge text-bg-secondary">No Item</span></td>
+                                            <?php elseif ($invoice['total_payment'] == 0): ?>
+                                                <td class="text-center"><span class="badge text-bg-danger">Unpaid</span></td>
+                                            <?php elseif ($invoice['total_payment'] < $invoice['total_bill']): ?>
+                                                <td class="text-center"><span class="badge text-bg-warning">Partially Paid</span></td>
+                                            <?php else: ?>
+                                                <td class="text-center"><span class="badge text-bg-success">Paid</span></td>
+                                            <?php endif; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
                                                     <a class="btn btn-sm btn-info text-black" href="../invoice-detail/detail.php?invoice_id=<?= $invoice['id'] ?>">Detail</a>
@@ -175,60 +248,7 @@ if (isset($_POST['search'])) {
         </main>
     </div>
 
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
-    <script>
-        (() => {
-            'use strict';
-            const STORAGE_KEY = 'lte-theme';
-            const getStoredTheme = () => localStorage.getItem(STORAGE_KEY);
-            const setStoredTheme = (theme) => localStorage.setItem(STORAGE_KEY, theme);
-            const prefersDark = () => globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-            const getPreferredTheme = () => {
-                const stored = getStoredTheme();
-                if (stored) return stored;
-                return prefersDark() ? 'dark' : 'light';
-            };
-            const setTheme = (theme) => {
-                const resolved = theme === 'auto' ? (prefersDark() ? 'dark' : 'light') : theme;
-                document.documentElement.setAttribute('data-bs-theme', resolved);
-            };
-            setTheme(getPreferredTheme());
-            const showActiveTheme = (theme) => {
-                document.querySelectorAll('[data-bs-theme-value]').forEach((el) => {
-                    el.classList.remove('active');
-                    el.setAttribute('aria-pressed', 'false');
-                    const check = el.querySelector('.bi-check-lg');
-                    if (check) check.classList.add('d-none');
-                });
-                const active = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-                if (active) {
-                    active.classList.add('active');
-                    active.setAttribute('aria-pressed', 'true');
-                    const check = active.querySelector('.bi-check-lg');
-                    if (check) check.classList.remove('d-none');
-                }
-                document.querySelectorAll('[data-lte-theme-icon]').forEach((icon) => {
-                    icon.classList.toggle('d-none', icon.dataset.lteThemeIcon !== theme);
-                });
-            };
-            globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                const stored = getStoredTheme();
-                if (!stored || stored === 'auto') setTheme(getPreferredTheme());
-            });
-            document.addEventListener('DOMContentLoaded', () => {
-                showActiveTheme(getPreferredTheme());
-                document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
-                    toggle.addEventListener('click', () => {
-                        const theme = toggle.getAttribute('data-bs-theme-value');
-                        setStoredTheme(theme);
-                        setTheme(theme);
-                        showActiveTheme(theme);
-                    });
-                });
-            });
-        })();
-    </script>
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

@@ -17,8 +17,8 @@ $items = $database->select('item', '*', [
     'LIMIT' => [$offset, $limit]
 ]);
 
-if (isset($_POST['search'])) {
-    $search = $_POST['search'];
+if (isset($_GET['search'])) {
+    $search = $_GET['search'];
 
     $items = $database->select('item', '*', [
         'OR' => [
@@ -49,39 +49,35 @@ if (isset($_POST['search'])) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../layouts/sidebar.php'; ?>
+        <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-
-                <!-- Page Title -->
                 <div class="mb-3">
                     <h3 class="fw-bold h4 m-0 text-white">Items Management</h3>
                     <p class="text-muted small m-0">Manage your product stocks, reference numbers, and pricing</p>
                 </div>
-
-                <!-- Header halaman & Tombol navigasi -->
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
                         <a href="item-add.php" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Item
                         </a>
                     </div>
-
-                    <!-- Kolom Pencarian -->
-                    <div class="col-12 col-sm-6 col-md-3">
-                        <form action="" method="POST" class="m-0">
+                    <div class="col-md-4 d-flex align-items-end gap-2">
+                        <form action="" method="GET" class="flex-grow-1">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off">
+                                <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off" value="<?= $_GET['search'] ?? ''; ?>">
                             </div>
                         </form>
+                        <a href="item.php" class="btn btn-outline-secondary w-25">
+                            <i class="bi bi-arrow-counterclockwise"></i>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Card Pembungkus Tabel -->
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -116,7 +112,6 @@ if (isset($_POST['search'])) {
                         </div>
                     </div>
 
-                    <!-- Navigasi Halaman / Pagination -->
                     <div class="card-footer bg-transparent border-top d-flex justify-content-end p-3">
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
@@ -145,60 +140,7 @@ if (isset($_POST['search'])) {
         </main>
     </div>
 
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
-    <script>
-        (() => {
-            'use strict';
-            const STORAGE_KEY = 'lte-theme';
-            const getStoredTheme = () => localStorage.getItem(STORAGE_KEY);
-            const setStoredTheme = (theme) => localStorage.setItem(STORAGE_KEY, theme);
-            const prefersDark = () => globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-            const getPreferredTheme = () => {
-                const stored = getStoredTheme();
-                if (stored) return stored;
-                return prefersDark() ? 'dark' : 'light';
-            };
-            const setTheme = (theme) => {
-                const resolved = theme === 'auto' ? (prefersDark() ? 'dark' : 'light') : theme;
-                document.documentElement.setAttribute('data-bs-theme', resolved);
-            };
-            setTheme(getPreferredTheme());
-            const showActiveTheme = (theme) => {
-                document.querySelectorAll('[data-bs-theme-value]').forEach((el) => {
-                    el.classList.remove('active');
-                    el.setAttribute('aria-pressed', 'false');
-                    const check = el.querySelector('.bi-check-lg');
-                    if (check) check.classList.add('d-none');
-                });
-                const active = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-                if (active) {
-                    active.classList.add('active');
-                    active.setAttribute('aria-pressed', 'true');
-                    const check = active.querySelector('.bi-check-lg');
-                    if (check) check.classList.remove('d-none');
-                }
-                document.querySelectorAll('[data-lte-theme-icon]').forEach((icon) => {
-                    icon.classList.toggle('d-none', icon.dataset.lteThemeIcon !== theme);
-                });
-            };
-            globalThis.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                const stored = getStoredTheme();
-                if (!stored || stored === 'auto') setTheme(getPreferredTheme());
-            });
-            document.addEventListener('DOMContentLoaded', () => {
-                showActiveTheme(getPreferredTheme());
-                document.querySelectorAll('[data-bs-theme-value]').forEach((toggle) => {
-                    toggle.addEventListener('click', () => {
-                        const theme = toggle.getAttribute('data-bs-theme-value');
-                        setStoredTheme(theme);
-                        setTheme(theme);
-                        showActiveTheme(theme);
-                    });
-                });
-            });
-        })();
-    </script>
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>
