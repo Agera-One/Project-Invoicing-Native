@@ -1,6 +1,11 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 use Medoo\Medoo;
 
@@ -77,6 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -120,6 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

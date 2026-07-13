@@ -1,12 +1,17 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $invoice_id = $_GET['invoice_id'];
 
 $details = $database->select('invoice', [
     '[>]customer' => ['customer_id' => 'id'],
-    '[>]user' => ['user_id' => 'id'],
+    '[>]company_pic' => ['pic_id' => 'id'],
     '[>]invoice_detail' => ['id' => 'invoice_id'],
     '[>]item' => ['invoice_detail.item_id' => 'id'],
 ], [
@@ -15,7 +20,7 @@ $details = $database->select('invoice', [
     'invoice.date',
     'invoice.due_date',
     'customer.name(customer_name)',
-    'user.name(user_name)',
+    'company_pic.name(pic_name)',
     'invoice_detail.id',
     'invoice_detail.unit_price',
     'invoice_detail.quantity',
@@ -56,6 +61,8 @@ foreach ($invoice_details as $invoice_detail) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -100,6 +107,8 @@ foreach ($invoice_details as $invoice_detail) {
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

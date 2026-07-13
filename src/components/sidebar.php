@@ -14,7 +14,6 @@
         /* Bagian Brand / Logo */
         .app-sidebar .sidebar-brand {
             background-color: #15171a !important;
-            /* Sedikit lebih gelap dari main page untuk struktur */
             border-bottom: 1px solid #2b3035 !important;
             height: 3.5rem;
             display: flex;
@@ -47,14 +46,7 @@
         }
 
         .app-sidebar .nav-link {
-            color: #dee2e6 !important;
-            /* Kontras tinggi untuk teks menu default */
-            font-size: 0.875rem !important;
-            font-weight: 500 !important;
-            padding: 0.55rem 0.75rem !important;
-            border-radius: 6px !important;
-            transition: all 0.1s ease-in-out;
-            position: relative;
+            border-left: 3px solid transparent;
         }
 
         /* Efek Hover: Lebih terang dan bersih */
@@ -66,10 +58,9 @@
 
         /* Status Aktif: Menonjol dengan background kontras */
         .app-sidebar .nav-link.active {
-            color: #ffffff !important;
-            background-color: #0d6efd !important;
-            /* Warna Blue Primary Bootstrap murni untuk indikasi tegas */
-            font-weight: 600 !important;
+            background: #2b3035;
+            border-left: 3px solid #9ca3af;
+            color: #fff;
         }
 
         /* Icon Styling */
@@ -85,6 +76,23 @@
         .app-sidebar .nav-link.active .nav-icon {
             color: #ffffff !important;
         }
+
+        .nav-treeview {
+            padding-left: 1rem;
+        }
+
+        .nav-treeview .nav-link {
+            font-size: .84rem !important;
+        }
+
+        .nav-arrow {
+            margin-left: auto;
+            transition: .25s;
+        }
+
+        .menu-open>.nav-link .nav-arrow {
+            transform: rotate(90deg);
+        }
     </style>
 </head>
 
@@ -98,113 +106,208 @@
             <ul class="nav sidebar-menu flex-column"
                 data-lte-toggle="treeview"
                 role="navigation"
-                aria-label="Main navigation"
-                data-accordion="true"
-                id="navigation">
+                data-accordion="false">
 
-                <li class="nav-item" data-group="barang">
+                <!-- Dashboard -->
+                <li class="nav-item">
                     <a href="../dashboard/dashboard.php" class="nav-link">
-                        <i class="nav-icon bi bi-box-seam"></i>
+                        <i class="nav-icon bi bi-grid-1x2"></i>
                         <p>Dashboard</p>
                     </a>
                 </li>
 
-                <li class="nav-item" data-group="barang">
-                    <a href="../item/item.php" class="nav-link">
-                        <i class="nav-icon bi bi-box-seam"></i>
-                        <p>Items</p>
+                <!-- Master Data -->
+                <li class="nav-item" data-menu="master">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-database"></i>
+                        <p>
+                            Master Data
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="../item/item.php" class="nav-link" data-page="item">
+                                <i class="bi bi-box-seam nav-icon"></i>
+                                <p>Items</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../customer/customer.php" class="nav-link" data-page="customer">
+                                <i class="bi bi-people nav-icon"></i>
+                                <p>Customers</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../pic-management/pic.php" class="nav-link" data-page="pic">
+                                <i class="bi bi-person-check nav-icon"></i>
+                                <p>Company PIC</p>
+                            </a>
+                        </li>
+                    </ul>
                 </li>
 
-                <li class="nav-item" data-group="customer">
-                    <a href="../customer/customer.php" class="nav-link">
-                        <i class="nav-icon bi bi-people"></i>
-                        <p>Customers</p>
+                <!-- Sales -->
+                <li class="nav-item" data-menu="sales">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-cart-check"></i>
+                        <p>
+                            Sales
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="../invoice/invoice.php" class="nav-link" data-page="invoice">
+                                <i class="bi bi-receipt-cutoff nav-icon"></i>
+                                <p>Invoices</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../payment/payment.php" class="nav-link" data-page="payment">
+                                <i class="bi bi-credit-card nav-icon"></i>
+                                <p>Payments</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../outstanding/outstanding.php" class="nav-link" data-page="outstanding">
+                                <i class="bi bi-hourglass-split nav-icon text-warning"></i>
+                                <p>Outstanding</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../overdue/overdue.php" class="nav-link" data-page="overdue">
+                                <i class="bi bi-exclamation-triangle nav-icon text-warning"></i>
+                                <p>Overdue</p>
+                            </a>
+                        </li>
+
+                    </ul>
                 </li>
 
-                <li class="nav-item" data-group="invoice">
-                    <a href="../invoice/invoice.php" class="nav-link">
-                        <i class="nav-icon bi bi-receipt-cutoff"></i>
-                        <p>Invoices</p>
+                <!-- Reports -->
+                <li class="nav-item" data-menu="reports">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-bar-chart"></i>
+                        <p>
+                            Reports
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="../revenue/revenue.php" class="nav-link" data-page="revenue">
+                                <i class="bi bi-graph-up-arrow nav-icon"></i>
+                                <p>Revenue</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../best-seller/best-seller.php" class="nav-link" data-page="best-seller">
+                                <i class="bi bi-trophy nav-icon"></i>
+                                <p>Best Seller</p>
+                            </a>
+                        </li>
+
+                    </ul>
                 </li>
 
-                <li class="nav-item" data-group="laporan">
-                    <a href="../sales/sales.php" class="nav-link">
-                        <i class="nav-icon bi bi-graph-up-arrow"></i>
-                        <p>Sales</p>
+                <!-- Administration -->
+                <li class="nav-item" data-menu="admin">
+                    <a href="#" class="nav-link">
+                        <i class="nav-icon bi bi-gear"></i>
+                        <p>
+                            Administration
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
+
+                    <ul class="nav nav-treeview">
+
+                        <li class="nav-item">
+                            <a href="../company-setting/company.php" class="nav-link" data-page="company">
+                                <i class="bi bi-building-gear nav-icon"></i>
+                                <p>Company Setting</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="../user-management/user.php" class="nav-link" data-page="user">
+                                <i class="bi bi-person-gear nav-icon"></i>
+                                <p>User Management</p>
+                            </a>
+                        </li>
+
+                    </ul>
                 </li>
 
-                <li class="nav-item" data-group="pembayaran">
-                    <a href="../payment/payment.php" class="nav-link">
-                        <i class="nav-icon bi bi-credit-card"></i>
-                        <p>Payments</p>
-                    </a>
-                </li>
-
-                <li class="nav-item" data-page="tunggakan">
-                    <a href="../arrears/arrears.php" class="nav-link">
-                        <i class="nav-icon bi bi-exclamation-circle-fill" style="color: #f59e0b !important;"></i>
-                        <p>Arrears</p>
-                    </a>
-                </li>
-
-                <li class="nav-item" data-group="perusahaan">
-                    <a href="../company-setting/company.php" class="nav-link">
-                        <i class="nav-icon bi bi-building-gear"></i>
-                        <p>Company Setting</p>
-                    </a>
-                </li>
-
-                <li class="nav-item" data-group="Manajemen">
-                    <a href="../user-management/user.php" class="nav-link">
-                        <i class="nav-icon bi bi-shield-lock"></i>
-                        <p>User Management</p>
-                    </a>
-                </li>
             </ul>
         </nav>
     </div>
 </aside>
 
-<!-- <script>
-    (function() {
-        const page = location.pathname.split('/').pop().replace(/\.[^.]+$/, '') || 'dashboard';
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
 
-        const barangPages = ['index', 'edit', 'create'];
-        const customerPages = ['customer', 'edit-customer', 'create-customer'];
-        const invoicePages = ['table-invoice', 'edit-invoice', 'create-invoice', 'invoice'];
-        const laporanPages = ['laporan'];
-        const pembayaranPages = ['pembayaran'];
-        const perusahaanPages = ['perusahaan'];
-        const manajemenPages = ['user-manajemen'];
+        const page = location.pathname
+            .split("/")
+            .pop()
+            .replace(".php", "");
 
-        // Handler untuk halaman tunggal / spesifik luar grup
-        if (page === 'tunggakan') {
-            const tunggakanLi = document.querySelector('[data-page="tunggakan"]');
-            if (tunggakanLi) tunggakanLi.querySelector('.nav-link').classList.add('active');
-        } else if (page === 'dashboard') {
-            const dashLi = document.querySelector('[data-page="dashboard"]');
-            if (dashLi) dashLi.querySelector('.nav-link').classList.add('active');
-        }
+        const pages = {
+            dashboard: "dashboard",
 
-        function openGroup(pages, groupName) {
-            if (pages.includes(page)) {
-                const group = document.querySelector(`[data-group="${groupName}"]`);
-                if (group) {
-                    group.querySelector('.nav-link').classList.add('active');
+            item: "master",
+            customer: "master",
+            pic: "master",
+
+            invoice: "sales",
+            payment: "sales",
+            outstanding: "sales",
+            overdue: "sales",
+
+            revenue: "reports",
+            "best-seller": "reports",
+
+            company: "admin",
+            user: "admin"
+        };
+
+        // aktifkan link
+        document.querySelectorAll(".nav-link[data-page]").forEach(link => {
+
+            if (link.dataset.page === page) {
+
+                link.classList.add("active");
+
+                const menu = pages[page];
+
+                if (menu) {
+
+                    const group = document.querySelector(`[data-menu="${menu}"]`);
+
+                    if (group) {
+
+                        group.classList.add("menu-open");
+
+                        group.querySelector(":scope > .nav-link")
+                            .classList.add("active");
+                    }
                 }
             }
-        }
 
-        openGroup(barangPages, 'barang');
-        openGroup(customerPages, 'customer');
-        openGroup(invoicePages, 'invoice');
-        openGroup(laporanPages, 'laporan');
-        openGroup(pembayaranPages, 'pembayaran');
-        openGroup(perusahaanPages, 'perusahaan');
-        openGroup(manajemenPages, 'Manajemen');
-    })();
-</script> -->
+        });
+
+    });
+</script>

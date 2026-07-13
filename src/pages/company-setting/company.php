@@ -1,5 +1,11 @@
 <?php
+session_start();
 require_once '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $company = $database->get('company', '*');
 ?>
@@ -73,6 +79,8 @@ $company = $database->get('company', '*');
 
 <body class="layout-fixed sidebar-expand-lg">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4 min-vh-100">
@@ -191,6 +199,8 @@ $company = $database->get('company', '*');
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

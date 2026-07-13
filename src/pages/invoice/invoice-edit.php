@@ -1,19 +1,16 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $id = $_GET['id'];
 $customer_id = $_GET['customer_id'];
 
-$invoice = $database->get('invoice', [
-    '[><]customer' => ['customer_id' => 'id']
-], [
-    'invoice.id',
-    'invoice.customer_id',
-    'invoice.invoice_code',
-    'invoice.date',
-    'invoice.due_date',
-], [
+$invoice = $database->get('invoice', '*', [
     'invoice.id' => $id
 ]);
 
@@ -67,6 +64,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -107,6 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

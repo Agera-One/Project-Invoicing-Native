@@ -1,8 +1,15 @@
 <?php
+session_start();
 require_once '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 use Medoo\Medoo;
 
+$today = date('Y-m-d');
 $limit = 10;
 $active_page = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
@@ -10,20 +17,26 @@ $offset = ($active_page - 1) * $limit;
 $rows = count($database->select("invoice", "*"));
 $total_page = ceil($rows / $limit);
 
-$invoices = $database->select('invoice', [
+$join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
     '[>]invoice_detail' => ['id' => 'invoice_id'],
     '[>]payment' => ['id' => 'invoice_id'],
-], [
+    '[><]company_pic' => ['pic_id' => 'id'],
+];
+
+$select_columns = [
     'invoice.id',
     'invoice.customer_id',
     'invoice.invoice_code',
     'invoice.date',
     'invoice.due_date',
+    'company_pic.name(pic_name)',
     'customer.name(customer_name)',
     'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
-], [
+];
+
+$invoices = $database->select('invoice', $join_structure, $select_columns, [
     'GROUP' => [
         'invoice.id',
         'invoice.customer_id',
@@ -48,7 +61,8 @@ if (isset($_GET['search'])) {
     if ($keyword !== '') {
         $where['OR'] = [
             'invoice.invoice_code[~]' => $keyword,
-            'customer.name[~]' => $keyword
+            'customer.name[~]' => $keyword,
+            'company_pic.name[~]' => $keyword
         ];
     }
 
@@ -74,25 +88,7 @@ if (isset($_GET['search'])) {
 
     $where['LIMIT'] = [$offset, $limit];
 
-    $invoices = $database->select(
-        'invoice',
-        [
-            '[><]customer' => ['customer_id' => 'id'],
-            '[>]invoice_detail' => ['id' => 'invoice_id'],
-            '[>]payment' => ['id' => 'invoice_id'],
-        ],
-        [
-            'invoice.id',
-            'invoice.customer_id',
-            'invoice.invoice_code',
-            'invoice.date',
-            'invoice.due_date',
-            'customer.name(customer_name)',
-            'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
-            'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)'),
-        ],
-        $where
-    );
+    $invoices = $database->select('invoice', $join_structure, $select_columns, $where);
 }
 ?>
 
@@ -112,6 +108,8 @@ if (isset($_GET['search'])) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -175,6 +173,7 @@ if (isset($_GET['search'])) {
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
                                         <th scope="col">Invoice Code</th>
+                                        <th scope="col">PIC Name</th>
                                         <th scope="col">Customer Name</th>
                                         <th scope="col">Date</th>
                                         <th scope="col">Due Date</th>
@@ -187,21 +186,24 @@ if (isset($_GET['search'])) {
                                     <?php foreach ($invoices as $invoice):
                                         $item_count = $database->count('invoice_detail', [
                                             'invoice_id' => $invoice['id']
-                                        ]); ?>
+                                        ]);
+
+                                        $remaining_unpaid = $invoice['total_bill'] - $invoice['total_payment']; ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
                                             <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
+                                            <td><?= $invoice['pic_name'] ?></td>
                                             <td><?= $invoice['customer_name'] ?></td>
                                             <td><?= $invoice['date'] ?></td>
                                             <td><?= $invoice['due_date'] ?></td>
                                             <td>Rp<?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
-                                            <?php if ($item_count == 0): ?>
+                                            <?php if ($remaining_unpaid > 0 && $invoice['due_date'] < $today): ?>
+                                                <td class="text-center"><span class="badge text-bg-danger">Overdue</span></td>
+                                            <?php elseif ($item_count == 0): ?>
                                                 <td class="text-center"><span class="badge text-bg-secondary">No Item</span></td>
-                                            <?php elseif ($invoice['total_payment'] == 0): ?>
-                                                <td class="text-center"><span class="badge text-bg-danger">Unpaid</span></td>
                                             <?php elseif ($invoice['total_payment'] < $invoice['total_bill']): ?>
-                                                <td class="text-center"><span class="badge text-bg-warning">Partially Paid</span></td>
-                                            <?php else: ?>
+                                                <td class="text-center"><span class="badge text-bg-warning">Unpaid</span></td>
+                                            <?php elseif ($invoice['total_payment'] == $invoice['total_bill']): ?>
                                                 <td class="text-center"><span class="badge text-bg-success">Paid</span></td>
                                             <?php endif; ?>
                                             <td class="pe-4">

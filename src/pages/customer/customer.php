@@ -1,5 +1,11 @@
 <?php
+session_start();
 require_once '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $number = 1;
 $limit = 10;
@@ -53,6 +59,8 @@ if (isset($_GET['search'])) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">

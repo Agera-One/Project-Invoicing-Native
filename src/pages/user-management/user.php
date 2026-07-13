@@ -1,5 +1,11 @@
 <?php
+session_start();
 require_once '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $number = 1;
 $limit = 10;
@@ -23,9 +29,8 @@ if (isset($_GET['search'])) {
     $users = $database->select('user', '*', [
         'OR' => [
             'name[~]' => $search,
-            'phone[~]' => $search,
             'email[~]' => $search,
-            'position[~]' => $search,
+            'role[~]' => $search,
         ],
         'ORDER' => [
             'id' => 'DESC'
@@ -51,6 +56,8 @@ if (isset($_GET['search'])) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -58,7 +65,7 @@ if (isset($_GET['search'])) {
 
                 <!-- Page Title -->
                 <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">User & PIC Management</h3>
+                    <h3 class="fw-bold h4 m-0 text-white">User Management</h3>
                     <p class="text-muted small m-0">Manage platform administrators, system users, and assignment privileges</p>
                 </div>
 
@@ -95,9 +102,8 @@ if (isset($_GET['search'])) {
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
                                         <th scope="col">Name</th>
-                                        <th scope="col">Phone</th>
                                         <th scope="col">Email</th>
-                                        <th scope="col">Position</th>
+                                        <th scope="col">Role</th>
                                         <th scope="col" class="text-center">Status</th>
                                         <th scope="col" class="pe-4" width="160">Action</th>
                                     </tr>
@@ -107,10 +113,9 @@ if (isset($_GET['search'])) {
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
                                             <td><?= $user['name'] ?></td>
-                                            <td><?= $user['phone'] ?></td>
                                             <td><?= $user['email'] ?></td>
-                                            <td><?= $user['position'] ?></td>
-                                            <?= ($user['status'] == 'active') ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>'; ?>
+                                            <td>Admin</td>
+                                            <?= ($user['id'] == $user_id) ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>'; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
                                                     <a class="btn btn-sm btn-success px-3" href="user-edit.php?id=<?= $user['id'] ?>">Edit</a>

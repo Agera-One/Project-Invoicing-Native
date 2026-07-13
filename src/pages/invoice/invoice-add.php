@@ -1,11 +1,19 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
 
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
+
+$pic_id = '';
 $customer_id = '';
+$company_pics = $database->select('company_pic', ['id', 'name']);
 $customers = $database->select('customer', ['id', 'name']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $pic_id = $_POST['pic_id'];
     $customer_id = $_POST['customer_id'];
     $invoice_code = $_POST['invoice_code'];
     $date = $_POST['date'];
@@ -24,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo '<script>alert("Code invoice already exists. Please use a different code invoice.")</script>';
         } else {
             $invoices = $database->insert('invoice', [
+                'pic_id' => $pic_id,
                 'customer_id' => $customer_id,
                 'invoice_code' => $invoice_code,
                 'date' => $date,
@@ -51,6 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -65,6 +76,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="mb-3">
                                     <label class="form-label">Code Invoice</label>
                                     <input value="<?= $invoice_code ?? ''; ?>" name="invoice_code" type="text" class="form-control" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">PIC Name</label>
+                                    <select name="pic_id" class="form-select" aria-label="Default select example" required>
+                                        <option value="" disabled selected>Select PIC name</option>
+                                        <?php foreach ($company_pics as $company_pic): ?>
+                                            <option value="<?= $company_pic['id']; ?>" <?= ($pic_id == $company_pic['id']) ? 'selected' : ''; ?>>
+                                                <?= $company_pic['name']; ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Customer Name</label>
@@ -95,6 +117,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

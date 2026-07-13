@@ -1,0 +1,154 @@
+<?php
+session_start();
+require_once '../../connection.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
+
+$id = $_GET['id'];
+$position_id = $_GET['position_id'];
+$department_id = $_GET['department_id'];
+
+$company_pic = $database->get('company_pic', '*', [
+    'id' => $id
+]);
+
+$positions = $database->select('position', ['id', 'name']);
+$departments = $database->select('department', ['id', 'name']);
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['name'];
+    $phone = $_POST['phone'];
+    $email = $_POST['email'];
+    $position = $_POST['position'];
+    $status = $_POST['status'];
+
+    $check_email = count($database->select('company_pic', 'email', [
+        'AND' => [
+            'email' => $email,
+            'id[!]' => $id
+        ]
+    ]));
+
+    $check_phone = count($database->select('company_pic', 'phone', [
+        'AND' => [
+            'phone' => $phone,
+            'id[!]' => $id
+        ]
+    ]));
+
+    $check_status = count($database->select('company_pic', 'status', [
+        'AND' => [
+            'status' => 'active',
+            'id[!]' => $id
+        ]
+    ]));
+
+    if ($check_email > 0) {
+        echo '<script>alert("Email already exists. Please use a different email.")</script>';
+    } elseif ($check_phone > 0) {
+        echo '<script>alert("phone already exists. Please use a different phone.")</script>';
+    } elseif (strlen($name) > 255) {
+        echo '<script>alert("Maximum name length is 255 characters.")</script>';
+    } elseif (strlen($phone) > 15) {
+        echo '<script>alert("Maximum phone length is 15 characters.")</script>';
+    } elseif (strlen($email) > 50) {
+        echo '<script>alert("Maximum email length is 50 characters.")</script>';
+    } elseif (strlen($position) > 50) {
+        echo '<script>alert("Maximum position length is 50 characters.")</script>';
+    } elseif ($check_status > 0 && $status === 'active') {
+        echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
+    } else {
+        $company_pics = $database->update('company_pic', [
+            'name' => $name,
+            'phone' => $phone,
+            'email' => $email,
+            'position' => $position,
+            'status' => $status
+        ], [
+            'id' => $id
+        ]);
+
+        header("Location: company_pic.php");
+        exit();
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
+</head>
+
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
+        <?php include '../../components/sidebar.php'; ?>
+
+        <main class="app-main py-4">
+            <div class="container-fluid px-4">
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header">
+                        <div class="card-title">Edit Item</div>
+                    </div>
+                    <form action="" method="POST">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Name</label>
+                                <input value="<?= $company_pic['name'] ?>" name="name" type="text" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Phone</label>
+                                <input value="<?= $company_pic['phone'] ?>" name="phone" type="tel" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Email</label>
+                                <input value="<?= $company_pic['email'] ?>" name="email" type="email" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Position PIC</label>
+                                <select name="position_id" class="form-select" aria-label="Default select example">
+                                    <?php foreach ($positions as $position): ?>
+                                        <option value="<?= $position['id']; ?>" <?= ($position_id == $position['id']) ? 'selected' : ''; ?>><?= $position['name']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Department PIC</label>
+                                <select name="department_id" class="form-select" aria-label="Default select example">
+                                    <?php foreach ($departments as $department): ?>
+                                        <option value="<?= $department['id']; ?>" <?= ($department_id == $department['id']) ? 'selected' : ''; ?>><?= $department['name']; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Status PIC</label>
+                                <select name="status" class="form-select" aria-label="Default select example" required>
+                                    <option value="" disabled selected>Select status PIC</option>
+                                    <option value="active" <?= ($company_pic['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="inactive" <?= ($company_pic['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">Update</button>
+                            <a href="pic.php" class="btn btn-danger">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <?php include '../../components/scripts.php'; ?>
+</body>
+
+</html>

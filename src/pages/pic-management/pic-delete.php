@@ -1,24 +1,27 @@
 <?php
-session_start();
 require_once '../../connection.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'];
 
-    if ($id == $_SESSION['user_id']) {
+    $total_invoice = $database->count('invoice', [
+        'pic_id' => $id
+    ]);
+
+    if ($total_invoice > 0) {
         echo "
         <script>
-            alert('You cannot delete the account yourself.');
-            window.location.href = 'user.php';
+            alert('The pic cannot be deleted because it is still being used by another table.');
+            window.location.href = 'pic.php';
         </script>";
 
         exit;
     } else {
-        $users = $database->delete('user', [
+        $company_pics = $database->delete('company_pic', [
             'id' => $id
         ]);
 
-        header('Location: user.php');
+        header('Location: pic.php');
         exit();
     }
 } else {

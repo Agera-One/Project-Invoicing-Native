@@ -1,6 +1,11 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 $id = $_GET['id'];
 
@@ -10,10 +15,13 @@ $user = $database->get('user', '*', [
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
-    $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $position = $_POST['position'];
-    $status = $_POST['status'];
+
+    if (!empty($_POST['password'])) {
+        $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    } else {
+        $password = $user['password'];
+    }
 
     $check_email = count($database->select('user', 'email', [
         'AND' => [
@@ -22,41 +30,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]
     ]));
 
-    $check_phone = count($database->select('user', 'phone', [
-        'AND' => [
-            'phone' => $phone,
-            'id[!]' => $id
-        ]
-    ]));
-
-    $check_status = count($database->select('user', 'status', [
-        'AND' => [
-            'status' => 'active',
-            'id[!]' => $id
-        ]
-    ]));
-
     if ($check_email > 0) {
         echo '<script>alert("Email already exists. Please use a different email.")</script>';
-    } elseif ($check_phone > 0) {
-        echo '<script>alert("phone already exists. Please use a different phone.")</script>';
     } elseif (strlen($name) > 255) {
         echo '<script>alert("Maximum name length is 255 characters.")</script>';
-    } elseif (strlen($phone) > 15) {
-        echo '<script>alert("Maximum phone length is 15 characters.")</script>';
     } elseif (strlen($email) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
-    } elseif (strlen($position) > 50) {
-        echo '<script>alert("Maximum position length is 50 characters.")</script>';
-    } elseif ($check_status > 0 && $status === 'active') {
-        echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
     } else {
-        $users = $database->update('user', [
+        $database->update('user', [
             'name' => $name,
-            'phone' => $phone,
+            'password' => $password,
             'email' => $email,
-            'position' => $position,
-            'status' => $status
         ], [
             'id' => $id
         ]);
@@ -79,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -90,28 +76,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form action="" method="POST">
                         <div class="card-body">
                             <div class="mb-3">
-                                <label for="exampleInputPassword1" class="form-label">Name</label>
-                                <input value="<?= $user['name'] ?>" name="name" type="text" class="form-control" required>
+                                <label class="form-label">Name</label>
+                                <input value="<?= htmlspecialchars($user['name']) ?>" name="name" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label for="exampleInputPassword1" class="form-label">Phone</label>
-                                <input value="<?= $user['phone'] ?>" name="phone" type="tel" class="form-control" required>
+                                <label class="form-label">Password</label>
+                                <!-- Ubah type ke password, hapus required, dan kosongkan value-nya -->
+                                <input name="password" type="password" class="form-control" placeholder="Leave blank if you don't want to change it">
                             </div>
                             <div class="mb-3">
-                                <label for="exampleInputPassword1" class="form-label">Email</label>
-                                <input value="<?= $user['email'] ?>" name="email" type="email" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="exampleInputPassword1" class="form-label">Position</label>
-                                <input value="<?= $user['position'] ?>" name="position" type="text" class="form-control" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Status User</label>
-                                <select name="status" class="form-select" aria-label="Default select example" required>
-                                    <option value="" disabled selected>Select status user</option>
-                                    <option value="active" <?= ($user['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?= ($user['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
-                                </select>
+                                <label class="form-label">Email</label>
+                                <input value="<?= htmlspecialchars($user['email']) ?>" name="email" type="email" class="form-control" required>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -123,6 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

@@ -13,29 +13,54 @@ $limit = 10;
 $active_page = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
-$rows = count($database->select("item", "*"));
+$rows = count($database->select('company_pic', '*'));
 $total_page = ceil($rows / $limit);
 
-$items = $database->select('item', '*', [
+$join_structure = [
+    '[><]position' => ['position_id' => 'id'],
+    '[><]department' => ['department_id' => 'id']
+];
+
+$select_columns = [
+    'company_pic.id',
+    'company_pic.name',
+    'company_pic.phone',
+    'company_pic.email',
+    'company_pic.status',
+    'company_pic.position_id',
+    'company_pic.department_id',
+    'position.name(position_name)',
+    'department.name(department_name)'
+];
+
+$company_pics = $database->select('company_pic', $join_structure, $select_columns, [
     'ORDER' => [
-        'id' => 'DESC'
+        'company_pic.id' => 'DESC'
     ],
-    'LIMIT' => [$offset, $limit]
 ]);
 
 if (isset($_GET['search'])) {
     $search = $_GET['search'];
 
-    $items = $database->select('item', '*', [
-        'OR' => [
-            'ref_no[~]' => $search,
-            'name[~]' => $search,
+    $company_pics = $database->select(
+        'company_pic',
+        $join_structure,
+        $select_columns,
+        [
+            'OR' => [
+                'company_pic.name[~]' => $search,
+                'company_pic.phone[~]' => $search,
+                'company_pic.email[~]' => $search,
+                'position.name[~]' => $search,
+                'department.name[~]' => $search,
+                'company_pic.status[~]' => $search,
+            ],
+            'ORDER' => [
+                'company_pic.id' => 'DESC',
+            ],
+            'LIMIT' => [$offset, $limit],
         ],
-        'ORDER' => [
-            'id' => 'DESC'
-        ],
-        'LIMIT' => [$offset, $limit]
-    ]);
+    );
 }
 ?>
 
@@ -61,31 +86,43 @@ if (isset($_GET['search'])) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+
+                <!-- Page Title -->
                 <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Items Management</h3>
-                    <p class="text-muted small m-0">Manage your product stocks, reference numbers, and pricing</p>
+                    <h3 class="fw-bold h4 m-0 text-white">Person in Charge (PIC)</h3>
+                    <p class="text-muted small m-0">
+                        Manage company representatives, contact information, and assigned responsibilities
+                    </p>
                 </div>
+
+                <!-- Header halaman & Tombol navigasi -->
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="item-add.php" class="btn btn-primary shadow-sm">
-                            <i class="bi bi-plus-circle me-1"></i> Add New Item
+                        <a href="pic-add.php" class="btn btn-primary shadow-sm">
+                            <i class="bi bi-plus-circle me-1"></i> Add New PIC
                         </a>
                     </div>
+
+                    <!-- Kolom Pencarian -->
                     <div class="col-md-4 d-flex align-items-end gap-2">
                         <form action="" method="GET" class="flex-grow-1">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off" value="<?= $_GET['search'] ?? ''; ?>">
+                                <input name="search" id="table-filter" type="search"
+                                    class="form-control border-start-0 ps-0" placeholder="Filter rows…"
+                                    aria-label="Filter rows" autofocus autocomplete="off"
+                                    value="<?= $_GET['search'] ?? '' ?>">
                             </div>
                         </form>
-                        <a href="item.php" class="btn btn-outline-secondary w-25">
+                        <a href="user.php" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
                 </div>
 
+                <!-- Card Pembungkus Tabel -->
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -93,24 +130,29 @@ if (isset($_GET['search'])) {
                                 <thead class="table-light text-uppercase fs-7 tracking-wider">
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
-                                        <th scope="col">Reference Number</th>
                                         <th scope="col">Name</th>
-                                        <th scope="col">Price</th>
+                                        <th scope="col">Phone</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Position</th>
+                                        <th scope="col">Department</th>
+                                        <th scope="col" class="text-center">Status</th>
                                         <th scope="col" class="pe-4" width="160">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($items as $item): ?>
+                                    <?php foreach ($company_pics as $company_pic): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
-                                            <td class="fw-medium text-white"><?= $item['ref_no'] ?></td>
-                                            <td><?= $item['name'] ?></td>
-                                            <td>Rp<?= number_format($item['price'], 0, ',', '.') ?></td>
+                                            <td><?= $company_pic['name'] ?></td>
+                                            <td><?= $company_pic['phone'] ?></td>
+                                            <td><?= $company_pic['email'] ?></td>
+                                            <td><?= $company_pic['position_name'] ?></td>
+                                            <td><?= $company_pic['department_name'] ?></td>
+                                            <?= $company_pic['status'] == 'active' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="item-edit.php?id=<?= $item['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="item-delete.php?id=<?= $item['id'] ?>"
-                                                        onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
+                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $company_pic['id'] ?>&position_id=<?= $company_pic['position_id'] ?>&department_id=<?= $company_pic['department_id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="pic-delete.php?id=<?= $company_pic['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -120,23 +162,26 @@ if (isset($_GET['search'])) {
                         </div>
                     </div>
 
+                    <!-- Navigasi Halaman / Pagination -->
                     <div class="card-footer bg-transparent border-top d-flex justify-content-end p-3">
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
                                 <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1 ?>">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1; ?>">Previous</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_page; $i++): ?>
-                                    <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
+                                    <li class="page-item <?= $i == $active_page ? 'active' : '' ?>">
                                         <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1 ?>">Next</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1; ?>">Next</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                                 <?php endif; ?>

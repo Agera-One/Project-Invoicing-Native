@@ -1,10 +1,18 @@
 <?php
+session_start();
 require_once '../../connection.php';
-include '../../components/scripts.php';
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit;
+}
 
 use Medoo\Medoo;
 
+$today = date('Y-m-d');
 $number = 1;
+$total_unpaid = 0;
+$total_overdue = 0;
 
 $where = [
     "date[>=]" => Medoo::raw("DATE_FORMAT(CURDATE(), '%Y-%m-01')"),
@@ -17,7 +25,6 @@ $invoices = $database->select('invoice', [
     '[>]payment' => ['id' => 'invoice_id'],
 ], [
     'invoice.id',
-    'invoice.customer_id',
     'invoice.invoice_code',
     'invoice.date',
     'invoice.due_date',
@@ -27,11 +34,9 @@ $invoices = $database->select('invoice', [
 ], [
     'GROUP' => [
         'invoice.id',
-        'invoice.customer_id',
         'invoice.invoice_code',
         'invoice.date',
         'invoice.due_date',
-        'customer.name'
     ],
     'ORDER' => [
         'invoice.id' => 'DESC'
@@ -58,8 +63,18 @@ $top_products = $database->select('item', [
 
 $total_invoice = count($database->select("invoice", "*"));
 $total_revenue = array_sum($database->select("payment", "amount"));
-$total_customer = count($database->select("customer", "*"));
-$total_item = count($database->select("item", "*"));
+
+foreach ($invoices as $invoice) {
+    $remaining = $invoice['total_bill'] - $invoice['total_payment'];
+    
+    if ($remaining > 0) {
+        if ($invoice['due_date'] >= $today) {
+            $total_unpaid += $remaining;
+        } else {
+            $total_overdue += $remaining;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -117,6 +132,8 @@ $total_item = count($database->select("item", "*"));
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+        <?php include '../../components/navbar.php'; ?>
+
         <?php include '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
@@ -131,9 +148,7 @@ $total_item = count($database->select("item", "*"));
 
                                 <p>Total Invoice</p>
                             </div>
-                            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z"></path>
-                            </svg>
+                            <i class="small-box-icon bi bi-receipt-cutoff"></i>
                             <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -149,9 +164,7 @@ $total_item = count($database->select("item", "*"));
 
                                 <p>Total Revenue</p>
                             </div>
-                            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M18.375 2.25c-1.035 0-1.875.84-1.875 1.875v15.75c0 1.035.84 1.875 1.875 1.875h.75c1.035 0 1.875-.84 1.875-1.875V4.125c0-1.036-.84-1.875-1.875-1.875h-.75zM9.75 8.625c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v11.25c0 1.035-.84 1.875-1.875 1.875h-.75a1.875 1.875 0 01-1.875-1.875V8.625zM3 13.125c0-1.036.84-1.875 1.875-1.875h.75c1.036 0 1.875.84 1.875 1.875v6.75c0 1.035-.84 1.875-1.875 1.875h-.75A1.875 1.875 0 013 19.875v-6.75z"></path>
-                            </svg>
+                            <i class="small-box-icon bi bi-cash-coin"></i>
                             <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -163,13 +176,11 @@ $total_item = count($database->select("item", "*"));
                         <!--begin::Small Box Widget 3-->
                         <div class="small-box text-bg-warning">
                             <div class="inner">
-                                <h3><?= $total_customer ?></h3>
+                                <h3>Rp<?= number_format($total_unpaid, 0, ',', '.') ?></h3>
 
-                                <p>Total Customers</p>
+                                <p>Total Unpaid</p>
                             </div>
-                            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z"></path>
-                            </svg>
+                            <i class="small-box-icon bi bi-hourglass-split"></i>
                             <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -181,14 +192,11 @@ $total_item = count($database->select("item", "*"));
                         <!--begin::Small Box Widget 4-->
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3><?= $total_item ?></h3>
+                                <h3>Rp<?= number_format($total_overdue, 0, ',', '.') ?></h3>
 
-                                <p>Total Item</p>
+                                <p>Total Overdue</p>
                             </div>
-                            <svg class="small-box-icon" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                <path clip-rule="evenodd" fill-rule="evenodd" d="M2.25 13.5a8.25 8.25 0 018.25-8.25.75.75 0 01.75.75v6.75H18a.75.75 0 01.75.75 8.25 8.25 0 01-16.5 0z"></path>
-                                <path clip-rule="evenodd" fill-rule="evenodd" d="M12.75 3a.75.75 0 01.75-.75 8.25 8.25 0 018.25 8.25.75.75 0 01-.75.75h-7.5a.75.75 0 01-.75-.75V3z"></path>
-                            </svg>
+                            <i class="small-box-icon bi bi-exclamation-triangle"></i>
                             <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
@@ -228,6 +236,7 @@ $total_item = count($database->select("item", "*"));
                                                     <th scope="col">Invoice Code</th>
                                                     <th scope="col">Customer Name</th>
                                                     <th scope="col">Date</th>
+                                                    <th scope="col">Due Date</th>
                                                     <th scope="col">Total Bill</th>
                                                     <th scope="col" class="text-center">Status</th>
                                                 </tr>
@@ -236,19 +245,22 @@ $total_item = count($database->select("item", "*"));
                                                 <?php foreach ($invoices as $invoice):
                                                     $item_count = $database->count('invoice_detail', [
                                                         'invoice_id' => $invoice['id']
-                                                    ]); ?>
+                                                    ]);
+
+                                                    $remaining_unpaid = $invoice['total_bill'] - $invoice['total_payment']; ?>
                                                     <tr>
                                                         <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
                                                         <td><?= $invoice['customer_name'] ?></td>
                                                         <td><?= $invoice['date'] ?></td>
-                                                        <td>Rp <?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
-                                                        <?php if ($item_count == 0): ?>
+                                                        <td><?= $invoice['due_date'] ?></td>
+                                                        <td>Rp<?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
+                                                        <?php if ($remaining_unpaid > 0 && $invoice['due_date'] < $today): ?>
+                                                            <td class="text-center"><span class="badge text-bg-danger">Overdue</span></td>
+                                                        <?php elseif ($item_count == 0): ?>
                                                             <td class="text-center"><span class="badge text-bg-secondary">No Item</span></td>
-                                                        <?php elseif ($invoice['total_payment'] == 0): ?>
-                                                            <td class="text-center"><span class="badge text-bg-danger">Unpaid</span></td>
                                                         <?php elseif ($invoice['total_payment'] < $invoice['total_bill']): ?>
-                                                            <td class="text-center"><span class="badge text-bg-warning">Partially Paid</span></td>
-                                                        <?php else: ?>
+                                                            <td class="text-center"><span class="badge text-bg-warning">Unpaid</span></td>
+                                                        <?php elseif ($invoice['total_payment'] == $invoice['total_bill']): ?>
                                                             <td class="text-center"><span class="badge text-bg-success">Paid</span></td>
                                                         <?php endif; ?>
                                                     </tr>
@@ -257,7 +269,7 @@ $total_item = count($database->select("item", "*"));
                                         </table>
                                     </div>
                                     <div class="text-center border-top py-2">
-                                        <a href="../invoice/table.invoice.php" class="btn btn-sm btn-link text-decoration-none">View All Transactions
+                                        <a href="../invoice/invoice.php" class="btn btn-sm btn-link text-decoration-none">View All Transactions
                                             <i class="bi bi-arrow-right ms-1"></i></a>
                                     </div>
                                 </div>
@@ -268,6 +280,8 @@ $total_item = count($database->select("item", "*"));
             </div>
         </main>
     </div>
+
+    <?php include '../../components/scripts.php'; ?>
 </body>
 
 </html>

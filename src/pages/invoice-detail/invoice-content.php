@@ -26,7 +26,7 @@
                 </div>
                 <div class="mb-4">
                     <p class="text-secondary small mb-1">Handled by</p>
-                    <p class="mb-0 fw-semibold"><?= $invoice['user_name'] ?></p>
+                    <p class="mb-0 fw-semibold"><?= $invoice['pic_name'] ?></p>
                 </div>
             </div>
             <div class="col-sm-6 text-sm-end">

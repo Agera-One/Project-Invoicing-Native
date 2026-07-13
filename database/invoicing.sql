@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.3-1.fc43
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Jul 04, 2026 at 12:01 PM
--- Server version: 8.4.3
--- PHP Version: 8.3.30
+-- Host: localhost
+-- Generation Time: Jul 12, 2026 at 07:50 AM
+-- Server version: 8.4.10
+-- PHP Version: 8.4.23
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -33,8 +33,8 @@ CREATE TABLE `company` (
   `email` varchar(50) DEFAULT NULL,
   `phone` varchar(15) DEFAULT NULL,
   `business_entity` enum('PT','CV','Firma','Koperasi','Perorangan') DEFAULT NULL,
-  `website_url` text,
   `sector` varchar(255) DEFAULT NULL,
+  `website_url` text,
   `description` text,
   `country` varchar(255) DEFAULT NULL,
   `province` varchar(255) DEFAULT NULL,
@@ -42,6 +42,36 @@ CREATE TABLE `company` (
   `subdistrict` varchar(255) DEFAULT NULL,
   `address` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `company`
+--
+
+INSERT INTO `company` (`id`, `name`, `email`, `phone`, `business_entity`, `sector`, `website_url`, `description`, `country`, `province`, `city_or_regency`, `subdistrict`, `address`) VALUES
+(1, 'Red Hat, Inc.', 'redhat@example.com', '081234567891', 'PT', 'Open Source Software', '', 'Red Hat is an American enterprise software company that provides open-source solutions for operating systems, hybrid cloud infrastructure, container platforms, automation, virtualization, middleware, and enterprise support services.', 'United States', 'North Carolina', 'Raleigh', 'Downtown Raleigh', '100 East Davie Street, Raleigh, NC 27601, United States');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `company_pic`
+--
+
+CREATE TABLE `company_pic` (
+  `id` int NOT NULL,
+  `position_id` int DEFAULT NULL,
+  `department_id` int DEFAULT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` char(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `email` varchar(50) NOT NULL,
+  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'inactive'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `company_pic`
+--
+
+INSERT INTO `company_pic` (`id`, `position_id`, `department_id`, `name`, `phone`, `email`, `status`) VALUES
+(8, 1, 8, 'Elon Musk', '081234567890', 'elon@example.com', 'active');
 
 -- --------------------------------------------------------
 
@@ -53,7 +83,7 @@ CREATE TABLE `customer` (
   `id` int NOT NULL,
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
-  `phone` varchar(20) DEFAULT NULL,
+  `phone` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `address` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -80,10 +110,43 @@ INSERT INTO `customer` (`id`, `name`, `email`, `phone`, `address`) VALUES
 (17, 'Qori Aulia', 'qori.aulia@example.com', '081234567817', 'Jl. Cemara No. 10, Tuban'),
 (18, 'Rizky Ramadhan', 'rizky.ramadhan@example.com', '081234567818', 'Jl. Kutilang No. 14, Ponorogo'),
 (19, 'Siti Rahma', 'siti.rahma@example.com', '081234567819', 'Jl. Merpati No. 22, Magetan'),
-(20, 'Taufik Hidayat', 'taufik.hidayat@example.com', '081234567820', 'Jl. Mangga No. 8, Pacitan'),
-(26, 'Eka Wahyuni', 'eka.wahyuni@example.com', '081234567826', 'Jl. Pemuda No. 10, Surabaya'),
-(27, 'Fajar Subekti', 'fajar.subekti@example.com', '081234567827', 'Jl. Pahlawan No. 55, Sidoarjo'),
-(28, 'Gita Permati', 'gita.permata@example.com', '081234567828', 'Jl. Jayandaru No. 22, Asro');
+(20, 'Taufik Hidayat', 'taufik.hidayat@example.com', '081234567820', 'Jl. Mangga No. 8, Pacitan');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `department`
+--
+
+CREATE TABLE `department` (
+  `id` int NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `department`
+--
+
+INSERT INTO `department` (`id`, `name`) VALUES
+(2, 'Accounting'),
+(16, 'Administration'),
+(13, 'Customer Service'),
+(19, 'Export Import'),
+(1, 'Finance'),
+(14, 'General Affairs'),
+(7, 'Human Resources'),
+(8, 'Information Technology'),
+(15, 'Legal'),
+(11, 'Logistics'),
+(6, 'Marketing'),
+(9, 'Operations'),
+(4, 'Procurement'),
+(10, 'Production'),
+(18, 'Project Management'),
+(3, 'Purchasing'),
+(5, 'Sales'),
+(17, 'Tax'),
+(12, 'Warehouse');
 
 -- --------------------------------------------------------
 
@@ -94,7 +157,7 @@ INSERT INTO `customer` (`id`, `name`, `email`, `phone`, `address`) VALUES
 CREATE TABLE `invoice` (
   `id` int NOT NULL,
   `customer_id` int NOT NULL,
-  `user_id` int NOT NULL DEFAULT '1',
+  `pic_id` int NOT NULL,
   `invoice_code` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `date` date DEFAULT NULL,
   `due_date` date DEFAULT NULL
@@ -104,10 +167,12 @@ CREATE TABLE `invoice` (
 -- Dumping data for table `invoice`
 --
 
-INSERT INTO `invoice` (`id`, `customer_id`, `user_id`, `invoice_code`, `date`, `due_date`) VALUES
-(64, 2, 1, 'INV-000001', '1111-11-11', '1111-11-11'),
-(68, 3, 1, 'INV-000002', '5555-05-05', '5555-05-05'),
-(70, 5, 1, 'INV-000004', '4444-04-04', '4444-04-04');
+INSERT INTO `invoice` (`id`, `customer_id`, `pic_id`, `invoice_code`, `date`, `due_date`) VALUES
+(64, 2, 8, 'INV-000001', '2026-07-06', '2026-07-06'),
+(68, 3, 8, 'INV-000002', '2026-07-06', '2026-07-06'),
+(71, 5, 8, 'INV-000003', '2026-07-06', '2026-07-06'),
+(72, 10, 8, 'INV-000004', '2026-07-05', '2026-07-12'),
+(79, 2, 8, 'INV-000005', '2026-07-08', '2026-07-09');
 
 -- --------------------------------------------------------
 
@@ -119,9 +184,9 @@ CREATE TABLE `invoice_detail` (
   `id` int NOT NULL,
   `invoice_id` int NOT NULL,
   `item_id` int NOT NULL,
-  `unit_price` int NOT NULL,
+  `unit_price` bigint NOT NULL,
   `quantity` int NOT NULL,
-  `amount` int DEFAULT NULL
+  `amount` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -130,9 +195,16 @@ CREATE TABLE `invoice_detail` (
 
 INSERT INTO `invoice_detail` (`id`, `invoice_id`, `item_id`, `unit_price`, `quantity`, `amount`) VALUES
 (52, 68, 20, 1100000, 1000, 1100000000),
-(55, 68, 13, 550000, 1000, 550000),
-(59, 68, 11, 4200000, 1000, 4200000),
-(60, 64, 3, 450000, 10, 4500000);
+(55, 68, 13, 550000, 100, 55000000),
+(60, 64, 3, 450000, 10, 4500000),
+(67, 71, 18, 950000, 11, 10450000),
+(68, 71, 7, 950000, 2, 1900000),
+(69, 71, 3, 450000, 1, 450000),
+(70, 71, 4, 2150000, 1, 2150000),
+(71, 71, 5, 780000, 1, 780000),
+(72, 71, 6, 320000, 1, 320000),
+(73, 72, 3, 450000, 435, 195750000),
+(74, 72, 8, 95000, 387, 36765000);
 
 -- --------------------------------------------------------
 
@@ -144,7 +216,7 @@ CREATE TABLE `item` (
   `id` int NOT NULL,
   `ref_no` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
-  `price` int DEFAULT NULL
+  `price` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -169,8 +241,7 @@ INSERT INTO `item` (`id`, `ref_no`, `name`, `price`) VALUES
 (17, 'REF-0017', 'Microphone Fifine K669B', 480000),
 (18, 'REF-0018', 'Meja Komputer Minimalis', 950000),
 (19, 'REF-0019', 'Kursi Gaming RGB', 1850000),
-(20, 'REF-0020', 'UPS APC 650VA', 1100000),
-(21, 'REF-0021', 'Zidan Rasyid Susanto', 100);
+(20, 'REF-0020', 'UPS APC 650VA', 1100000);
 
 -- --------------------------------------------------------
 
@@ -184,7 +255,7 @@ CREATE TABLE `payment` (
   `invoice_id` int NOT NULL,
   `payment_code` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `date` date NOT NULL,
-  `amount` int DEFAULT NULL
+  `amount` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -192,9 +263,45 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`id`, `customer_id`, `invoice_id`, `payment_code`, `date`, `amount`) VALUES
-(7, 2, 64, '1111111111', '1111-11-11', 135000000),
-(9, 2, 64, '222223', '1111-11-11', 50000000),
-(10, 3, 68, '333333', '3333-03-31', 1000000000);
+(12, 3, 68, '1111111111', '2026-07-05', 100000000),
+(13, 2, 64, '222222', '2026-07-05', 4500000),
+(14, 3, 68, '333333', '2026-07-09', 100000000),
+(15, 5, 71, '000000', '2026-07-12', 16050000),
+(16, 10, 72, '99999', '2026-07-12', 200000000);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `position`
+--
+
+CREATE TABLE `position` (
+  `id` int NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `position`
+--
+
+INSERT INTO `position` (`id`, `name`) VALUES
+(15, 'Administrator'),
+(16, 'Assistant'),
+(6, 'Assistant Manager'),
+(8, 'Coordinator'),
+(3, 'Director'),
+(13, 'Executive'),
+(4, 'General Manager'),
+(5, 'Manager'),
+(12, 'Officer'),
+(1, 'Owner'),
+(2, 'President Director'),
+(17, 'Secretary'),
+(10, 'Senior Staff'),
+(14, 'Specialist'),
+(11, 'Staff'),
+(7, 'Supervisor'),
+(9, 'Team Leader');
 
 -- --------------------------------------------------------
 
@@ -204,19 +311,12 @@ INSERT INTO `payment` (`id`, `customer_id`, `invoice_id`, `payment_code`, `date`
 
 CREATE TABLE `user` (
   `id` int NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `phone` char(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `position` varchar(50) NOT NULL
+  `fullname` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','user') NOT NULL DEFAULT 'user',
+  `status` enum('active','inactive') NOT NULL DEFAULT 'inactive'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `user`
---
-
-INSERT INTO `user` (`id`, `name`, `phone`, `email`, `position`) VALUES
-(1, 'Linus Torvald', '081234567830', 'linus@example.com', 'founder'),
-(2, 'Administrator', '1246789900975', 'admin@example.com', 'admin');
 
 --
 -- Indexes for dumped tables
@@ -229,6 +329,16 @@ ALTER TABLE `company`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `company_pic`
+--
+ALTER TABLE `company_pic`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `phone` (`phone`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `fk_position` (`position_id`),
+  ADD KEY `fk_department` (`department_id`);
+
+--
 -- Indexes for table `customer`
 --
 ALTER TABLE `customer`
@@ -237,12 +347,19 @@ ALTER TABLE `customer`
   ADD UNIQUE KEY `phone` (`phone`);
 
 --
+-- Indexes for table `department`
+--
+ALTER TABLE `department`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
 -- Indexes for table `invoice`
 --
 ALTER TABLE `invoice`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code_invoice` (`invoice_code`),
-  ADD KEY `fk_user` (`user_id`),
+  ADD KEY `fk_user` (`pic_id`),
   ADD KEY `invoice_ibfk_1` (`customer_id`);
 
 --
@@ -269,12 +386,17 @@ ALTER TABLE `payment`
   ADD KEY `fl_invoice_2` (`invoice_id`);
 
 --
+-- Indexes for table `position`
+--
+ALTER TABLE `position`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `phone` (`phone`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -284,53 +406,78 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `company`
 --
 ALTER TABLE `company`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `company_pic`
+--
+ALTER TABLE `company_pic`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+
+--
+-- AUTO_INCREMENT for table `department`
+--
+ALTER TABLE `department`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `invoice`
 --
 ALTER TABLE `invoice`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- AUTO_INCREMENT for table `invoice_detail`
 --
 ALTER TABLE `invoice_detail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
 
 --
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
+-- AUTO_INCREMENT for table `position`
+--
+ALTER TABLE `position`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
 --
 
 --
+-- Constraints for table `company_pic`
+--
+ALTER TABLE `company_pic`
+  ADD CONSTRAINT `fk_department` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_position` FOREIGN KEY (`position_id`) REFERENCES `position` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+--
 -- Constraints for table `invoice`
 --
 ALTER TABLE `invoice`
-  ADD CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_pic` FOREIGN KEY (`pic_id`) REFERENCES `company_pic` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 --
