@@ -61,8 +61,8 @@ $top_products = $database->select('item', [
     'LIMIT' => 5
 ]);
 
-$total_invoice = count($database->select("invoice", "*"));
-$total_revenue = array_sum($database->select("payment", "amount"));
+$invoice_value = $database->sum("invoice_detail", "amount");
+$total_revenue = $database->sum("payment", "amount");
 
 foreach ($invoices as $invoice) {
     $remaining = $invoice['total_bill'] - $invoice['total_payment'];
@@ -126,6 +126,100 @@ foreach ($invoices as $invoice) {
             justify-content: center;
             flex-shrink: 0;
         }
+
+        /* Finance summary cards */
+        .finance-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: .6rem;
+            padding: 1.15rem 1.3rem;
+            background: var(--bs-body-bg);
+            border: 1px solid var(--bs-border-color);
+            border-left: 4px solid var(--accent);
+            border-radius: .6rem;
+        }
+
+        .finance-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: .75rem;
+        }
+
+        .finance-card-label {
+            font-size: .9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            /* color: var(--bs-secondary-color); */
+        }
+
+        .finance-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: .5rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            color: var(--accent);
+            background: rgba(var(--accent-rgb), .12);
+        }
+
+        .finance-card-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            line-height: 1.30;
+            font-variant-numeric: tabular-nums;
+            color: var(--bs-emphasis-color);
+        }
+
+        .finance-card-caption {
+            font-size: .9rem;
+            /* color: var(--bs-secondary-color); */
+        }
+
+        .finance-card-footer {
+            margin-top: auto;
+            padding-top: .6rem;
+            border-top: 1px solid var(--bs-border-color);
+        }
+
+        .finance-card-footer a {
+            font-size: .8rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+        }
+
+        .finance-card-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .finance-card--primary {
+            --accent: var(--bs-primary);
+            --accent-rgb: var(--bs-primary-rgb);
+        }
+
+        .finance-card--success {
+            --accent: var(--bs-success);
+            --accent-rgb: var(--bs-success-rgb);
+        }
+
+        .finance-card--warning {
+            --accent: var(--bs-warning);
+            --accent-rgb: var(--bs-warning-rgb);
+        }
+
+        .finance-card--danger {
+            --accent: var(--bs-danger);
+            --accent-rgb: var(--bs-danger-rgb);
+        }
     </style>
 </head>
 
@@ -148,53 +242,57 @@ foreach ($invoices as $invoice) {
                     </div>
                 </div>
 
-                <div class="row mb-4">
+                <div class="row mb-4 g-3">
                     <div class="col-lg-3 col-6">
-                        <div class="small-box text-bg-primary">
-                            <div class="inner">
-                                <h3><?= $total_invoice ?></h3>
-                                <p>Total Invoice</p>
+                        <div class="finance-card finance-card--primary">
+                            <div class="finance-card-top">
+                                <div class="finance-card-label">Invoice Value</div>
+                                <div class="finance-card-icon"><i class="bi bi-receipt-cutoff"></i></div>
                             </div>
-                            <i class="small-box-icon bi bi-receipt-cutoff"></i>
-                            <a href="../invoice/invoice.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                More info <i class="bi bi-link-45deg"></i>
-                            </a>
+                            <div class="finance-card-value">Rp<?= number_format($invoice_value, 0, ',', '.') ?></div>
+                            <!-- <div class="finance-card-caption">Total amount from all invoices</div> -->
+                            <div class="finance-card-footer">
+                                <a href="../invoice/invoice.php">More info <i class="bi bi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <div class="small-box text-bg-success">
-                            <div class="inner">
-                                <h3>Rp<?= number_format($total_revenue, 0, ',', '.') ?></h3>
-                                <p>Total Revenue</p>
+                        <div class="finance-card finance-card--success">
+                            <div class="finance-card-top">
+                                <div class="finance-card-label">Total Revenue</div>
+                                <div class="finance-card-icon"><i class="bi bi-cash-coin"></i></div>
                             </div>
-                            <i class="small-box-icon bi bi-cash-coin"></i>
-                            <a href="../revenue/revenue.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                More info <i class="bi bi-link-45deg"></i>
-                            </a>
+                            <div class="finance-card-value">Rp<?= number_format($total_revenue, 0, ',', '.') ?></div>
+                            <!-- <div class="finance-card-caption">Total payments received</div> -->
+                            <div class="finance-card-footer">
+                                <a href="../revenue/revenue.php">More info <i class="bi bi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <div class="small-box text-bg-warning">
-                            <div class="inner">
-                                <h3>Rp<?= number_format($total_unpaid, 0, ',', '.') ?></h3>
-                                <p>Total Unpaid</p>
+                        <div class="finance-card finance-card--warning">
+                            <div class="finance-card-top">
+                                <div class="finance-card-label">Total Unpaid</div>
+                                <div class="finance-card-icon"><i class="bi bi-hourglass-split"></i></div>
                             </div>
-                            <i class="small-box-icon bi bi-hourglass-split"></i>
-                            <a href="../outstanding/outstanding.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
-                                More info <i class="bi bi-link-45deg"></i>
-                            </a>
+                            <div class="finance-card-value">Rp<?= number_format($total_unpaid, 0, ',', '.') ?></div>
+                            <!-- <div class="finance-card-caption">Not yet paid off; the due date has not yet passed</div> -->
+                            <div class="finance-card-footer">
+                                <a href="../outstanding/outstanding.php">More info <i class="bi bi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-3 col-6">
-                        <div class="small-box text-bg-danger">
-                            <div class="inner">
-                                <h3>Rp<?= number_format($total_overdue, 0, ',', '.') ?></h3>
-                                <p>Total Overdue</p>
+                        <div class="finance-card finance-card--danger">
+                            <div class="finance-card-top">
+                                <div class="finance-card-label">Total Overdue</div>
+                                <div class="finance-card-icon"><i class="bi bi-exclamation-triangle"></i></div>
                             </div>
-                            <i class="small-box-icon bi bi-exclamation-triangle"></i>
-                            <a href="../overdue/overdue.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
-                                More info <i class="bi bi-link-45deg"></i>
-                            </a>
+                            <div class="finance-card-value">Rp<?= number_format($total_overdue, 0, ',', '.') ?></div>
+                            <!-- <div class="finance-card-caption">Not yet paid off. The due date has passed.</div> -->
+                            <div class="finance-card-footer">
+                                <a href="../overdue/overdue.php">More info <i class="bi bi-arrow-right"></i></a>
+                            </div>
                         </div>
                     </div>
                 </div>
