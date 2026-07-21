@@ -13,58 +13,30 @@ $number = 1;
 $period = $_GET['period'] ?? 'daily';
 
 if ($period === 'daily') {
-    $omsets = $database->select('invoice', [
-        '[><]invoice_detail' => [
-            'id' => 'invoice_id'
-        ]
-    ], [
-        'period' => Medoo::raw("DATE_FORMAT(<invoice.date>, '%W, %d %M %Y')"),
-        'total_invoice' => Medoo::raw('COUNT(DISTINCT <invoice.id>)'),
-        'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
-        'total_revenue' => Medoo::raw('SUM(<invoice_detail.unit_price> * <invoice_detail.quantity>)')
-    ], [
-        'GROUP' => 'invoice.date',
-        'ORDER' => [
-            'invoice.date' => 'DESC'
-        ],
-        'LIMIT' => 7
-    ]);
+    $periodKeyExpr   = "DATE(<payment.date>)";
+    $periodLabelExpr = "DATE_FORMAT(<payment.date>, '%W, %d %M %Y')";
+    $limit           = 7;
 } elseif ($period === 'weekly') {
-    $omsets = $database->select('invoice', [
-        '[><]invoice_detail' => [
-            'id' => 'invoice_id'
-        ]
-    ], [
-        'period_code' => Medoo::raw('YEARWEEK(<invoice.date>, 1)'),
-        'period' => Medoo::raw("CONCAT('Week ', WEEK(MIN(<invoice.date>), 1), ' (', DATE_FORMAT(MIN(<invoice.date>), '%M'), ')')"),
-        'total_invoice' => Medoo::raw('COUNT(DISTINCT <invoice.id>)'),
-        'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
-        'total_revenue' => Medoo::raw('SUM(<invoice_detail.unit_price> * <invoice_detail.quantity>)')
-    ], [
-        'GROUP' => 'period_code',
-        'ORDER' => [
-            'period_code' => 'DESC'
-        ],
-        'LIMIT' => 5
-    ]);
+    $periodKeyExpr   = "YEARWEEK(<payment.date>, 1)";
+    $periodLabelExpr = "CONCAT('Week ', WEEK(MIN(<payment.date>), 1), ' (', DATE_FORMAT(MIN(<payment.date>), '%M'), ')')";
+    $limit           = 5;
 } else {
-    $omsets = $database->select('invoice', [
-        '[><]invoice_detail' => [
-            'id' => 'invoice_id'
-        ]
-    ], [
-        'period' => Medoo::raw("DATE_FORMAT(<invoice.date>, '%Y-%m')"),
-        'total_invoice' => Medoo::raw('COUNT(DISTINCT <invoice.id>)'),
-        'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
-        'total_revenue' => Medoo::raw('SUM(<invoice_detail.unit_price> * <invoice_detail.quantity>)')
-    ], [
-        'GROUP' => 'period',
-        'ORDER' => [
-            'period' => 'DESC'
-        ],
-        'LIMIT' => 6
-    ]);
+    $periodKeyExpr   = "DATE_FORMAT(<payment.date>, '%Y-%m')";
+    $periodLabelExpr = "DATE_FORMAT(<payment.date>, '%Y-%m')";
+    $limit           = 6;
 }
+
+$omsets = $database->select('payment', [
+    'period_key' => Medoo::raw($periodKeyExpr),
+    'period' => Medoo::raw($periodLabelExpr),
+    'total_invoice' => Medoo::raw('COUNT(DISTINCT <payment.invoice_id>)'),
+    'total_payment' => Medoo::raw('COUNT(<payment.id>)'),
+    'revenue' => Medoo::raw('SUM(<payment.amount>)')
+], [
+    'GROUP' => 'period_key',
+    'ORDER' => ['period_key' => 'DESC'],
+    'LIMIT' => $limit
+]);
 ?>
 
 <!DOCTYPE html>
@@ -79,6 +51,15 @@ if ($period === 'daily') {
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
+    <style>
+        .period-filter .btn {
+            min-width: 100px;
+        }
+
+        .period-filter .btn.active {
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
@@ -101,26 +82,24 @@ if ($period === 'daily') {
                     </div>
                 </div>
 
-                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
-                    <div class="btn-group shadow-sm" role="group">
-                        <?php if ($period == "daily"): ?>
-                            <a class="btn btn-sm btn-primary active px-3" href="?period=daily">Daily</a>
-                        <?php else: ?>
-                            <a class="btn btn-sm btn-outline-primary px-3" href="?period=daily">Daily</a>
-                        <?php endif; ?>
-
-                        <?php if ($period == "weekly"): ?>
-                            <a class="btn btn-sm btn-primary active px-3" href="?period=weekly">Weekly</a>
-                        <?php else: ?>
-                            <a class="btn btn-sm btn-outline-primary px-3" href="?period=weekly">Weekly</a>
-                        <?php endif; ?>
-
-                        <?php if ($period == "monthly"): ?>
-                            <a class="btn btn-sm btn-primary active px-3" href="?period=monthly">Monthly</a>
-                        <?php else: ?>
-                            <a class="btn btn-sm btn-outline-primary px-3" href="?period=monthly">Monthly</a>
-                        <?php endif; ?>
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <div class="btn-group period-filter" role="group" aria-label="Period filter">
+                        <a href="?period=daily"
+                            class="btn btn-outline-light <?= $period === 'daily' ? 'active btn-light text-dark' : '' ?>">
+                            Daily
+                        </a>
+                        <a href="?period=weekly"
+                            class="btn btn-outline-light <?= $period === 'weekly' ? 'active btn-light text-dark' : '' ?>">
+                            Weekly
+                        </a>
+                        <a href="?period=monthly"
+                            class="btn btn-outline-light <?= $period === 'monthly' ? 'active btn-light text-dark' : '' ?>">
+                            Monthly
+                        </a>
                     </div>
+                    <span class="text-white-50 mt-2 mt-sm-0">
+                        Showing: <span class="fw-semibold text-white"><?= ucfirst($period) ?></span>
+                    </span>
                 </div>
 
                 <div class="card shadow-sm border-0 mb-4">
@@ -131,19 +110,24 @@ if ($period === 'daily') {
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
                                         <th scope="col">Period</th>
-                                        <th scope="col">Total Invoices</th>
-                                        <th scope="col">Total Units Sold</th>
+                                        <th scope="col">Invoices Paid</th>
+                                        <th scope="col">Total Payments</th>
                                         <th scope="col" class="pe-4">Revenue</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <?php if (empty($omsets)): ?>
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">No revenue data found.</td>
+                                        </tr>
+                                    <?php endif; ?>
                                     <?php foreach ($omsets as $omset): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= $number++ ?></th>
                                             <td class="fw-medium"><?= $omset['period'] ?></td>
                                             <td><?= $omset['total_invoice'] ?></td>
-                                            <td><?= $omset['total_unit_sold'] ?></td>
-                                            <td class="pe-4">Rp<?= number_format($omset['total_revenue'], 2, ',', '.') ?></td>
+                                            <td><?= $omset['total_payment'] ?></td>
+                                            <td class="pe-4 fw-semibold">Rp<?= number_format($omset['revenue'], 0, ',', '.') ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
