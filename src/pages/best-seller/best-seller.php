@@ -11,22 +11,66 @@ use Medoo\Medoo;
 
 $number = 1;
 
-$top_products = $database->select('item', [
-    '[><]invoice_detail' => [
-        'id' => 'item_id'
-    ]
-], [
-    'item.name(item_name)',
-    'invoice_detail.unit_price',
-    'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
-    'total_revenue' => Medoo::raw('SUM(<invoice_detail.unit_price> * <invoice_detail.quantity>)')
-], [
+$allowed_periods = ['all', 'yearly', 'monthly', 'weekly'];
+$period = $_GET['period'] ?? 'all';
+if (!in_array($period, $allowed_periods)) {
+    $period = 'all';
+}
+
+$where = [
     'GROUP' => 'item.id',
     'ORDER' => [
         'total_unit_sold' => 'DESC'
     ],
     'LIMIT' => 10
-]);
+];
+
+$period_label = 'All Time';
+
+switch ($period) {
+    case 'weekly':
+        $start = date('Y-m-d', strtotime('monday this week'));
+        $end   = date('Y-m-d', strtotime('sunday this week'));
+        $where['invoice.date[>=]'] = $start;
+        $where['invoice.date[<=]'] = $end;
+        $period_label = 'This Week';
+        break;
+
+    case 'monthly':
+        $start = date('Y-m-01');
+        $end   = date('Y-m-t');
+        $where['invoice.date[>=]'] = $start;
+        $where['invoice.date[<=]'] = $end;
+        $period_label = 'This Month';
+        break;
+
+    case 'yearly':
+        $start = date('Y-01-01');
+        $end   = date('Y-12-31');
+        $where['invoice.date[>=]'] = $start;
+        $where['invoice.date[<=]'] = $end;
+        $period_label = 'This Year';
+        break;
+
+    case 'all':
+    default:
+        $period_label = 'All Time';
+        break;
+}
+
+$top_products = $database->select('item', [
+    '[><]invoice_detail' => [
+        'id' => 'item_id'
+    ],
+    '[><]invoice' => [
+        'invoice_detail.invoice_id' => 'id'
+    ]
+], [
+    'item.name(item_name)',
+    'item.price',
+    'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
+    'total_sales' => Medoo::raw('SUM(<invoice_detail.amount>)')
+], $where);
 ?>
 
 <!DOCTYPE html>
@@ -41,6 +85,15 @@ $top_products = $database->select('item', [
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
+    <style>
+        .period-filter .btn {
+            min-width: 100px;
+        }
+
+        .period-filter .btn.active {
+            font-weight: 600;
+        }
+    </style>
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
@@ -63,6 +116,30 @@ $top_products = $database->select('item', [
                     </div>
                 </div>
 
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <div class="btn-group period-filter" role="group" aria-label="Period filter">
+                        <a href="?period=all"
+                            class="btn btn-outline-light <?= $period === 'all' ? 'active btn-light text-dark' : '' ?>">
+                            All Time
+                        </a>
+                        <a href="?period=yearly"
+                            class="btn btn-outline-light <?= $period === 'yearly' ? 'active btn-light text-dark' : '' ?>">
+                            Yearly
+                        </a>
+                        <a href="?period=monthly"
+                            class="btn btn-outline-light <?= $period === 'monthly' ? 'active btn-light text-dark' : '' ?>">
+                            Monthly
+                        </a>
+                        <a href="?period=weekly"
+                            class="btn btn-outline-light <?= $period === 'weekly' ? 'active btn-light text-dark' : '' ?>">
+                            Weekly
+                        </a>
+                    </div>
+                    <span class="text-white-50 mt-2 mt-sm-0">
+                        Showing: <span class="fw-semibold text-white"><?= $period_label ?></span>
+                    </span>
+                </div>
+
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -71,21 +148,29 @@ $top_products = $database->select('item', [
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
                                         <th scope="col">Item Name</th>
-                                        <th scope="col">Units Price</th>
+                                        <th scope="col">Unit Price</th>
                                         <th scope="col">Units Sold</th>
-                                        <th scope="col" class="pe-4">Revenue</th>
+                                        <th scope="col" class="pe-4">Total Sales</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($top_products as $top_product): ?>
+                                    <?php if (empty($top_products)): ?>
                                         <tr>
-                                            <th scope="row" class="ps-4 text-muted fw-normal"><?= $number++ ?></th>
-                                            <td class="fw-medium"><?= $top_product['item_name'] ?></td>
-                                            <td>Rp<?= number_format($top_product['unit_price'], 0, ',', '.') ?></td>
-                                            <td><?= $top_product['total_unit_sold'] ?></td>
-                                            <td class="pe-4">Rp<?= number_format($top_product['total_revenue'], 2, ',', '.') ?></td>
+                                            <td colspan="5" class="text-center text-muted py-4">
+                                                No sales data found for this period.
+                                            </td>
                                         </tr>
-                                    <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <?php foreach ($top_products as $top_product): ?>
+                                            <tr>
+                                                <th scope="row" class="ps-4 text-muted fw-normal"><?= $number++ ?></th>
+                                                <td class="fw-medium"><?= $top_product['item_name'] ?></td>
+                                                <td>Rp<?= number_format($top_product['price'], 0, ',', '.') ?></td>
+                                                <td><?= $top_product['total_unit_sold'] ?></td>
+                                                <td class="pe-4 fw-semibold">Rp<?= number_format($top_product['total_sales'], 0, ',', '.') ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </tbody>
                             </table>
                         </div>
