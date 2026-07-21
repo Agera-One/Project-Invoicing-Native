@@ -100,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input value="<?= $invoice['date']; ?>" name="date" type="date" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Date</label>
+                                <label class="form-label">Due Date</label>
                                 <input value="<?= $invoice['due_date']; ?>" name="due_date" type="date" class="form-control" required>
                             </div>
                         </div>
