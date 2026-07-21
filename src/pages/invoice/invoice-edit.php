@@ -1,11 +1,14 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit;
 }
+
+$invoice_code = generate_code($database, "invoice", "invoice_code", "INV");
 
 $id = $_GET['id'];
 $customer_id = $_GET['customer_id'];
@@ -18,27 +21,14 @@ $customers = $database->select('customer', ['id', 'name']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customer_id = $_POST['customer_id'];
-    $invoice_code = $_POST['invoice_code'];
     $date = $_POST['date'];
     $due_date = $_POST['due_date'];
 
-    $check_invoice_code = count($database->select('invoice', 'invoice_code', [
-        'AND' => [
-            'invoice_code' => $invoice_code,
-            'id[!]' => $id
-        ]
-    ]));
-
-    if (strlen($invoice_code) > 10) {
-        echo '<script>alert("The invoice code is limited to a maximum of 10 characters")</script>';
-    } elseif ($due_date < $date) {
+    if ($due_date < $date) {
         echo '<script>alert("The due date must not be earlier than the invoice date")</script>';
-    } elseif ($check_invoice_code > 0) {
-        echo '<script>alert("Invoice code already exists. Please use a different invoice code.")</script>';
     } else {
-        $invoices = $database->update('invoice', [
+        $database->update('invoice', [
             'customer_id' => $customer_id,
-            'invoice_code' => $invoice_code,
             'date' => $date,
             'due_date' => $due_date
         ], [
@@ -58,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Edit Invoice</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
 </head>
 
@@ -70,6 +60,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Edit Invoice</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../invoice/invoice.php">Invoices Billing</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Edit Invoice</li>
+                        </ol>
+                    </div>
+                </div>
+
                 <div class="card card-primary card-outline mb-4">
                     <div class="card-header">
                         <div class="card-title">Edit Invoice</div>
@@ -77,8 +80,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <form action="" method="POST">
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="form-label">Code Invoice</label>
-                                <input value="<?= $invoice['invoice_code']; ?>" name="invoice_code" type="text" class="form-control" required>
+                                <label for="exampleInputEmail1" class="form-label">Invoice Code</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="form-control-plaintext fs-5 fw-bold text-primary bg-body-secondary border rounded px-3 py-2 mb-0">
+                                        <i class="bi bi-upc-scan me-2"></i><span id="noFakturText"><?= $invoice['invoice_code'] ?></span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Customer Name</label>

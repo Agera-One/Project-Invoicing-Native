@@ -10,36 +10,30 @@ if (!isset($_SESSION['user_id'])) {
 $number = 1;
 $limit = 10;
 
-$active_page = isset($_GET['page']) ? $_GET['page'] : 1;
+$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
+$where_condition = [];
+$search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$rows = count($database->select("customer", "*"));
+if ($search !== '') {
+    $where_condition['OR'] = [
+        'customer_code[~]' => $search,
+        'name[~]' => $search,
+        'email[~]' => $search,
+        'phone[~]' => $search,
+        'address[~]' => $search,
+    ];
+}
+
+$rows = count($database->select("customer", "*", $where_condition));
 $total_page = ceil($rows / $limit);
 
-$customers = $database->select('customer', '*', [
-    'ORDER' => [
-        'id' => 'DESC'
-    ],
-    'LIMIT' => [$offset, $limit]
-]);
+$query_options = $where_condition;
+$query_options['ORDER'] = ['id' => 'DESC'];
+$query_options['LIMIT'] = [$offset, $limit];
 
-if (isset($_GET['search'])) {
-    $search = $_GET['search'];
-
-    $customers = $database->select('customer', '*', [
-        'OR' => [
-            'name[~]' => $search,
-            'email[~]' => $search,
-            'phone[~]' => $search,
-            'address[~]' => $search,
-        ],
-        'ORDER' => [
-            'id' => 'DESC'
-        ],
-        'LIMIT' => [$offset, $limit]
-    ]);
-}
+$customers = $database->select('customer', '*', $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -57,7 +51,7 @@ if (isset($_GET['search'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -65,9 +59,16 @@ if (isset($_GET['search'])) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-                <div class="mb-4">
-                    <h3 class="fw-bold h4 m-0 text-white">Customer Management</h3>
-                    <p class="text-muted small m-0">Manage your clients data and information</p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Customers Management</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Customers Management</li>
+                        </ol>
+                    </div>
                 </div>
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -107,6 +108,7 @@ if (isset($_GET['search'])) {
                                 <thead class="table-light text-uppercase fs-7 tracking-wider">
                                     <tr>
                                         <th scope="col" class="ps-4" width="60">#</th>
+                                        <th scope="col">Customer Code</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Phone</th>
@@ -118,7 +120,8 @@ if (isset($_GET['search'])) {
                                     <?php foreach ($customers as $customer): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
-                                            <td class="fw-medium"><?= $customer['name'] ?></td>
+                                            <td class="fw-medium"><?= $customer['customer_code'] ?></td>
+                                            <td><?= $customer['name'] ?></td>
                                             <td><?= $customer['email'] ?></td>
                                             <td><?= $customer['phone'] ?></td>
                                             <td><?= $customer['address'] ?></td>
@@ -140,19 +143,23 @@ if (isset($_GET['search'])) {
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
                                 <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1 ?>">Previous</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>">Previous</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_page; $i++): ?>
                                     <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?><?= $search ? '&search=' . urlencode($search) : '' ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1 ?>">Next</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>">Next</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                                 <?php endif; ?>

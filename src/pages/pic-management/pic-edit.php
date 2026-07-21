@@ -22,7 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $position = $_POST['position'];
+    $position_id = $_POST['position_id'];
+    $department_id = $_POST['department_id'];
     $status = $_POST['status'];
 
     $check_email = count($database->select('company_pic', 'email', [
@@ -39,12 +40,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]
     ]));
 
-    $check_status = count($database->select('company_pic', 'status', [
-        'AND' => [
-            'status' => 'active',
-            'id[!]' => $id
-        ]
-    ]));
+    // $check_status = count($database->select('company_pic', 'status', [
+    //     'AND' => [
+    //         'status' => 'active',
+    //         'id[!]' => $id
+    //     ]
+    // ]));
 
     if ($check_email > 0) {
         echo '<script>alert("Email already exists. Please use a different email.")</script>';
@@ -56,22 +57,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<script>alert("Maximum phone length is 15 characters.")</script>';
     } elseif (strlen($email) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
-    } elseif (strlen($position) > 50) {
-        echo '<script>alert("Maximum position length is 50 characters.")</script>';
-    } elseif ($check_status > 0 && $status === 'active') {
-        echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
+    // } elseif ($check_status > 0 && $status === 'active') {
+    //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
     } else {
         $company_pics = $database->update('company_pic', [
             'name' => $name,
             'phone' => $phone,
             'email' => $email,
-            'position' => $position,
+            'position_id' => $position_id,
+            'department_id' => $department_id,
             'status' => $status
         ], [
             'id' => $id
         ]);
 
-        header("Location: company_pic.php");
+        header("Location: pic.php");
         exit();
     }
 }
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Edit PIC</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
 </head>
 
@@ -95,6 +95,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Edit PIC</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../pic-management/pic.php">Person in Charge (PIC)</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Edit PIC</li>
+                        </ol>
+                    </div>
+                </div>
+
                 <div class="card card-primary card-outline mb-4">
                     <div class="card-header">
                         <div class="card-title">Edit Item</div>

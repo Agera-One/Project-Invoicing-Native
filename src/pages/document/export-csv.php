@@ -4,6 +4,7 @@ require_once '../../connection.php';
 // Fetch all data from customer table
 $customers = $database->select('customer', [
     'id',
+    'customer_code',
     'name',
     'email',
     'phone',
@@ -31,6 +32,7 @@ $no = 1;
 foreach ($customers as $customer) {
     $row_data = [
         $no++,
+        $customer['customer_code'],
         $customer['name'],
         $customer['email'],
         $customer['phone'],

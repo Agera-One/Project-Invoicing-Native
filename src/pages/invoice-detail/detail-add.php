@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Add Invoice Item</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
@@ -70,6 +70,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Add Invoice Item</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../invoice/invoice.php">Invoices Billing</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="detail.php?invoice_id=<?= $invoice_id ?>">Invoice Details</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Add Invoice Item</li>
+                        </ol>
+                    </div>
+                </div>
+
                 <div class="card card-primary card-outline mb-4">
                     <div class="card-header">
                         <div class="card-title">Add Some Item</div>

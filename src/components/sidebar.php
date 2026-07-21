@@ -236,7 +236,7 @@
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="../company-setting/company.php" class="nav-link" data-page="company">
+                            <a href="../company/company.php" class="nav-link" data-page="company">
                                 <i class="bi bi-building-gear nav-icon"></i>
                                 <p>Company Setting</p>
                             </a>

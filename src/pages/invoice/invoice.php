@@ -11,11 +11,12 @@ use Medoo\Medoo;
 
 $today = date('Y-m-d');
 $limit = 10;
-$active_page = isset($_GET['page']) ? $_GET['page'] : 1;
+$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
-$rows = count($database->select("invoice", "*"));
-$total_page = ceil($rows / $limit);
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+$date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
+$date_to   = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
 $join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
@@ -36,60 +37,41 @@ $select_columns = [
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ];
 
-$invoices = $database->select('invoice', $join_structure, $select_columns, [
-    'GROUP' => [
-        'invoice.id',
-        'invoice.customer_id',
-        'invoice.invoice_code',
-        'invoice.date',
-        'invoice.due_date',
-        'customer.name'
-    ],
-    'ORDER' => [
-        'invoice.id' => 'DESC'
-    ],
-    'LIMIT' => [$offset, $limit]
-]);
-
-if (isset($_GET['search'])) {
-    $keyword = $_GET['keyword'];
-    $date_from = $_GET['date_from'];
-    $date_to   = $_GET['date_to'];
-
-    $where = [];
-
-    if ($keyword !== '') {
-        $where['OR'] = [
-            'invoice.invoice_code[~]' => $keyword,
-            'customer.name[~]' => $keyword,
-            'company_pic.name[~]' => $keyword
-        ];
-    }
-
-    if (!empty($date_from) && !empty($date_to)) {
-        $where['invoice.date[<>]'] = [$date_from, $date_to];
-    } elseif (!empty($date_from)) {
-        $where['invoice.date[>=]'] = $date_from;
-    } elseif (!empty($date_to)) {
-        $where['invoice.date[<=]'] = $date_to;
-    }
-
-    $where['GROUP'] = [
-        'invoice.id',
-        'invoice.customer_id',
-        'invoice.invoice_code',
-        'invoice.date',
-        'customer.name'
+$where_condition = [];
+if ($keyword !== '') {
+    $where_condition['OR'] = [
+        'invoice.invoice_code[~]' => $keyword,
+        'customer.name[~]' => $keyword,
+        'company_pic.name[~]' => $keyword
     ];
-
-    $where['ORDER'] = [
-        'invoice.id' => 'DESC'
-    ];
-
-    $where['LIMIT'] = [$offset, $limit];
-
-    $invoices = $database->select('invoice', $join_structure, $select_columns, $where);
 }
+
+if (!empty($date_from) && !empty($date_to)) {
+    $where_condition['invoice.date[<>]'] = [$date_from, $date_to];
+} elseif (!empty($date_from)) {
+    $where_condition['invoice.date[>=]'] = $date_from;
+} elseif (!empty($date_to)) {
+    $where_condition['invoice.date[<=]'] = $date_to;
+}
+
+$count_options = $where_condition;
+$count_options['GROUP'] = ['invoice.id'];
+$rows = count($database->select("invoice", $join_structure, "invoice.id", $count_options));
+$total_page = ceil($rows / $limit);
+
+$query_options = $where_condition;
+$query_options['GROUP'] = [
+    'invoice.id',
+    'invoice.customer_id',
+    'invoice.invoice_code',
+    'invoice.date',
+    'invoice.due_date',
+    'customer.name'
+];
+$query_options['ORDER'] = ['invoice.id' => 'DESC'];
+$query_options['LIMIT'] = [$offset, $limit];
+
+$invoices = $database->select('invoice', $join_structure, $select_columns, $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -98,7 +80,7 @@ if (isset($_GET['search'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Invoices Billing</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -106,7 +88,7 @@ if (isset($_GET['search'])) {
         crossorigin="anonymous" />
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -114,9 +96,16 @@ if (isset($_GET['search'])) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-                <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Invoices Billing</h3>
-                    <p class="text-muted small m-0">Track customer billing orders and histories</p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Invoices Billing</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Invoices Billing</li>
+                        </ol>
+                    </div>
                 </div>
 
                 <div class="flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -175,7 +164,7 @@ if (isset($_GET['search'])) {
                                         <th scope="col">Invoice Code</th>
                                         <th scope="col">PIC Name</th>
                                         <th scope="col">Customer Name</th>
-                                        <th scope="col">Date</th>
+                                        <th scope="col">Invoice Date</th>
                                         <th scope="col">Due Date</th>
                                         <th scope="col">Total Bill</th>
                                         <th scope="col" class="text-center">Status</th>
@@ -224,20 +213,22 @@ if (isset($_GET['search'])) {
                     <div class="card-footer bg-transparent border-top d-flex justify-content-end p-3">
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
+                                <?php $filter_params = '&keyword=' . urlencode($keyword) . '&date_from=' . urlencode($date_from) . '&date_to=' . urlencode($date_to) . '&search='; ?>
+
                                 <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1 ?>">Previous</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page=<?= $active_page - 1 ?><?= $filter_params ?>">Previous</a></li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_page; $i++): ?>
                                     <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?><?= $filter_params ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1 ?>">Next</a></li>
+                                    <li class="page-item"><a class="page-link" href="?page=<?= $active_page + 1 ?><?= $filter_params ?>">Next</a></li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                                 <?php endif; ?>

@@ -2,37 +2,45 @@
 session_start();
 require_once '../../connection.php';
 
-if (isset($_POST["login"])) {
+if (isset($_POST["register"])) {
+    $name = $_POST["name"];
     $email    = $_POST["email"];
-    $password = $_POST["password"];
+    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
 
-    $user = $database->get('user', '*', ['email' => $email]);
+    $check_email = count($database->select('user', 'email', [
+        'email' => $email
+    ]));
 
-    if ($user) {
-        if (password_verify($password, $user["password"])) {
-            $_SESSION["user_id"] = $user["id"];
-
-            header("Location: ../dashboard/dashboard.php");
-            exit();
-        } else {
-            echo '<script>alert("Incorrect password. Please try again.")</script>';
-        }
+    if ($check_email > 0) {
+        echo '<script>alert("Email already exists. Please use a different email.")</script>';
     } else {
-        echo '<script>alert("Email not found. Please register first.")</script>';
+        $users = $database->insert('user', [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+        ]);
+
+        if ($users) {
+            echo '<script>alert("Registration successful. Please log in.")</script>';
+            echo '<script>window.location.href = "login.php";</script>';
+        } else {
+            echo '<script>alert("Error occurred during registration.")</script>';
+        }
     }
 }
 ?>
+
 <!doctype html>
 <html lang="en">
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Red Hat | Login Page</title>
+    <title>Hunter Shop | Register Page</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
-    <meta name="title" content="Hunter Shop | Login Page" />
+    <meta name="title" content="Hunter Shop | Register Page" />
     <meta name="author" content="Hunter Shop" />
     <meta name="supported-color-schemes" content="light dark" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
@@ -41,20 +49,29 @@ if (isset($_POST["login"])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/css/adminlte.min.css" />
 </head>
 
-<body class="login-page bg-body-secondary">
-    <div class="login-box">
+<body class="register-page bg-body-secondary">
+    <div class="register-box">
         <div class="card card-outline card-primary">
             <div class="card-header text-center">
-                <h1 class="mb-0">Login</h1>
+                <h1 class="mb-0">register</h1>
             </div>
-            <div class="card-body login-card-body">
-                <p class="login-box-msg">Sign in to start your session</p>
+            <div class="card-body register-card-body">
+                <p class="register-box-msg">Register a new account</p>
 
                 <form action="" method="post">
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginEmail" type="email" class="form-control" placeholder="" name="email" />
-                            <label for="loginEmail">Email</label>
+                            <input id="registername" type="text" class="form-control" placeholder="" name="name" required />
+                            <label for="registername">Username</label>
+                        </div>
+                        <div class="input-group-text">
+                            <span class="bi bi-person"></span>
+                        </div>
+                    </div>
+                    <div class="input-group mb-1">
+                        <div class="form-floating">
+                            <input id="registerEmail" type="email" class="form-control" placeholder="" name="email" required />
+                            <label for="registerEmail">Email</label>
                         </div>
                         <div class="input-group-text">
                             <span class="bi bi-envelope"></span>
@@ -62,8 +79,8 @@ if (isset($_POST["login"])) {
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginPassword" type="password" class="form-control" placeholder="" name="password" />
-                            <label for="loginPassword">Password</label>
+                            <input id="registerPassword" type="password" class="form-control" placeholder="" name="password" required />
+                            <label for="registerPassword">Password</label>
                         </div>
                         <div class="input-group-text">
                             <span class="bi bi-lock-fill"></span>
@@ -74,21 +91,21 @@ if (isset($_POST["login"])) {
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
                                 <label class="form-check-label" for="flexCheckDefault">
-                                    Remember Me
+                                    I agree to the <a href="#">terms</a>
                                 </label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="d-grid gap-2">
-                                <button type="submit" name="login" class="btn btn-primary">Login</button>
+                                <button type="submit" name="register" class="btn btn-primary">Register</button>
                             </div>
                         </div>
                     </div>
                 </form>
 
                 <p class="mb-0">
-                    <a href="register.php" class="text-center">
-                        Register a new account
+                    <a href="login.php" class="link-primary text-center">
+                        I already have a account
                     </a>
                 </p>
             </div>
@@ -100,7 +117,6 @@ if (isset($_POST["login"])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" crossorigin="anonymous">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
-    <script src="../js/adminlte.js"></script>
     <script>
         const SELECTOR_SIDEBAR_WRAPPER = ".sidebar-wrapper";
         const Default = {
@@ -156,6 +172,7 @@ if (isset($_POST["login"])) {
             setTheme(getPreferredTheme());
 
             const showActiveTheme = (theme) => {
+                // Highlight the active dropdown option
                 document.querySelectorAll("[data-bs-theme-value]").forEach((el) => {
                     el.classList.remove("active");
                     el.setAttribute("aria-pressed", "false");
@@ -201,11 +218,6 @@ if (isset($_POST["login"])) {
             });
         })();
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/js/adminlte.min.js"></script>
 </body>
 
 </html>

@@ -37,16 +37,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email' => $email
         ]));
 
-        $check_status = count($database->select('company_pic', 'status', [
-            'status' => 'active'
-        ]));
+        // $check_status = count($database->select('company_pic', 'status', [
+        //     'status' => 'active'
+        // ]));
 
         if ($check_phone > 0) {
             echo '<script>alert("Phone number already exists. Please use a different phone number.")</script>';
         } elseif ($check_email > 0) {
             echo '<script>alert("Email already exists. Please use a different email.")</script>';
-        } elseif ($check_status > 0 && $status === 'active') {
-            echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
+        // } elseif ($check_status > 0 && $status === 'active') {
+        //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
         } else {
             $company_pics = $database->insert('company_pic', [
                 'name' => $name,
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Add New PIC</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
@@ -84,6 +84,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Add New PIC</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../pic-management/pic.php">Person in Charge (PIC)</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Add New PIC</li>
+                        </ol>
+                    </div>
+                </div>
+
                 <div class="card card-primary card-outline mb-4">
                     <div class="card-header">
                         <div class="card-title">Add New User</div>

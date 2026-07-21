@@ -1,7 +1,7 @@
 <?php
 $user_id = $_SESSION['user_id'];
 
-$user = $database->get('user', '*', ['id' => $user_id]);
+$logged_in_user = $database->get('user', '*', ['id' => $user_id]);
 ?>
 
 <style>
@@ -129,7 +129,7 @@ $user = $database->get('user', '*', ['id' => $user_id]);
             class="user-image rounded-circle shadow"
             alt="User">
           <span class="d-none d-md-inline">
-            <?= $user['name'] ?>
+            <?= $logged_in_user ['name'] ?>
           </span>
         </a>
         <!-- Dropdown -->
@@ -138,21 +138,12 @@ $user = $database->get('user', '*', ['id' => $user_id]);
             <img
               src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=160"
               alt="User">
-            <p><?= $user['name'] ?><small>Admin</small></p>
+            <p><?= $logged_in_user ['name'] ?><small>Admin</small></p>
           </li>
           <li class="user-footer">
-            <div class="row g-2">
-              <div class="col-6">
-                <a href="#" class="btn btn-outline-secondary w-100">
-                  Profil
-                </a>
-              </div>
-              <div class="col-6">
-                <a href="../auth/logout.php" class="btn btn-outline-danger w-100">
-                  Logout
-                </a>
-              </div>
-            </div>
+            <a href="../auth/logout.php" class="btn btn-outline-danger w-100">
+              Logout
+            </a>
           </li>
         </ul>
       </li>

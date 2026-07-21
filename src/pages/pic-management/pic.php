@@ -10,11 +10,10 @@ if (!isset($_SESSION['user_id'])) {
 $number = 1;
 $limit = 10;
 
-$active_page = isset($_GET['page']) ? $_GET['page'] : 1;
+$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
-$rows = count($database->select('company_pic', '*'));
-$total_page = ceil($rows / $limit);
+$search = isset($_GET['search']) ? $_GET['search'] : '';
 
 $join_structure = [
     '[><]position' => ['position_id' => 'id'],
@@ -33,35 +32,26 @@ $select_columns = [
     'department.name(department_name)'
 ];
 
-$company_pics = $database->select('company_pic', $join_structure, $select_columns, [
-    'ORDER' => [
-        'company_pic.id' => 'DESC'
-    ],
-]);
-
-if (isset($_GET['search'])) {
-    $search = $_GET['search'];
-
-    $company_pics = $database->select(
-        'company_pic',
-        $join_structure,
-        $select_columns,
-        [
-            'OR' => [
-                'company_pic.name[~]' => $search,
-                'company_pic.phone[~]' => $search,
-                'company_pic.email[~]' => $search,
-                'position.name[~]' => $search,
-                'department.name[~]' => $search,
-                'company_pic.status[~]' => $search,
-            ],
-            'ORDER' => [
-                'company_pic.id' => 'DESC',
-            ],
-            'LIMIT' => [$offset, $limit],
-        ],
-    );
+$where_condition = [];
+if ($search !== '') {
+    $where_condition['OR'] = [
+        'company_pic.name[~]' => $search,
+        'company_pic.phone[~]' => $search,
+        'company_pic.email[~]' => $search,
+        'position.name[~]' => $search,
+        'department.name[~]' => $search,
+        'company_pic.status[~]' => $search,
+    ];
 }
+
+$rows = count($database->select('company_pic', $join_structure, $select_columns, $where_condition));
+$total_page = ceil($rows / $limit);
+
+$query_options = $where_condition;
+$query_options['ORDER'] = ['company_pic.id' => 'DESC'];
+$query_options['LIMIT'] = [$offset, $limit];
+
+$company_pics = $database->select('company_pic', $join_structure, $select_columns, $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -70,7 +60,7 @@ if (isset($_GET['search'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Person in Charge (PIC)</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -78,7 +68,7 @@ if (isset($_GET['search'])) {
         crossorigin="anonymous" />
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -86,16 +76,18 @@ if (isset($_GET['search'])) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-
-                <!-- Page Title -->
-                <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Person in Charge (PIC)</h3>
-                    <p class="text-muted small m-0">
-                        Manage company representatives, contact information, and assigned responsibilities
-                    </p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Person in Charge (PIC)</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Person in Charge (PIC)</li>
+                        </ol>
+                    </div>
                 </div>
 
-                <!-- Header halaman & Tombol navigasi -->
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
                         <a href="pic-add.php" class="btn btn-primary shadow-sm">
@@ -103,7 +95,6 @@ if (isset($_GET['search'])) {
                         </a>
                     </div>
 
-                    <!-- Kolom Pencarian -->
                     <div class="col-md-4 d-flex align-items-end gap-2">
                         <form action="" method="GET" class="flex-grow-1">
                             <div class="input-group">
@@ -116,13 +107,12 @@ if (isset($_GET['search'])) {
                                     value="<?= $_GET['search'] ?? '' ?>">
                             </div>
                         </form>
-                        <a href="user.php" class="btn btn-outline-secondary w-25">
+                        <a href="pic.php" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
                 </div>
 
-                <!-- Card Pembungkus Tabel -->
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -162,25 +152,26 @@ if (isset($_GET['search'])) {
                         </div>
                     </div>
 
-                    <!-- Navigasi Halaman / Pagination -->
                     <div class="card-footer bg-transparent border-top d-flex justify-content-end p-3">
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
                                 <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1; ?>">Previous</a>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page - 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">Previous</a>
                                     </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_page; $i++): ?>
-                                    <li class="page-item <?= $i == $active_page ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                    <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
+                                        <a class="page-link" href="?page=<?= $i ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1; ?>">Next</a>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page + 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">Next</a>
                                     </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>

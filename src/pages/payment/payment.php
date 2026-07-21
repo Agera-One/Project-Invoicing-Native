@@ -8,16 +8,17 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $limit = 10;
-$active_page = isset($_GET['page']) ? $_GET['page'] : 1;
+$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $offset = ($active_page - 1) * $limit;
 
-$rows = count($database->select("payment", "*"));
-$total_page = ceil($rows / $limit);
+$search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$payments = $database->select('payment', [
+$join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
     '[><]invoice' => ['invoice_id' => 'id']
-], [
+];
+
+$select_columns = [
     'payment.id',
     'payment.payment_code',
     'payment.date',
@@ -26,40 +27,26 @@ $payments = $database->select('payment', [
     'customer.name(customer_name)',
     'invoice.id(invoice_id)',
     'invoice.invoice_code(invoice_code)'
-], [
-    'ORDER' => [
-        'payment.id' => 'DESC'
-    ],
-    'LIMIT' => [$offset, $limit]
-]);
+];
 
-if (isset($_GET['search'])) {
-    $search = $_GET['search'];
-
-    $payments = $database->select('payment', [
-        '[><]customer' => ['customer_id' => 'id'],
-        '[><]invoice' => ['invoice_id' => 'id']
-    ], [
-        'payment.id',
-        'payment.payment_code',
-        'payment.date',
-        'payment.amount',
-        'customer.id(customer_id)',
-        'customer.name(customer_name)',
-        'invoice.id(invoice_id)',
-        'invoice.invoice_code(invoice_code)'
-    ], [
-        'OR' => [
-            'payment.payment_code[~]' => $search,
-            'invoice.invoice_code[~]' => $search,
-            'customer.name[~]' => $search,
-            'payment.date[~]' => $search
-        ],
-        'ORDER' => [
-            'payment.id' => 'DESC'
-        ],
-    ]);
+$where_condition = [];
+if ($search !== '') {
+    $where_condition['OR'] = [
+        'payment.payment_code[~]' => $search,
+        'invoice.invoice_code[~]' => $search,
+        'customer.name[~]' => $search,
+        'payment.date[~]' => $search
+    ];
 }
+
+$rows = count($database->select("payment", $join_structure, "payment.id", $where_condition));
+$total_page = ceil($rows / $limit);
+
+$query_options = $where_condition;
+$query_options['ORDER'] = ['payment.id' => 'DESC'];
+$query_options['LIMIT'] = [$offset, $limit];
+
+$payments = $database->select('payment', $join_structure, $select_columns, $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -68,7 +55,7 @@ if (isset($_GET['search'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Payment Transactions</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -77,7 +64,7 @@ if (isset($_GET['search'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -85,9 +72,16 @@ if (isset($_GET['search'])) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-                <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Payment Transactions</h3>
-                    <p class="text-muted small m-0">Monitor and track incoming payment payments and receipts</p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Payment Transactions</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Payment Transactions</li>
+                        </ol>
+                    </div>
                 </div>
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -138,7 +132,6 @@ if (isset($_GET['search'])) {
                                             <td>Rp<?= number_format($payment['amount'], 0, ',', '.') ?></td>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-info text-black" href="../invoice-detail/detail.php?invoice_id=<?= $payment['invoice_id'] ?>">Detail</a>
                                                     <a class="btn btn-sm btn-success" href="payment-edit.php?id=<?= $payment['id'] ?>&customer_id=<?= $payment['customer_id'] ?>&invoice_id=<?= $payment['invoice_id'] ?>">Edit</a>
                                                     <a class="btn btn-sm btn-danger" href="payment-delete.php?id=<?= $payment['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this payment?');">Delete</a>
@@ -155,19 +148,23 @@ if (isset($_GET['search'])) {
                         <nav aria-label="Page navigation example" class="m-0">
                             <ul class="pagination pagination-sm m-0">
                                 <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page - 1 ?>">Previous</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page - 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">Previous</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
                                 <?php for ($i = 1; $i <= $total_page; $i++): ?>
                                     <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
-                                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                                        <a class="page-link" href="?page=<?= $i ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
                                 <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?php echo $active_page + 1 ?>">Next</a></li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?= $active_page + 1 ?><?= !empty($search) ? '&search=' . urlencode($search) : '' ?>">Next</a>
+                                    </li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                                 <?php endif; ?>

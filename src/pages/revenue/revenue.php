@@ -73,7 +73,7 @@ if ($period === 'daily') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Revenue Overview</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -81,7 +81,7 @@ if ($period === 'daily') {
         crossorigin="anonymous" />
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -89,12 +89,16 @@ if ($period === 'daily') {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-                <!-- Page Title -->
-                <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Revenue Overview</h3>
-                    <p class="text-muted small m-0">
-                        Analyze revenue trends, sales performance, and business growth over time
-                    </p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Revenue Overview</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Revenue Overview</li>
+                        </ol>
+                    </div>
                 </div>
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -119,7 +123,6 @@ if ($period === 'daily') {
                     </div>
                 </div>
 
-                <!-- Tabel Omset -->
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body p-0">
                         <div class="table-responsive">

@@ -25,7 +25,7 @@ $top_products = $database->select('item', [
     'ORDER' => [
         'total_unit_sold' => 'DESC'
     ],
-    'LIMIT' => 5
+    'LIMIT' => 10
 ]);
 ?>
 
@@ -35,7 +35,7 @@ $top_products = $database->select('item', [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Best Selling Products</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -43,7 +43,7 @@ $top_products = $database->select('item', [
         crossorigin="anonymous" />
 </head>
 
-<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+<body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
         <?php include '../../components/navbar.php'; ?>
 
@@ -51,15 +51,18 @@ $top_products = $database->select('item', [
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
-                <!-- Page Title -->
-                <div class="mb-3">
-                    <h3 class="fw-bold h4 m-0 text-white">Best Selling Products</h3>
-                    <p class="text-muted small m-0">
-                        Discover your top-performing products based on sales volume and revenue
-                    </p>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Best Selling Products</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Best Selling Products</li>
+                        </ol>
+                    </div>
                 </div>
 
-                <!-- Tabel Top Products -->
                 <div class="card shadow-sm border-0">
                     <div class="card-body p-0">
                         <div class="table-responsive">

@@ -66,7 +66,7 @@ $total_revenue = array_sum($database->select("payment", "amount"));
 
 foreach ($invoices as $invoice) {
     $remaining = $invoice['total_bill'] - $invoice['total_payment'];
-    
+
     if ($remaining > 0) {
         if ($invoice['due_date'] >= $today) {
             $total_unpaid += $remaining;
@@ -103,7 +103,6 @@ foreach ($invoices as $invoice) {
             margin-bottom: .9rem;
         }
 
-        /* ── Top products ────────────────────────────────────── */
         .product-row {
             display: flex;
             align-items: center;
@@ -138,72 +137,66 @@ foreach ($invoices as $invoice) {
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Dashboard</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+                        </ol>
+                    </div>
+                </div>
+
                 <div class="row mb-4">
-                    <!--begin::Col-->
                     <div class="col-lg-3 col-6">
-                        <!--begin::Small Box Widget 1-->
                         <div class="small-box text-bg-primary">
                             <div class="inner">
                                 <h3><?= $total_invoice ?></h3>
-
                                 <p>Total Invoice</p>
                             </div>
                             <i class="small-box-icon bi bi-receipt-cutoff"></i>
-                            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                            <a href="../invoice/invoice.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
                         </div>
-                        <!--end::Small Box Widget 1-->
                     </div>
-                    <!--end::Col-->
                     <div class="col-lg-3 col-6">
-                        <!--begin::Small Box Widget 2-->
                         <div class="small-box text-bg-success">
                             <div class="inner">
                                 <h3>Rp<?= number_format($total_revenue, 0, ',', '.') ?></h3>
-
                                 <p>Total Revenue</p>
                             </div>
                             <i class="small-box-icon bi bi-cash-coin"></i>
-                            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                            <a href="../revenue/revenue.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
                         </div>
-                        <!--end::Small Box Widget 2-->
                     </div>
-                    <!--end::Col-->
                     <div class="col-lg-3 col-6">
-                        <!--begin::Small Box Widget 3-->
                         <div class="small-box text-bg-warning">
                             <div class="inner">
                                 <h3>Rp<?= number_format($total_unpaid, 0, ',', '.') ?></h3>
-
                                 <p>Total Unpaid</p>
                             </div>
                             <i class="small-box-icon bi bi-hourglass-split"></i>
-                            <a href="#" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
+                            <a href="../outstanding/outstanding.php" class="small-box-footer link-dark link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
                         </div>
-                        <!--end::Small Box Widget 3-->
                     </div>
-                    <!--end::Col-->
                     <div class="col-lg-3 col-6">
-                        <!--begin::Small Box Widget 4-->
                         <div class="small-box text-bg-danger">
                             <div class="inner">
                                 <h3>Rp<?= number_format($total_overdue, 0, ',', '.') ?></h3>
-
                                 <p>Total Overdue</p>
                             </div>
                             <i class="small-box-icon bi bi-exclamation-triangle"></i>
-                            <a href="#" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
+                            <a href="../overdue/overdue.php" class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-link-45deg"></i>
                             </a>
                         </div>
-                        <!--end::Small Box Widget 4-->
                     </div>
-                    <!--end::Col-->
                 </div>
                 <div class="dash-section">
                     <div class="row g-3">
