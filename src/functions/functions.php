@@ -1,6 +1,6 @@
 <?php
 function generate_code($database, $table, $column, $prefix) {
-    $date = date("md");
+    $date = date("Y");
 
     $last = $database->get($table, [$column], [
         $column . "[~]" => "{$prefix}-{$date}-%",
