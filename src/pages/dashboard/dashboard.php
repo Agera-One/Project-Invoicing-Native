@@ -14,15 +14,11 @@ $number = 1;
 $total_unpaid = 0;
 $total_overdue = 0;
 
-$where = [
-    "date[>=]" => Medoo::raw("DATE_FORMAT(CURDATE(), '%Y-%m-01')"),
-    "date[<]"  => Medoo::raw("DATE_FORMAT(CURDATE() + INTERVAL 1 MONTH, '%Y-%m-01')")
-];
+$invoice_value = $database->sum("invoice_detail", "amount");
+$total_revenue = $database->sum("payment", "amount");
 
 $invoices = $database->select('invoice', [
     '[><]customer' => ['customer_id' => 'id'],
-    '[>]invoice_detail' => ['id' => 'invoice_id'],
-    '[>]payment' => ['id' => 'invoice_id'],
 ], [
     'invoice.id',
     'invoice.invoice_code',
@@ -32,15 +28,7 @@ $invoices = $database->select('invoice', [
     'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ], [
-    'GROUP' => [
-        'invoice.id',
-        'invoice.invoice_code',
-        'invoice.date',
-        'invoice.due_date',
-    ],
-    'ORDER' => [
-        'invoice.id' => 'DESC'
-    ],
+    'ORDER' => ['invoice.id' => 'DESC'],
     'LIMIT' => 6
 ]);
 
@@ -61,10 +49,14 @@ $top_products = $database->select('item', [
     'LIMIT' => 5
 ]);
 
-$invoice_value = $database->sum("invoice_detail", "amount");
-$total_revenue = $database->sum("payment", "amount");
+$all_invoices = $database->select('invoice', [
+    'id',
+    'due_date',
+    'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
+    'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
+]);
 
-foreach ($invoices as $invoice) {
+foreach ($all_invoices as $invoice) {
     $remaining = $invoice['total_bill'] - $invoice['total_payment'];
 
     if ($remaining > 0) {
