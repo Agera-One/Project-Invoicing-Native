@@ -14,8 +14,8 @@ $offset = ($active_page - 1) * $limit;
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
 $join_structure = [
-    '[><]customer' => ['customer_id' => 'id'],
-    '[><]invoice' => ['invoice_id' => 'id']
+    '[><]invoice' => ['invoice_id' => 'id'],
+    '[>]customer' => ['invoice.customer_id' => 'id']
 ];
 
 $select_columns = [

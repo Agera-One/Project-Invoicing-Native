@@ -13,7 +13,7 @@ $invoice_code = generate_code($database, "invoice", "invoice_code", "INV");
 $pic_id = '';
 $customer_id = '';
 $customers = $database->select('customer', ['id', 'name']);
-$company_pics = $database->select('company_pic', ['id', 'name'], [
+$pics = $database->select('pic', ['id', 'name'], [
     'status' => 'active'
 ]);
 
@@ -93,9 +93,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label class="form-label">PIC Name</label>
                                     <select name="pic_id" class="form-select" aria-label="Default select example" required>
                                         <option value="" disabled selected>Select PIC name</option>
-                                        <?php foreach ($company_pics as $company_pic): ?>
-                                            <option value="<?= $company_pic['id']; ?>" <?= ($pic_id == $company_pic['id']) ? 'selected' : ''; ?>>
-                                                <?= $company_pic['name']; ?>
+                                        <?php foreach ($pics as $pic): ?>
+                                            <option value="<?= $pic['id']; ?>" <?= ($pic_id == $pic['id']) ? 'selected' : ''; ?>>
+                                                <?= $pic['name']; ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>

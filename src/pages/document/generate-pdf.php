@@ -7,7 +7,7 @@ $invoice_id = $_GET['invoice_id'];
 
 $details = $database->select('invoice', [
     '[>]customer' => ['customer_id' => 'id'],
-    '[>]company_pic' => ['pic_id' => 'id'],
+    '[>]pic' => ['pic_id' => 'id'],
     '[>]invoice_detail' => ['id' => 'invoice_id'],
     '[>]item' => ['invoice_detail.item_id' => 'id'],
     '[><]company' => ['company_id' => 'id'],
@@ -17,7 +17,7 @@ $details = $database->select('invoice', [
     'invoice.date',
     'invoice.due_date',
     'customer.name(customer_name)',
-    'company_pic.name(pic_name)',
+    'pic.name(pic_name)',
     'company.signature(company_signature)',
     'invoice_detail.id',
     'invoice_detail.unit_price',

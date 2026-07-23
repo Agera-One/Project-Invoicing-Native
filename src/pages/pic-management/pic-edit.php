@@ -11,7 +11,7 @@ $id = $_GET['id'];
 $position_id = $_GET['position_id'];
 $department_id = $_GET['department_id'];
 
-$company_pic = $database->get('company_pic', '*', [
+$pic = $database->get('pic', '*', [
     'id' => $id
 ]);
 
@@ -26,21 +26,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $department_id = $_POST['department_id'];
     $status = $_POST['status'];
 
-    $check_email = count($database->select('company_pic', 'email', [
+    $check_email = count($database->select('pic', 'email', [
         'AND' => [
             'email' => $email,
             'id[!]' => $id
         ]
     ]));
 
-    $check_phone = count($database->select('company_pic', 'phone', [
+    $check_phone = count($database->select('pic', 'phone', [
         'AND' => [
             'phone' => $phone,
             'id[!]' => $id
         ]
     ]));
 
-    // $check_status = count($database->select('company_pic', 'status', [
+    // $check_status = count($database->select('pic', 'status', [
     //     'AND' => [
     //         'status' => 'active',
     //         'id[!]' => $id
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // } elseif ($check_status > 0 && $status === 'active') {
     //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
     } else {
-        $company_pics = $database->update('company_pic', [
+        $pics = $database->update('pic', [
             'name' => $name,
             'phone' => $phone,
             'email' => $email,
@@ -116,15 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Name</label>
-                                <input value="<?= $company_pic['name'] ?>" name="name" type="text" class="form-control" required>
+                                <input value="<?= $pic['name'] ?>" name="name" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Phone</label>
-                                <input value="<?= $company_pic['phone'] ?>" name="phone" type="tel" class="form-control" required>
+                                <input value="<?= $pic['phone'] ?>" name="phone" type="tel" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Email</label>
-                                <input value="<?= $company_pic['email'] ?>" name="email" type="email" class="form-control" required>
+                                <input value="<?= $pic['email'] ?>" name="email" type="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Position PIC</label>
@@ -146,8 +146,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">Status PIC</label>
                                 <select name="status" class="form-select" aria-label="Default select example" required>
                                     <option value="" disabled selected>Select status PIC</option>
-                                    <option value="active" <?= ($company_pic['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?= ($company_pic['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                                    <option value="active" <?= ($pic['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="inactive" <?= ($pic['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
                                 </select>
                             </div>
                         </div>

@@ -22,7 +22,7 @@ $join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
     '[>]invoice_detail' => ['id' => 'invoice_id'],
     '[>]payment' => ['id' => 'invoice_id'],
-    '[><]company_pic' => ['pic_id' => 'id'],
+    '[><]pic' => ['pic_id' => 'id'],
 ];
 
 $select_columns = [
@@ -31,7 +31,7 @@ $select_columns = [
     'invoice.invoice_code',
     'invoice.date',
     'invoice.due_date',
-    'company_pic.name(pic_name)',
+    'pic.name(pic_name)',
     'customer.name(customer_name)',
     'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
@@ -42,7 +42,7 @@ if ($keyword !== '') {
     $where_condition['OR'] = [
         'invoice.invoice_code[~]' => $keyword,
         'customer.name[~]' => $keyword,
-        'company_pic.name[~]' => $keyword
+        'pic.name[~]' => $keyword
     ];
 }
 

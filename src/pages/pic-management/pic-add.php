@@ -29,15 +29,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (strlen($email) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
     } else {
-        $check_phone = count($database->select('company_pic', 'phone', [
+        $check_phone = count($database->select('pic', 'phone', [
             'phone' => $phone
         ]));
 
-        $check_email = count($database->select('company_pic', 'email', [
+        $check_email = count($database->select('pic', 'email', [
             'email' => $email
         ]));
 
-        // $check_status = count($database->select('company_pic', 'status', [
+        // $check_status = count($database->select('pic', 'status', [
         //     'status' => 'active'
         // ]));
 
@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // } elseif ($check_status > 0 && $status === 'active') {
         //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
         } else {
-            $company_pics = $database->insert('company_pic', [
+            $pics = $database->insert('pic', [
                 'name' => $name,
                 'phone' => $phone,
                 'email' => $email,

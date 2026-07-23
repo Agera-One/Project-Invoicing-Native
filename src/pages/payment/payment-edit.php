@@ -176,20 +176,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <span id="summary-due-date"><?= $selected_invoice['due_date'] ?? '-' ?></span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center py-1">
-                                    <span class="text-muted">Total Invoice</span>
+                                    <span class="text-muted">Total Bill</span>
                                     <span id="summary-total">
                                         Rp<?= number_format($selected_invoice['total_bill'] ?? 0, 0, ',', '.') ?>
                                     </span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center py-1">
-                                    <span class="text-muted">Already paid</span>
+                                    <span class="text-muted">Amount Paid</span>
                                     <span id="summary-paid">
                                         Rp<?= number_format($selected_invoice['total_amount_paid'] ?? 0, 0, ',', '.') ?>
                                     </span>
                                 </div>
                                 <hr class="my-2">
                                 <div class="d-flex justify-content-between align-items-center py-1">
-                                    <span class="text-muted">Rest of the bill</span>
+                                    <span class="text-muted">Remaining Unpaid</span>
                                     <span class="fw-bold fs-4 text-danger" id="summary-remaining">
                                         Rp<?= number_format(($selected_invoice['total_bill'] ?? 0) - ($selected_invoice['total_amount_paid'] ?? 0), 0, ',', '.') ?>
                                     </span>

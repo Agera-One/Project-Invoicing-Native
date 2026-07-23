@@ -21,13 +21,13 @@ $join_structure = [
 ];
 
 $select_columns = [
-    'company_pic.id',
-    'company_pic.name',
-    'company_pic.phone',
-    'company_pic.email',
-    'company_pic.status',
-    'company_pic.position_id',
-    'company_pic.department_id',
+    'pic.id',
+    'pic.name',
+    'pic.phone',
+    'pic.email',
+    'pic.status',
+    'pic.position_id',
+    'pic.department_id',
     'position.name(position_name)',
     'department.name(department_name)'
 ];
@@ -35,23 +35,23 @@ $select_columns = [
 $where_condition = [];
 if ($search !== '') {
     $where_condition['OR'] = [
-        'company_pic.name[~]' => $search,
-        'company_pic.phone[~]' => $search,
-        'company_pic.email[~]' => $search,
+        'pic.name[~]' => $search,
+        'pic.phone[~]' => $search,
+        'pic.email[~]' => $search,
         'position.name[~]' => $search,
         'department.name[~]' => $search,
-        'company_pic.status[~]' => $search,
+        'pic.status[~]' => $search,
     ];
 }
 
-$rows = count($database->select('company_pic', $join_structure, $select_columns, $where_condition));
+$rows = count($database->select('pic', $join_structure, $select_columns, $where_condition));
 $total_page = ceil($rows / $limit);
 
 $query_options = $where_condition;
-$query_options['ORDER'] = ['company_pic.id' => 'DESC'];
+$query_options['ORDER'] = ['pic.id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];
 
-$company_pics = $database->select('company_pic', $join_structure, $select_columns, $query_options);
+$pics = $database->select('pic', $join_structure, $select_columns, $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -130,19 +130,19 @@ $company_pics = $database->select('company_pic', $join_structure, $select_column
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($company_pics as $company_pic): ?>
+                                    <?php foreach ($pics as $pic): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
-                                            <td><?= $company_pic['name'] ?></td>
-                                            <td><?= $company_pic['phone'] ?></td>
-                                            <td><?= $company_pic['email'] ?></td>
-                                            <td><?= $company_pic['position_name'] ?></td>
-                                            <td><?= $company_pic['department_name'] ?></td>
-                                            <?= $company_pic['status'] == 'active' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
+                                            <td><?= $pic['name'] ?></td>
+                                            <td><?= $pic['phone'] ?></td>
+                                            <td><?= $pic['email'] ?></td>
+                                            <td><?= $pic['position_name'] ?></td>
+                                            <td><?= $pic['department_name'] ?></td>
+                                            <?= $pic['status'] == 'active' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $company_pic['id'] ?>&position_id=<?= $company_pic['position_id'] ?>&department_id=<?= $company_pic['department_id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="pic-delete.php?id=<?= $company_pic['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
+                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $pic['id'] ?>&position_id=<?= $pic['position_id'] ?>&department_id=<?= $pic['department_id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="pic-delete.php?id=<?= $pic['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
                                                 </div>
                                             </td>
                                         </tr>
