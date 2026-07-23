@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3-1.fc43
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Jul 12, 2026 at 07:50 AM
--- Server version: 8.4.10
--- PHP Version: 8.4.23
+-- Host: localhost:3306
+-- Generation Time: Jul 22, 2026 at 02:10 AM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -32,7 +32,7 @@ CREATE TABLE `company` (
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
   `phone` varchar(15) DEFAULT NULL,
-  `business_entity` enum('PT','CV','Firma','Koperasi','Perorangan') DEFAULT NULL,
+  `business_entity` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `sector` varchar(255) DEFAULT NULL,
   `website_url` text,
   `description` text,
@@ -40,15 +40,17 @@ CREATE TABLE `company` (
   `province` varchar(255) DEFAULT NULL,
   `city_or_regency` varchar(255) DEFAULT NULL,
   `subdistrict` varchar(255) DEFAULT NULL,
-  `address` text
+  `address` text,
+  `logo` text,
+  `signature` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `company`
 --
 
-INSERT INTO `company` (`id`, `name`, `email`, `phone`, `business_entity`, `sector`, `website_url`, `description`, `country`, `province`, `city_or_regency`, `subdistrict`, `address`) VALUES
-(1, 'Red Hat, Inc.', 'redhat@example.com', '081234567891', 'PT', 'Open Source Software', '', 'Red Hat is an American enterprise software company that provides open-source solutions for operating systems, hybrid cloud infrastructure, container platforms, automation, virtualization, middleware, and enterprise support services.', 'United States', 'North Carolina', 'Raleigh', 'Downtown Raleigh', '100 East Davie Street, Raleigh, NC 27601, United States');
+INSERT INTO `company` (`id`, `name`, `email`, `phone`, `business_entity`, `sector`, `website_url`, `description`, `country`, `province`, `city_or_regency`, `subdistrict`, `address`, `logo`, `signature`) VALUES
+(1, 'Red Hat, Inc.', 'redhat@example.com', '081234567891', 'PT', 'Open Source Software', '', 'Red Hat is an American enterprise software company that provides open-source solutions for operating systems, hybrid cloud infrastructure, container platforms, automation, virtualization, middleware, and enterprise support services.', 'Indonesia', 'North Carolina', 'Raleigh', 'Downtown Raleigh', '100 East Davie Street, Raleigh, NC 27601, United States', 'logo_1_1784535584.png', 'signature_1_1784533072.png');
 
 -- --------------------------------------------------------
 
@@ -63,7 +65,7 @@ CREATE TABLE `company_pic` (
   `name` varchar(255) NOT NULL,
   `phone` char(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `email` varchar(50) NOT NULL,
-  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'inactive'
+  `status` enum('active','inactive') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -71,7 +73,8 @@ CREATE TABLE `company_pic` (
 --
 
 INSERT INTO `company_pic` (`id`, `position_id`, `department_id`, `name`, `phone`, `email`, `status`) VALUES
-(8, 1, 8, 'Elon Musk', '081234567890', 'elon@example.com', 'active');
+(8, 1, 8, 'Elon Musk', '081234567890', 'elon@example.com', 'active'),
+(10, 10, 5, 'jekso', '0882009259927', 'dzakiprasetyo98@gmail.com', 'active');
 
 -- --------------------------------------------------------
 
@@ -81,6 +84,7 @@ INSERT INTO `company_pic` (`id`, `position_id`, `department_id`, `name`, `phone`
 
 CREATE TABLE `customer` (
   `id` int NOT NULL,
+  `customer_code` char(14) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
   `phone` char(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -91,26 +95,26 @@ CREATE TABLE `customer` (
 -- Dumping data for table `customer`
 --
 
-INSERT INTO `customer` (`id`, `name`, `email`, `phone`, `address`) VALUES
-(2, 'Budi Santoso', 'budi.santoso@example.com', '081234567802', 'Jl. Kenanga No. 5, Sidoarjo'),
-(3, 'Citra Lestari', 'citra.lestari@example.com', '081234567803', 'Jl. Mawar No. 18, Gresik'),
-(4, 'Dewi Anggraini', 'dewi.anggraini@example.com', '081234567804', 'Jl. Melati No. 7, Malang'),
-(5, 'Eko Prasetyo', 'eko.prasetyo@example.com', '081234567805', 'Jl. Diponegoro No. 21, Kediri'),
-(6, 'Fitri Handayani', 'fitri.handayani@example.com', '081234567806', 'Jl. Ahmad Yani No. 9, Jombang'),
-(7, 'Galih Nugroho', 'galih.nugroho@example.com', '081234567807', 'Jl. Veteran No. 33, Mojokerto'),
-(8, 'Hani Wulandari', 'hani.wulandari@example.com', '081234567808', 'Jl. Cempaka No. 15, Pasuruan'),
-(9, 'Indra Wijaya', 'indra.wijaya@example.com', '081234567809', 'Jl. Anggrek No. 11, Probolinggo'),
-(10, 'Joko Susilo', 'joko.susilo@example.com', '081234567810', 'Jl. Pahlawan No. 44, Blitar'),
-(11, 'Kartika Putri', 'kartika.putri@example.com', '081234567811', 'Jl. Teratai No. 6, Tulungagung'),
-(12, 'Lukman Hakim', 'lukman.hakim@example.com', '081234567812', 'Jl. Rajawali No. 27, Lamongan'),
-(13, 'Maya Sari', 'maya.sari@example.com', '081234567813', 'Jl. Flamboyan No. 3, Banyuwangi'),
-(14, 'Nanda Prakoso', 'nanda.prakoso@example.com', '081234567814', 'Jl. Imam Bonjol No. 19, Madiun'),
-(15, 'Olivia Permata', 'olivia.permata@example.com', '081234567815', 'Jl. Gajah Mada No. 24, Ngawi'),
-(16, 'Putra Mahendra', 'putra.mahendra@example.com', '081234567816', 'Jl. Sudirman No. 31, Bojonegoro'),
-(17, 'Qori Aulia', 'qori.aulia@example.com', '081234567817', 'Jl. Cemara No. 10, Tuban'),
-(18, 'Rizky Ramadhan', 'rizky.ramadhan@example.com', '081234567818', 'Jl. Kutilang No. 14, Ponorogo'),
-(19, 'Siti Rahma', 'siti.rahma@example.com', '081234567819', 'Jl. Merpati No. 22, Magetan'),
-(20, 'Taufik Hidayat', 'taufik.hidayat@example.com', '081234567820', 'Jl. Mangga No. 8, Pacitan');
+INSERT INTO `customer` (`id`, `customer_code`, `name`, `email`, `phone`, `address`) VALUES
+(2, 'CUST-00002', 'Budi Santoso', 'budi.santoso@example.com', '081234567802', 'Jl. Kenanga No. 5, Sidoarjo'),
+(3, 'CUST-00003', 'Citra Lestari', 'citra.lestari@example.com', '081234567803', 'Jl. Mawar No. 18, Gresik'),
+(4, 'CUST-00004', 'Dewi Anggraini', 'dewi.anggraini@example.com', '081234567804', 'Jl. Melati No. 7, Malang'),
+(5, 'CUST-00005', 'Eko Prasetyo', 'eko.prasetyo@example.com', '081234567805', 'Jl. Diponegoro No. 21, Kediri'),
+(6, 'CUST-00006', 'Fitri Handayani', 'fitri.handayani@example.com', '081234567806', 'Jl. Ahmad Yani No. 9, Jombang'),
+(7, 'CUST-00007', 'Galih Nugroho', 'galih.nugroho@example.com', '081234567807', 'Jl. Veteran No. 33, Mojokerto'),
+(8, 'CUST-00008', 'Hani Wulandari', 'hani.wulandari@example.com', '081234567808', 'Jl. Cempaka No. 15, Pasuruan'),
+(9, 'CUST-00009', 'Indra Wijaya', 'indra.wijaya@example.com', '081234567809', 'Jl. Anggrek No. 11, Probolinggo'),
+(10, 'CUST-00010', 'Joko Susilo', 'joko.susilo@example.com', '081234567810', 'Jl. Pahlawan No. 44, Blitar'),
+(11, 'CUST-00011', 'Kartika Putri', 'kartika.putri@example.com', '081234567811', 'Jl. Teratai No. 6, Tulungagung'),
+(12, 'CUST-00012', 'Lukman Hakim', 'lukman.hakim@example.com', '081234567812', 'Jl. Rajawali No. 27, Lamongan'),
+(13, 'CUST-00013', 'Maya Sari', 'maya.sari@example.com', '081234567813', 'Jl. Flamboyan No. 3, Banyuwangi'),
+(14, 'CUST-00014', 'Nanda Prakoso', 'nanda.prakoso@example.com', '081234567814', 'Jl. Imam Bonjol No. 19, Madiun'),
+(15, 'CUST-00015', 'Olivia Permata', 'olivia.permata@example.com', '081234567815', 'Jl. Gajah Mada No. 24, Ngawi'),
+(16, 'CUST-00016', 'Putra Mahendra', 'putra.mahendra@example.com', '081234567816', 'Jl. Sudirman No. 31, Bojonegoro'),
+(17, 'CUST-00017', 'Qori Aulia', 'qori.aulia@example.com', '081234567817', 'Jl. Cemara No. 10, Tuban'),
+(18, 'CUST-00018', 'Rizky Ramadhan', 'rizky.ramadhan@example.com', '081234567818', 'Jl. Kutilang No. 14, Ponorogo'),
+(19, 'CUST-00019', 'Siti Rahma', 'siti.rahma@example.com', '081234567819', 'Jl. Merpati No. 22, Magetan'),
+(20, 'CUST-00020', 'Taufik Hidayat', 'taufik.hidayat@example.com', '081234567820', 'Jl. Mangga No. 8, Pacitan');
 
 -- --------------------------------------------------------
 
@@ -158,7 +162,8 @@ CREATE TABLE `invoice` (
   `id` int NOT NULL,
   `customer_id` int NOT NULL,
   `pic_id` int NOT NULL,
-  `invoice_code` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `company_id` int DEFAULT '1',
+  `invoice_code` char(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `date` date DEFAULT NULL,
   `due_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -167,12 +172,16 @@ CREATE TABLE `invoice` (
 -- Dumping data for table `invoice`
 --
 
-INSERT INTO `invoice` (`id`, `customer_id`, `pic_id`, `invoice_code`, `date`, `due_date`) VALUES
-(64, 2, 8, 'INV-000001', '2026-07-06', '2026-07-06'),
-(68, 3, 8, 'INV-000002', '2026-07-06', '2026-07-06'),
-(71, 5, 8, 'INV-000003', '2026-07-06', '2026-07-06'),
-(72, 10, 8, 'INV-000004', '2026-07-05', '2026-07-12'),
-(79, 2, 8, 'INV-000005', '2026-07-08', '2026-07-09');
+INSERT INTO `invoice` (`id`, `customer_id`, `pic_id`, `company_id`, `invoice_code`, `date`, `due_date`) VALUES
+(64, 2, 8, 1, 'INV-000001', '2026-07-06', '2026-07-06'),
+(68, 3, 8, 1, 'INV-000002', '2026-07-06', '2026-07-06'),
+(71, 5, 8, 1, 'INV-000003', '2026-07-06', '2026-07-06'),
+(72, 2, 8, 1, 'INV-000004', '2026-07-05', '2026-07-14'),
+(79, 2, 8, 1, 'INV-000005', '2026-07-08', '2026-07-16'),
+(83, 2, 8, 1, 'INV-000019', '2026-07-14', '2026-07-21'),
+(85, 19, 10, 1, 'INV-0720-0001', '2026-07-20', '2026-07-27'),
+(86, 12, 8, 1, 'INV-2026-0001', '2026-07-21', '2026-07-28'),
+(87, 18, 8, 1, 'INV-2026-0002', '2026-07-21', '2026-07-28');
 
 -- --------------------------------------------------------
 
@@ -204,7 +213,17 @@ INSERT INTO `invoice_detail` (`id`, `invoice_id`, `item_id`, `unit_price`, `quan
 (71, 71, 5, 780000, 1, 780000),
 (72, 71, 6, 320000, 1, 320000),
 (73, 72, 3, 450000, 435, 195750000),
-(74, 72, 8, 95000, 387, 36765000);
+(74, 72, 8, 95000, 387, 36765000),
+(75, 83, 3, 450000, 1000, 450000000),
+(76, 79, 14, 85000, 100, 8500000),
+(77, 85, 19, 1850000, 1, 1850000),
+(78, 86, 5, 780000, 421, 328380000),
+(79, 86, 14, 85000, 36, 3060000),
+(80, 86, 6, 320000, 465, 148800000),
+(81, 87, 3, 450000, 1, 450000),
+(82, 87, 5, 780000, 1, 780000),
+(100, 87, 12, 350000, 12, 4200000),
+(101, 87, 9, 2450000, 1, 2450000);
 
 -- --------------------------------------------------------
 
@@ -214,7 +233,7 @@ INSERT INTO `invoice_detail` (`id`, `invoice_id`, `item_id`, `unit_price`, `quan
 
 CREATE TABLE `item` (
   `id` int NOT NULL,
-  `ref_no` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  `ref_no` varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
   `price` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -224,7 +243,7 @@ CREATE TABLE `item` (
 --
 
 INSERT INTO `item` (`id`, `ref_no`, `name`, `price`) VALUES
-(3, 'REF-0003', 'Keyboard Mechanical Fantech', 450000),
+(3, 'pisang', 'Keyboard Mechanical Fantech', 450000),
 (4, 'REF-0004', 'Monitor LG 24 Inch', 2150000),
 (5, 'REF-0005', 'Headset HyperX Cloud Stinger', 780000),
 (6, 'REF-0006', 'Webcam Logitech C270', 320000),
@@ -253,7 +272,7 @@ CREATE TABLE `payment` (
   `id` int NOT NULL,
   `customer_id` int NOT NULL,
   `invoice_id` int NOT NULL,
-  `payment_code` char(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `payment_code` char(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `date` date NOT NULL,
   `amount` bigint DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -267,7 +286,11 @@ INSERT INTO `payment` (`id`, `customer_id`, `invoice_id`, `payment_code`, `date`
 (13, 2, 64, '222222', '2026-07-05', 4500000),
 (14, 3, 68, '333333', '2026-07-09', 100000000),
 (15, 5, 71, '000000', '2026-07-12', 16050000),
-(16, 10, 72, '99999', '2026-07-12', 200000000);
+(16, 10, 72, '99999', '2026-07-12', 200000000),
+(21, 2, 79, '5623566', '2026-07-17', 8500000),
+(23, 19, 85, 'PAY-0720-0001', '2026-07-20', 850000),
+(24, 19, 85, 'PAY-0720-0002', '2026-07-20', 1000000),
+(26, 3, 68, 'PAY-2026-0001', '2026-07-21', 55000000);
 
 -- --------------------------------------------------------
 
@@ -311,12 +334,22 @@ INSERT INTO `position` (`id`, `name`) VALUES
 
 CREATE TABLE `user` (
   `id` int NOT NULL,
-  `fullname` varchar(255) NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('admin','user') NOT NULL DEFAULT 'user',
-  `status` enum('active','inactive') NOT NULL DEFAULT 'inactive'
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `user`
+--
+
+INSERT INTO `user` (`id`, `name`, `email`, `password`, `created_at`, `updated_at`) VALUES
+(1, 'Administrator', 'admin@example.com', '$2y$10$7LFqBXiWDQkkFshwijx/g.kSdeTn4haiUmPAGcYbenk9G4u5W8JHu', '2026-07-15 15:30:16', '2026-07-15 15:30:16'),
+(2, 'Zidan', 'zidan@example.com', '$2y$10$GYrdEopPOm8.IgK6yEEVYObQDO5pjp4Jqhllff1YrFu/tc1FDA9Ne', '2026-07-15 15:30:16', '2026-07-15 15:30:16'),
+(4, 'jesko', 'jesko@gmail.com', '$2y$10$akcwRBX5kKagdLkN3ENWh.JwdG59d/7YyxFIAgKVv8buiIYtI3w.a', '2026-07-15 15:30:16', '2026-07-15 15:53:43'),
+(5, 'rakha', 'rakha@example.com', '$2y$10$pdKBvX/PZMq6AJ.z2Q8vY.nI4X5CyW2cMHIzaWdoKw/3jPFlaIhZK', '2026-07-15 16:01:07', '2026-07-15 16:01:07');
 
 --
 -- Indexes for dumped tables
@@ -344,7 +377,8 @@ ALTER TABLE `company_pic`
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
-  ADD UNIQUE KEY `phone` (`phone`);
+  ADD UNIQUE KEY `phone` (`phone`),
+  ADD UNIQUE KEY `customer_code` (`customer_code`);
 
 --
 -- Indexes for table `department`
@@ -360,7 +394,8 @@ ALTER TABLE `invoice`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code_invoice` (`invoice_code`),
   ADD KEY `fk_user` (`pic_id`),
-  ADD KEY `invoice_ibfk_1` (`customer_id`);
+  ADD KEY `invoice_ibfk_1` (`customer_id`),
+  ADD KEY `fk_company` (`company_id`);
 
 --
 -- Indexes for table `invoice_detail`
@@ -412,13 +447,13 @@ ALTER TABLE `company`
 -- AUTO_INCREMENT for table `company_pic`
 --
 ALTER TABLE `company_pic`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `customer`
 --
 ALTER TABLE `customer`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
 
 --
 -- AUTO_INCREMENT for table `department`
@@ -430,25 +465,25 @@ ALTER TABLE `department`
 -- AUTO_INCREMENT for table `invoice`
 --
 ALTER TABLE `invoice`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=88;
 
 --
 -- AUTO_INCREMENT for table `invoice_detail`
 --
 ALTER TABLE `invoice_detail`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=75;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=102;
 
 --
 -- AUTO_INCREMENT for table `item`
 --
 ALTER TABLE `item`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `position`
@@ -460,7 +495,7 @@ ALTER TABLE `position`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables
@@ -477,6 +512,7 @@ ALTER TABLE `company_pic`
 -- Constraints for table `invoice`
 --
 ALTER TABLE `invoice`
+  ADD CONSTRAINT `fk_company` FOREIGN KEY (`company_id`) REFERENCES `company` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_pic` FOREIGN KEY (`pic_id`) REFERENCES `company_pic` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `invoice_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 

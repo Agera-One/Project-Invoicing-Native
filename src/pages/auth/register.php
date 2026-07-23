@@ -1,4 +1,7 @@
 <?php
+header("Location: login.php");
+exit();
+
 session_start();
 require_once '../../connection.php';
 

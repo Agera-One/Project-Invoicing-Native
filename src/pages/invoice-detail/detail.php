@@ -22,7 +22,7 @@ $details = $database->select('invoice', [
     'invoice.due_date',
     'customer.name(customer_name)',
     'company_pic.name(pic_name)',
-    'invoice_detail.id',
+    'invoice_detail.id(detail_id)',
     'invoice_detail.unit_price',
     'invoice_detail.quantity',
     'invoice_detail.amount',
@@ -177,10 +177,10 @@ foreach ($invoice_details as $invoice_detail) {
                                                         <td class="text-end">Rp<?= number_format($invoice_detail['unit_price'], 0, ',', '.') ?></td>
                                                         <td class="text-end">Rp<?= number_format($invoice_detail['amount'], 0, ',', '.') ?></td>
                                                         <td class="text-end d-print-none">
-                                                            <a class="btn btn-sm btn-success" href="detail-edit.php?id=<?= $invoice_detail['id'] ?>&item_id=<?= $invoice_detail['item_id'] ?>&invoice_id=<?= $invoice_detail['invoice_id'] ?>">
+                                                            <a class="btn btn-sm btn-success" href="detail-edit.php?id=<?= $invoice_detail['detail_id'] ?>&item_id=<?= $invoice_detail['item_id'] ?>&invoice_id=<?= $invoice_detail['invoice_id'] ?>">
                                                                 Edit
                                                             </a>
-                                                            <a class="btn btn-sm btn-danger" href="detail-delete.php?id=<?= $invoice_detail['id'] ?>&invoice_id=<?= $invoice_detail['invoice_id'] ?>"
+                                                            <a class="btn btn-sm btn-danger" href="detail-delete.php?id=<?= $invoice_detail['detail_id'] ?>&invoice_id=<?= $invoice_detail['invoice_id'] ?>"
                                                                 onclick="return confirm('Are you sure you want to delete this detail?');">
                                                                 Delete
                                                             </a>

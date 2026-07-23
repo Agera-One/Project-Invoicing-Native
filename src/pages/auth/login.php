@@ -86,11 +86,11 @@ if (isset($_POST["login"])) {
                     </div>
                 </form>
 
-                <p class="mb-0">
+                <!-- <p class="mb-0">
                     <a href="register.php" class="text-center">
                         Register a new account
                     </a>
-                </p>
+                </p> -->
             </div>
         </div>
     </div>
