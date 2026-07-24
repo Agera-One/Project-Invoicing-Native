@@ -143,7 +143,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="../pic-management/pic.php" class="nav-link" data-page="pic">
+                            <a href="../pic/pic.php" class="nav-link" data-page="pic">
                                 <i class="bi bi-person-check nav-icon"></i>
                                 <p>Company PIC</p>
                             </a>
@@ -243,7 +243,7 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="../user-management/user.php" class="nav-link" data-page="user">
+                            <a href="../user/user.php" class="nav-link" data-page="user">
                                 <i class="bi bi-person-gear nav-icon"></i>
                                 <p>User Management</p>
                             </a>
