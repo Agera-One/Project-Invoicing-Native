@@ -6,7 +6,7 @@ use Medoo\Medoo;
 $database = new Medoo([
     'type' => 'mysql',
     'host' => 'localhost',
-    'database' => 'invoicing',
+    'database' => 'invoice_new',
     'username' => 'root',
     'password' => '',
 ]);
