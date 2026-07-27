@@ -32,7 +32,7 @@ $details = $database->select('invoice', [
     'company.email(company_email)',
     'company.province(company_province)',
     'company.subdistrict(company_subdistrict)',
-    'company.logo(company_logo)',
+    'company.logo(company_logo)' ?? '',
 ], [
     'invoice.id' => $invoice_id
 ]);
@@ -94,9 +94,6 @@ foreach ($invoice_details as $invoice_detail) {
                         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
                             <div>
                                 <h3 class="fw-bold h4 m-0 text-white">Invoice Details</h3>
-                                <!-- <p class="text-muted small m-0">
-                                    View and manage invoice information, billing details, and payment records
-                                </p> -->
                             </div>
 
                             <div class="d-flex flex-wrap justify-content-lg-end gap-2 d-print-none">
@@ -117,10 +114,14 @@ foreach ($invoice_details as $invoice_detail) {
                             <div class="card-body p-4 p-md-5">
                                 <div class="row mb-4">
                                     <div class="col-sm-6">
-                                        <img src="../../../storage/<?= $invoice['company_logo']; ?>" alt="<?= $invoice['company_name']; ?>"
-                                            style="max-height: 100px; width: auto;"
-                                            class="mb-4">
-                                        <h2 class="h4 text-primary fw-semibold"><?= $invoice['company_name'] ?></h2>
+                                        <?php if ($invoice['company_logo']) : ?>
+                                            <img src="../../../storage/<?= $invoice['company_logo'] ?>" alt="<?= $invoice['company_name']; ?>"
+                                                style="max-height: 100px; width: auto;"
+                                                class="mb-4">
+                                            <h2 class="h4 text-primary fw-semibold"><?= $invoice['company_name'] ?></h2>
+                                        <?php else : ?>
+                                            <h2 class="h4 text-primary fw-semibold"><?= $invoice['company_name'] ?></h2>
+                                        <?php endif; ?>
                                         <p class="text-secondary mb-0 small">
                                             <?= $invoice['company_province'] ?><br>
                                             <?= $invoice['company_subdistrict'] ?><br>
@@ -210,7 +211,9 @@ foreach ($invoice_details as $invoice_detail) {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
