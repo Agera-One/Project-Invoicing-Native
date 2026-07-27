@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -22,6 +25,8 @@ if ($search !== '') {
         'email[~]' => $search,
     ];
 }
+
+$where_condition['company_id'] = $company_id;
 
 $rows = count($database->select("user", "*", $where_condition));
 $total_page = ceil($rows / $limit);
@@ -162,7 +167,9 @@ $user_id = $_SESSION['user_id'];
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

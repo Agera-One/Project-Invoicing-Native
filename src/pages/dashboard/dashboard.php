@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -14,8 +17,17 @@ $number = 1;
 $total_unpaid = 0;
 $total_overdue = 0;
 
-$invoice_value = $database->sum("invoice_detail", "amount") ?: 0;
-$total_revenue = $database->sum("payment", "amount") ?: 0;
+$invoice_value = $database->sum('invoice', [
+    '[><]invoice_detail' => ['id' => 'invoice_id']
+], 'invoice_detail.amount', [
+    'company_id' => $company_id
+]) ?: 0;
+
+$total_revenue = $database->sum('payment', [
+    '[><]invoice' => ['invoice_id' => 'id']
+], 'payment.amount', [
+    'invoice.company_id' => $company_id
+]) ?: 0;
 
 $invoices = $database->select('invoice', [
     '[><]customer' => ['customer_id' => 'id'],
@@ -29,6 +41,7 @@ $invoices = $database->select('invoice', [
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ], [
     'ORDER' => ['invoice.id' => 'DESC'],
+    'invoice.company_id' => $company_id,
     'LIMIT' => 6
 ]);
 
@@ -46,6 +59,7 @@ $top_products = $database->select('item', [
     'ORDER' => [
         'total_unit_sold' => 'DESC'
     ],
+    'item.company_id' => $company_id,
     'LIMIT' => 5
 ]);
 
@@ -54,6 +68,8 @@ $all_invoices = $database->select('invoice', [
     'due_date',
     'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
+], [
+    'invoice.company_id' => $company_id,
 ]);
 
 foreach ($all_invoices as $invoice) {
@@ -75,141 +91,13 @@ foreach ($all_invoices as $invoice) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Dashboard</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
-    <style>
-        .dash-section {
-            margin-bottom: 2rem;
-        }
-
-        .dash-section-title {
-            font-size: .8rem;
-            font-weight: 600;
-            letter-spacing: .04em;
-            text-transform: uppercase;
-            color: var(--bs-secondary-color);
-            margin-bottom: .9rem;
-        }
-
-        .product-row {
-            display: flex;
-            align-items: center;
-            gap: .85rem;
-            padding: .65rem 0;
-        }
-
-        .product-row+.product-row {
-            border-top: 1px solid var(--bs-border-color);
-        }
-
-        .product-rank {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            background: var(--bs-tertiary-bg);
-            font-size: .75rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .finance-card {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: .6rem;
-            padding: 1.15rem 1.3rem;
-            background: var(--bs-body-bg);
-            border: 1px solid var(--bs-border-color);
-            border-left: 4px solid var(--accent);
-            border-radius: .6rem;
-        }
-
-        .finance-card-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: .75rem;
-        }
-
-        .finance-card-label {
-            font-size: .9rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
-
-        .finance-card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: .5rem;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.05rem;
-            color: var(--accent);
-            background: rgba(var(--accent-rgb), .12);
-        }
-
-        .finance-card-value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            line-height: 1.30;
-            font-variant-numeric: tabular-nums;
-            color: var(--bs-emphasis-color);
-        }
-
-        .finance-card-caption {
-            font-size: .9rem;
-        }
-
-        .finance-card-footer {
-            margin-top: auto;
-            padding-top: .6rem;
-            border-top: 1px solid var(--bs-border-color);
-        }
-
-        .finance-card-footer a {
-            font-size: .8rem;
-            font-weight: 600;
-            text-decoration: none;
-            color: var(--accent);
-            display: inline-flex;
-            align-items: center;
-            gap: .25rem;
-        }
-
-        .finance-card-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .finance-card--primary {
-            --accent: var(--bs-primary);
-            --accent-rgb: var(--bs-primary-rgb);
-        }
-
-        .finance-card--success {
-            --accent: var(--bs-success);
-            --accent-rgb: var(--bs-success-rgb);
-        }
-
-        .finance-card--warning {
-            --accent: var(--bs-warning);
-            --accent-rgb: var(--bs-warning-rgb);
-        }
-
-        .finance-card--danger {
-            --accent: var(--bs-danger);
-            --accent-rgb: var(--bs-danger-rgb);
-        }
-    </style>
+    <link rel="stylesheet" href="../../../assets/css/dashboard.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
@@ -357,7 +245,9 @@ foreach ($all_invoices as $invoice) {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

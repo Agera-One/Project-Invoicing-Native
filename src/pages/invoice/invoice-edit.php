@@ -3,21 +3,27 @@ session_start();
 require_once '../../connection.php';
 include '../../functions/functions.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
 
+$customer_id = $_GET['customer_id'];
+
 $invoice_code = generate_code($database, "invoice", "invoice_code", "INV");
 
 $id = $_GET['id'];
-$customer_id = $_GET['customer_id'];
 
 $invoice = $database->get('invoice', '*', [
     'invoice.id' => $id
 ]);
 
-$customers = $database->select('customer', ['id', 'name']);
+$customers = $database->select('customer', ['id', 'name'], [
+    'company_id' => $company_id
+]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customer_id = $_POST['customer_id'];
@@ -114,7 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

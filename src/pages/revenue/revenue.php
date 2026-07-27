@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -27,6 +30,8 @@ if ($period === 'daily') {
 }
 
 $omsets = $database->select('payment', [
+    '[><]invoice' => ['invoice_id' => 'id']
+], [
     'period_key' => Medoo::raw($periodKeyExpr),
     'period' => Medoo::raw($periodLabelExpr),
     'total_invoice' => Medoo::raw('COUNT(DISTINCT <payment.invoice_id>)'),
@@ -35,6 +40,7 @@ $omsets = $database->select('payment', [
 ], [
     'GROUP' => 'period_key',
     'ORDER' => ['period_key' => 'DESC'],
+    'invoice.company_id' => $company_id,
     'LIMIT' => $limit
 ]);
 ?>
@@ -51,15 +57,7 @@ $omsets = $database->select('payment', [
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
-    <style>
-        .period-filter .btn {
-            min-width: 100px;
-        }
-
-        .period-filter .btn.active {
-            font-weight: 600;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../assets/css/report.css">
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
@@ -139,7 +137,9 @@ $omsets = $database->select('payment', [
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

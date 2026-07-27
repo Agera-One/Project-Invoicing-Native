@@ -3,7 +3,10 @@ session_start();
 require_once '../../connection.php';
 include '../../functions/functions.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -21,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]));
 
     $check_phone = count($database->select('customer', 'phone', [
-        'phone' => $phone,  
+        'phone' => $phone,
     ]));
 
     if ($check_email > 0) {
@@ -40,7 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name' => $name,
             'email' => $email,
             'phone' => $phone,
-            'address' => $address
+            'address' => $address,
+            'company_id' => $company_id
         ]);
 
         header("Location: customer.php");
@@ -124,7 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -16,7 +19,7 @@ $offset = ($active_page - 1) * $limit;
 
 $keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
-$date_to   = isset($_GET['date_to']) ? $_GET['date_to'] : '';
+$date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
 $join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
@@ -59,15 +62,9 @@ $count_options['GROUP'] = ['invoice.id'];
 $rows = count($database->select("invoice", $join_structure, "invoice.id", $count_options));
 $total_page = ceil($rows / $limit);
 
+$where_condition['invoice.company_id'] = $company_id;
 $query_options = $where_condition;
-$query_options['GROUP'] = [
-    'invoice.id',
-    'invoice.customer_id',
-    'invoice.invoice_code',
-    'invoice.date',
-    'invoice.due_date',
-    'customer.name'
-];
+$query_options['GROUP'] = 'invoice.id';
 $query_options['ORDER'] = ['invoice.id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];
 
@@ -241,7 +238,9 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

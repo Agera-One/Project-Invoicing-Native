@@ -3,7 +3,10 @@ session_start();
 require_once '../../connection.php';
 include '../../functions/functions.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -12,9 +15,16 @@ $invoice_code = generate_code($database, "invoice", "invoice_code", "INV");
 
 $pic_id = '';
 $customer_id = '';
-$customers = $database->select('customer', ['id', 'name']);
+
+$customers = $database->select('customer', ['id', 'name'], [
+    'company_id' => $company_id
+]);
+
 $pics = $database->select('pic', ['id', 'name'], [
-    'status' => 'active'
+    'AND' => [
+        'status' => 'active',
+        'company_id' => $company_id
+    ]
 ]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -32,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'invoice_code' => $invoice_code,
             'date' => $date,
             'due_date' => $due_date,
+            'company_id' => $company_id,
             'created_by' => $_SESSION['user_id']
         ]);
 
@@ -136,25 +147,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
-    <script>
-        const invoiceDate = document.getElementById('invoice_date');
-        const dueDate = document.getElementById('due_date');
-
-        invoiceDate.addEventListener('change', function() {
-            if (!this.value) return;
-
-            const date = new Date(this.value);
-
-            date.setDate(date.getDate() + 7);
-
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-
-            dueDate.value = `${year}-${month}-${day}`;
-        });
-    </script>
+    <script src="../../../assets/js/invoice.js"></script>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

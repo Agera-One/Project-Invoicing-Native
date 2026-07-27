@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -21,7 +24,6 @@ $select_columns = [
     'invoice.invoice_code',
     'invoice.date',
     'invoice.due_date',
-    'invoice.customer_id',
     'customer.name(customer_name)',
     'total_bill' => Medoo::raw('SUM(<invoice_detail.amount>)'),
     'total_amount_paid' => Medoo::raw('(SELECT COALESCE(SUM(payment.amount), 0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
@@ -38,7 +40,12 @@ $where_condition = [
 ];
 
 if ($search !== '') {
-    $where_condition['customer.name[~]'] = $search;
+    $where_condition['OR'] = [
+        'invoice.invoice_code[~]' => $search,
+        'customer.name[~]' => $search,
+        'invoice.date[~]' => $search,
+        'invoice.due_date[~]' => $search
+    ];
 }
 
 $count_options = $where_condition;
@@ -46,6 +53,7 @@ $count_options['GROUP'] = ['invoice.id', 'customer.name', 'invoice.due_date'];
 $rows = count($database->select('invoice', $join_structure, 'invoice.id', $count_options));
 $total_page = ceil($rows / $limit);
 
+$where_condition['invoice.company_id'] = $company_id;
 $query_options = $where_condition;
 $query_options['GROUP'] = 'invoice.id';
 $query_options['ORDER'] = ['invoice.id' => 'DESC'];
@@ -101,7 +109,7 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
                                     value="<?= $_GET['search'] ?? '' ?>">
                             </div>
                         </form>
-                        <a href="arrears.php" class="btn btn-outline-secondary w-25">
+                        <a href="outstanding.php" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -137,7 +145,7 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
                                             <td>Rp<?= number_format($invoice['total_amount_paid'], 0, ',', '.') ?></td>
                                             <td class="text-danger">Rp<?= number_format($remaining_unpaid, 0, ',', '.') ?></td>
                                             <td>
-                                                <a class="btn btn-sm btn-success" href="../payment/payment-add.php?invoice_id=<?= $invoice['id'] ?>&customer_id=<?= $invoice['customer_id'] ?>">Pay</a>
+                                                <a class="btn btn-sm btn-success" href="../payment/payment-add.php?invoice_id=<?= $invoice['id'] ?>">Pay</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -179,7 +187,9 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
