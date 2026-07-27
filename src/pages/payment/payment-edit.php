@@ -3,7 +3,10 @@ session_start();
 require_once '../../connection.php';
 include '../../functions/functions.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -13,7 +16,6 @@ $payment_code = generate_code($database, "payment", "payment_code", "PAY");
 use Medoo\Medoo;
 
 $id = $_GET['id'];
-$customer_id = $_GET['customer_id'];
 $invoice_id = $_GET['invoice_id'];
 
 $payment = $database->get('payment', '*', [
@@ -33,14 +35,8 @@ $invoices = $database->select('invoice', [
     'total_bill' => Medoo::raw('SUM(<invoice_detail.amount>)'),
     'total_amount_paid' => Medoo::raw('(SELECT COALESCE(SUM(payment.amount), 0) FROM payment WHERE payment.invoice_id = <invoice.id> AND payment.id != ' . (int) $id . ')')
 ], [
-    'GROUP' => [
-        'invoice.id',
-        'invoice.invoice_code',
-        'invoice.customer_id',
-        'invoice.date',
-        'invoice.due_date',
-        'customer.name'
-    ]
+    'GROUP' => 'invoice.id',
+    'invoice.company_id' => $company_id
 ]);
 
 $selected_invoice = null;
@@ -52,47 +48,40 @@ foreach ($invoices as $invoice) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $invoice_data = $_POST['invoice_data'];
+    $invoice_id  = $_POST['invoice_id'];
+    $date = $_POST['date'];
+    $amount = (int) $_POST['amount'];
 
-    if (!empty($invoice_data)) {
-        $data_splitting = explode('-', $invoice_data);
-        $customer_id = $data_splitting[0];
-        $invoice_id  = $data_splitting[1];
-        $date = $_POST['date'];
-        $amount = (int) $_POST['amount'];
+    if ($amount < 1) {
+        echo '<script>alert("The minimum amount is 1.")</script>';
+    } else {
+        $total_bill_query = $database->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
+        $total_bill = array_sum($total_bill_query) ?? 0;
 
-        if ($amount < 1) {
-            echo '<script>alert("The minimum amount is 1.")</script>';
+        $total_paid_query = $database->select('payment', 'amount', [
+            'AND' => [
+                'invoice_id' => $invoice_id,
+                'id[!]' => $id
+            ]
+        ]);
+
+        $total_already_paid = array_sum($total_paid_query) ?? 0;
+
+        $remaining_bill = $total_bill - $total_already_paid;
+
+        if ($amount > $remaining_bill) {
+            echo '<script>alert("Failed! Payment amount (Rp ' . number_format($amount, 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
         } else {
-            $total_bill_query = $database->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
-            $total_bill = array_sum($total_bill_query) ?? 0;
-
-            $total_paid_query = $database->select('payment', 'amount', [
-                'AND' => [
-                    'invoice_id' => $invoice_id,
-                    'id[!]' => $id
-                ]
+            $database->update('payment', [
+                'invoice_id' => $invoice_id,
+                'date' => $date,
+                'amount' => $amount
+            ], [
+                'id' => $id
             ]);
 
-            $total_already_paid = array_sum($total_paid_query) ?? 0;
-
-            $remaining_bill = $total_bill - $total_already_paid;
-
-            if ($amount > $remaining_bill) {
-                echo '<script>alert("Failed! Payment amount (Rp ' . number_format($amount, 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
-            } else {
-                $database->update('payment', [
-                    'customer_id' => $customer_id,
-                    'invoice_id' => $invoice_id,
-                    'date' => $date,
-                    'amount' => $amount
-                ], [
-                    'id' => $id
-                ]);
-
-                header("Location: payment.php");
-                exit();
-            }
+            header("Location: payment.php");
+            exit();
         }
     }
 }
@@ -139,11 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="card-body">
                             <div class="mb-3">
                                 <label class="form-label">Choose Invoice <span class="text-danger">*</span></label>
-                                <select name="invoice_data" id="invoice-select" class="form-select" aria-label="Default select example" required>
+                                <select name="invoice_id" id="invoice-select" class="form-select" aria-label="Default select example" required>
                                     <?php foreach ($invoices as $invoice):
                                         $remaining = $invoice['total_bill'] - $invoice['total_amount_paid']; ?>
                                         <option
-                                            value="<?= $invoice['customer_id'] . '-' . $invoice['id']; ?>"
+                                            value="<?= $invoice['id'] ?>"
                                             data-code="<?= htmlspecialchars($invoice['invoice_code']) ?>"
                                             data-customer="<?= htmlspecialchars($invoice['customer_name']) ?>"
                                             data-date="<?= htmlspecialchars($invoice['date']) ?>"
@@ -152,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             data-paid="<?= (int) $invoice['total_amount_paid'] ?>"
                                             data-remaining="<?= (int) $remaining ?>"
                                             <?= ($invoice_id == $invoice['id']) ? 'selected' : ''; ?>>
-                                            <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] . ' (Rp' . number_format($invoice['total_bill'], 0, ',', '.') . ')'; ?>
+                                            <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -226,47 +215,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
-
-    <script>
-        const invoiceSelect = document.getElementById('invoice-select');
-        const summaryCard = document.getElementById('invoice-summary-card');
-        const amountInput = document.getElementById('amount-input');
-        const amountHint = document.getElementById('amount-hint');
-
-        const rupiah = (value) => 'Rp' + Number(value).toLocaleString('id-ID');
-
-        function updateInvoiceSummary() {
-            const selected = invoiceSelect.options[invoiceSelect.selectedIndex];
-
-            if (!selected || !selected.value) {
-                summaryCard.style.display = 'none';
-                amountHint.textContent = '';
-                amountInput.removeAttribute('max');
-                return;
-            }
-
-            const total = Number(selected.dataset.total || 0);
-            const paid = Number(selected.dataset.paid || 0);
-            const remaining = Number(selected.dataset.remaining ?? (total - paid));
-
-            document.getElementById('summary-code').textContent = selected.dataset.code || '-';
-            document.getElementById('summary-customer').textContent = selected.dataset.customer || '-';
-            document.getElementById('summary-date').textContent = selected.dataset.date || '-';
-            document.getElementById('summary-due-date').textContent = selected.dataset.dueDate || '-';
-            document.getElementById('summary-total').textContent = rupiah(total);
-            document.getElementById('summary-paid').textContent = rupiah(paid);
-            document.getElementById('summary-remaining').textContent = rupiah(remaining);
-
-            summaryCard.style.display = '';
-
-            amountHint.textContent = 'Max: ' + rupiah(remaining);
-            amountInput.setAttribute('max', remaining);
-        }
-
-        invoiceSelect.addEventListener('change', updateInvoiceSummary);
-        updateInvoiceSummary();
-    </script>
+    <script src="../../../assets/js/payment.js"></script>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
