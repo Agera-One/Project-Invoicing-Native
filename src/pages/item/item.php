@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -23,6 +26,8 @@ if ($search !== '') {
     ];
 }
 
+$where_condition['company_id'] = $company_id;
+
 $rows = count($database->select("item", "*", $where_condition));
 $total_page = ceil($rows / $limit);
 
@@ -39,7 +44,7 @@ $items = $database->select('item', '*', $query_options);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Items Management</title>
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
@@ -154,7 +159,9 @@ $items = $database->select('item', '*', $query_options);
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
