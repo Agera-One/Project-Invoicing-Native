@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -15,43 +18,36 @@ $offset = ($active_page - 1) * $limit;
 
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-$join_structure = [
-    '[><]position' => ['position_id' => 'id'],
-    '[><]department' => ['department_id' => 'id']
-];
-
 $select_columns = [
-    'pic.id',
-    'pic.name',
-    'pic.phone',
-    'pic.email',
-    'pic.status',
-    'pic.position_id',
-    'pic.department_id',
-    'position.name(position_name)',
-    'department.name(department_name)'
+    'id',
+    'name',
+    'phone',
+    'email',
+    'status',
+    'position',
 ];
 
 $where_condition = [];
 if ($search !== '') {
     $where_condition['OR'] = [
-        'pic.name[~]' => $search,
-        'pic.phone[~]' => $search,
-        'pic.email[~]' => $search,
-        'position.name[~]' => $search,
-        'department.name[~]' => $search,
-        'pic.status[~]' => $search,
+        'name[~]' => $search,
+        'phone[~]' => $search,
+        'email[~]' => $search,
+        'position[~]' => $search,
+        'status[~]' => $search,
     ];
 }
 
-$rows = count($database->select('pic', $join_structure, $select_columns, $where_condition));
+$where_condition['company_id'] = $company_id;
+
+$rows = count($database->select('pic', $select_columns, $where_condition));
 $total_page = ceil($rows / $limit);
 
 $query_options = $where_condition;
 $query_options['ORDER'] = ['pic.id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];
 
-$pics = $database->select('pic', $join_structure, $select_columns, $query_options);
+$pics = $database->select('pic', $select_columns, $query_options);
 ?>
 
 <!DOCTYPE html>
@@ -124,7 +120,6 @@ $pics = $database->select('pic', $join_structure, $select_columns, $query_option
                                         <th scope="col">Phone</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Position</th>
-                                        <th scope="col">Department</th>
                                         <th scope="col" class="text-center">Status</th>
                                         <th scope="col" class="pe-4" width="160">Action</th>
                                     </tr>
@@ -136,12 +131,11 @@ $pics = $database->select('pic', $join_structure, $select_columns, $query_option
                                             <td><?= $pic['name'] ?></td>
                                             <td><?= $pic['phone'] ?></td>
                                             <td><?= $pic['email'] ?></td>
-                                            <td><?= $pic['position_name'] ?></td>
-                                            <td><?= $pic['department_name'] ?></td>
+                                            <td><?= $pic['position'] ?></td>
                                             <?= $pic['status'] == 'active' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $pic['id'] ?>&position_id=<?= $pic['position_id'] ?>&department_id=<?= $pic['department_id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $pic['id'] ?>">Edit</a>
                                                     <a class="btn btn-sm btn-danger px-2" href="pic-delete.php?id=<?= $pic['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
                                                 </div>
                                             </td>
@@ -184,7 +178,9 @@ $pics = $database->select('pic', $join_structure, $select_columns, $query_option
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

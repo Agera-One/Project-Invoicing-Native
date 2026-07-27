@@ -2,24 +2,21 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
 
 $status = '';
-$position_id = '';
-$department_id = '';
-
-$positions = $database->select('position', ['id', 'name']);
-$departments = $database->select('department', ['id', 'name']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $position_id = $_POST['position_id'];
-    $department_id = $_POST['department_id'];
+    $position = $_POST['position'];
     $status = $_POST['status'];
 
     if (strlen($name) > 255) {
@@ -46,9 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'name' => $name,
                 'phone' => $phone,
                 'email' => $email,
-                'position_id' => $position_id,
-                'department_id' => $department_id,
-                'status' => $status
+                'position' => $position,
+                'status' => $status,
+                'company_id' => $company_id
             ]);
 
             header("Location: pic.php");
@@ -110,26 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input value="<?= $email ?? ''; ?>" name="email" type="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Position</label>
-                                <select name="position_id" class="form-select" aria-label="Default select example" required>
-                                    <option value="" disabled selected>Select position</option>
-                                    <?php foreach ($positions as $position): ?>
-                                        <option value="<?= $position['id']; ?>" <?= ($position_id == $position['id']) ? 'selected' : ''; ?>>
-                                            <?= $position['name']; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Department</label>
-                                <select name="department_id" class="form-select" aria-label="Default select example" required>
-                                    <option value="" disabled selected>Select department</option>
-                                    <?php foreach ($departments as $department): ?>
-                                        <option value="<?= $department['id']; ?>" <?= ($department_id == $department['id']) ? 'selected' : ''; ?>>
-                                            <?= $department['name']; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <label for="exampleInputPassword1" class="form-label">Position</label>
+                                <input value="<?= $position ?? ''; ?>" name="position" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status PIC</label>
@@ -150,7 +129,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

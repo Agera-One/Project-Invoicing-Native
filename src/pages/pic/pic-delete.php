@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         exit;
     } else {
-        $company_pics = $database->delete('company_pic', [
+        $pics = $database->delete('pic', [
             'id' => $id
         ]);
 

@@ -8,22 +8,16 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $id = $_GET['id'];
-$position_id = $_GET['position_id'];
-$department_id = $_GET['department_id'];
 
 $pic = $database->get('pic', '*', [
     'id' => $id
 ]);
 
-$positions = $database->select('position', ['id', 'name']);
-$departments = $database->select('department', ['id', 'name']);
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
-    $position_id = $_POST['position_id'];
-    $department_id = $_POST['department_id'];
+    $position = $_POST['position'];
     $status = $_POST['status'];
 
     $check_email = count($database->select('pic', 'email', [
@@ -40,13 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ]
     ]));
 
-    // $check_status = count($database->select('pic', 'status', [
-    //     'AND' => [
-    //         'status' => 'active',
-    //         'id[!]' => $id
-    //     ]
-    // ]));
-
     if ($check_email > 0) {
         echo '<script>alert("Email already exists. Please use a different email.")</script>';
     } elseif ($check_phone > 0) {
@@ -57,15 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<script>alert("Maximum phone length is 15 characters.")</script>';
     } elseif (strlen($email) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
-    // } elseif ($check_status > 0 && $status === 'active') {
-    //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
     } else {
         $pics = $database->update('pic', [
             'name' => $name,
             'phone' => $phone,
             'email' => $email,
-            'position_id' => $position_id,
-            'department_id' => $department_id,
+            'position' => $position,
             'status' => $status
         ], [
             'id' => $id
@@ -127,20 +111,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input value="<?= $pic['email'] ?>" name="email" type="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Position PIC</label>
-                                <select name="position_id" class="form-select" aria-label="Default select example">
-                                    <?php foreach ($positions as $position): ?>
-                                        <option value="<?= $position['id']; ?>" <?= ($position_id == $position['id']) ? 'selected' : ''; ?>><?= $position['name']; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Department PIC</label>
-                                <select name="department_id" class="form-select" aria-label="Default select example">
-                                    <?php foreach ($departments as $department): ?>
-                                        <option value="<?= $department['id']; ?>" <?= ($department_id == $department['id']) ? 'selected' : ''; ?>><?= $department['name']; ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <label for="exampleInputPassword1" class="form-label">Position</label>
+                                <input value="<?= $pic['position'] ?>" name="position" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status PIC</label>
@@ -161,7 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
