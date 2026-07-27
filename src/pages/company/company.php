@@ -2,12 +2,20 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
 
-$company = $database->get('company', '*');
+$company_id = $database->get('user', 'company_id', [
+    'id' => $user_id
+]);
+
+$company = $database->get('company', '*', [
+    'id' => $company_id
+]);
 ?>
 
 <!DOCTYPE html>
@@ -20,61 +28,7 @@ $company = $database->get('company', '*');
     <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
     <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <style>
-        body {
-            background-color: #222e3c;
-        }
-
-        .app-main {
-            background-color: #2c3034 !important;
-            color: #ffffff;
-        }
-
-        .custom-dark-card {
-            background-color: #212529 !important;
-            border: 1px solid #373b3e !important;
-            border-radius: 6px;
-            margin-bottom: 24px;
-        }
-
-        .custom-dark-card .card-header {
-            border-bottom: 1px solid #373b3e !important;
-            padding: 12px 20px;
-        }
-
-        .custom-dark-card .card-title {
-            color: #ced4da;
-            font-size: 1rem;
-        }
-
-        .custom-dark-card .card-body {
-            padding: 20px;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #ffffff;
-            margin-bottom: 2px;
-        }
-
-        .info-value {
-            color: #adb5bd;
-            margin-bottom: 15px;
-        }
-
-        .btn-custom-warning {
-            background-color: #ffc107 !important;
-            border-color: #ffc107 !important;
-            color: #000000 !important;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        .btn-custom-warning:hover {
-            background-color: #e0a800 !important;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../assets/css/company.css">
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg">
@@ -124,14 +78,14 @@ $company = $database->get('company', '*');
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Business Website</div>
-                                                <div class="info-value"><?= $company['website_url'] ?? '-' ?></div>
+                                                <div class="info-value"><?= empty($company['website']) ? '-' : $company['website'] ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="info-label">Business Description</div>
-                                                <div class="info-value"><?= $company['description'] ?? '-' ?></div>
+                                                <div class="info-value"><?= empty($company['description']) ? '-' : $company['description'] ?></div>
                                             </div>
                                         </div>
 
@@ -149,7 +103,7 @@ $company = $database->get('company', '*');
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="info-label">City/Regency</div>
-                                                <div class="info-value"><?= $company['city_or_regency'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $company['city'] ?? '-' ?></div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Subdistrict</div>
@@ -262,15 +216,10 @@ $company = $database->get('company', '*');
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
-    <script>
-        document.querySelectorAll(".custom-file-input").forEach(function(input) {
-            input.addEventListener("change", function() {
-                let fileName = this.files[0]?.name || "Choose File";
-                this.nextElementSibling.innerHTML = fileName;
-            });
-        });
-    </script>
+    <script src="../../../assets/js/company.js"></script>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

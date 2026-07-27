@@ -15,11 +15,11 @@ if (isset($_GET['info'])) {
         'name',
         'business_entity',
         'sector',
-        'website_url',
+        'website',
         'description',
         'country',
         'province',
-        'city_or_regency',
+        'city',
         'subdistrict',
         'address'
     ], [
@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'name'             => $_POST['name'],
             'business_entity'  => $_POST['business_entity'],
             'sector'           => $_POST['sector'],
-            'website_url'      => $_POST['website_url'],
+            'website'      => $_POST['website'],
             'description'      => $_POST['description'],
             'country'          => $_POST['country'],
             'province'         => $_POST['province'],
-            'city_or_regency'  => $_POST['city_or_regency'],
+            'city'  => $_POST['city'],
             'subdistrict'      => $_POST['subdistrict'],
             'address'          => $_POST['address']
         ];
@@ -153,9 +153,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label class="form-label">Website</label>
                                     <input
                                         type="url"
-                                        name="website_url"
+                                        name="website"
                                         class="form-control"
-                                        value="<?= $company['website_url'] ?>">
+                                        value="<?= $company['website'] ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Business Description</label>
@@ -184,9 +184,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label class="form-label">City / Regency</label>
                                     <input
                                         type="text"
-                                        name="city_or_regency"
+                                        name="city"
                                         class="form-control"
-                                        value="<?= $company['city_or_regency'] ?>">
+                                        value="<?= $company['city'] ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Subdistrict</label>
@@ -234,7 +234,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
