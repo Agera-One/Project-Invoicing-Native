@@ -1,0 +1,7 @@
+.period-filter .btn {
+    min-width: 100px;
+}
+
+.period-filter .btn.active {
+    font-weight: 600;
+}
