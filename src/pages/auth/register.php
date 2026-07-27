@@ -10,7 +10,7 @@ if (isset($_POST["register"])) {
     $company_name = $_POST['company_name'];
     $business_entity = $_POST['business_entity'];
     $business_sector = $_POST['business_sector'];
-    $business_website = $_POST['business_website'] ?? '';
+    $business_website = $_POST['business_website'] === '' ? null : $_POST['business_website'];
     $business_description = $_POST['business_description'] ?? '';
 
     $country = $_POST['country'];
