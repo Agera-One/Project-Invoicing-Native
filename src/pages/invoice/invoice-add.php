@@ -26,13 +26,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($due_date < $date) {
         echo '<script>alert("The due date must not be earlier than the invoice date")</script>';
     } else {
-        $database->insert('invoice', [
+        $insert = $database->insert('invoice', [
             'pic_id' => $pic_id,
             'customer_id' => $customer_id,
             'invoice_code' => $invoice_code,
             'date' => $date,
-            'due_date' => $due_date
+            'due_date' => $due_date,
+            'created_by' => $_SESSION['user_id']
         ]);
+
+        if (!$insert) {
+            echo '<script>alert("No company data found. Please add your company information before creating an invoice.")</script>';
+        }
 
         header("Location: invoice.php");
         exit();
