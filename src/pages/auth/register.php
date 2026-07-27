@@ -1,29 +1,77 @@
 <?php
-// header("Location: login.php");
-// exit();
-
 session_start();
 require_once '../../connection.php';
 
 if (isset($_POST["register"])) {
-    $name = $_POST["username"];
-    $email    = $_POST["email"];
-    $password = password_hash($_POST["password"], PASSWORD_DEFAULT);
+    $name = $_POST['username'];
+    $email = $_POST['email'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-    $check_email = count($database->select('user', 'email', [
+    $company_name = $_POST['company_name'];
+    $business_entity = $_POST['business_entity'];
+    $business_sector = $_POST['business_sector'];
+    $business_website = $_POST['business_website'] ?? '';
+    $business_description = $_POST['business_description'] ?? '';
+
+    $country = $_POST['country'];
+    $province = $_POST['province'];
+    $city = $_POST['city'];
+    $subdistrict = $_POST['subdistrict'];
+    $business_address = $_POST['business_address'];
+    
+    $company_email = $_POST['company_email'];
+    $company_phone = $_POST['company_phone'];
+
+    $check_user_email = count($database->select('user', 'email', [
         'email' => $email
     ]));
 
-    if ($check_email > 0) {
-        echo '<script>alert("Email already exists. Please use a different email.")</script>';
+    $check_company_email = count($database->select('company', 'email', [
+        'email' => $email
+    ]));
+
+    $check_company_phone = count($database->select('company', 'phone', [
+        'phone' => $company_phone
+    ]));
+
+    $check_company_website = count($database->select('company', 'website', [
+        'website' => $business_website
+    ]));
+
+    if ($check_user_email > 0) {
+        echo '<script>alert("User email already exists. Please use a different email.")</script>';
+    } elseif ($check_company_email > 0) {
+        echo '<script>alert("Company email already exists. Please use a different email.")</script>';
+    } elseif ($check_company_phone > 0) {
+        echo '<script>alert("Company phone already exists. Please use a different phone.")</script>';
+    } elseif ($check_company_website > 0) {
+        echo '<script>alert("Company website already exists. Please use a different website.")</script>';
     } else {
-        $users = $database->insert('user', [
+        $company = $database->insert('company', [
+            'name' => $company_name,
+            'email' => $company_email,
+            'phone' => $company_phone,
+            'business_entity' => $business_entity,
+            'sector' => $business_sector,
+            'website' => $business_website,
+            'description' => $business_description,
+            'country' => $country,
+            'province' => $province,
+            'city' => $city,
+            'subdistrict' => $subdistrict,
+            'address' => $business_address,
+        ]);
+
+        $company_id = $database->id();
+
+        $user = $database->insert('user', [
             'name' => $name,
             'email' => $email,
             'password' => $password,
+            'company_id' => $company_id,
         ]);
 
-        if ($users) {
+        if ($user) {
             echo '<script>alert("Registration successful. Please log in.")</script>';
             echo '<script>window.location.href = "login.php";</script>';
         } else {
@@ -105,13 +153,12 @@ if (isset($_POST["register"])) {
                                 <label class="form-label" for="wz-business-entity"> Business Entity <span class="required-indicator sr-only"> (required)</span></label>
                                 <select class="form-select" id="wz-business-entity" name="business_entity" required="">
                                     <option value="" disabled selected>Choose…</option>
-                                    <option>PT</option>
-                                    <option>CV</option>
-                                    <option>UD</option>
-                                    <option>Firma</option>
-                                    <option>Koperasi</option>
-                                    <option>Yayasan</option>
-                                    <option>Perorangan</option>
+                                    <option value="PT">PT</option>
+                                    <option value="CV">CV</option>
+                                    <option value="UD">UD</option>
+                                    <option value="Firma">Firma</option>
+                                    <option value="Koperasi">Koperasi</option>
+                                    <option value="Perorangan">Perorangan</option>
                                 </select>
                                 <div class="invalid-feedback">Please select a business entity.</div>
                             </div>
