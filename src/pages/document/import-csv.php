@@ -128,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (!preg_match('/^INV-\d{4}-\d{4}$/', $customer_code)) {
                             $skipped_rows[] = [
                                 'row'    => $row_number,
-                                'reason' => "Invalid CUSTOMER CODE format (must be INV-MMDD-XXXX): \"{$customer_code}\".",
+                                'reason' => "Invalid CUSTOMER CODE format (must be INV-YYYY-XXXX): \"{$customer_code}\".",
                             ];
                             continue;
                         }
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div class="form-text text-muted mt-2">
                                     Column structure must match the export template: <code>CUSTOMER CODE, NAME, EMAIL, PHONE, ADDRESS</code> (Comma Separated).
                                     <br>
-                                    <code>CUSTOMER CODE</code> is optional — leave it blank and one will be generated automatically in the format <code>INV-MMDD-XXXX</code>. If filled in, it must follow that same format and must be unique.
+                                    <code>CUSTOMER CODE</code> is optional — leave it blank and one will be generated automatically in the format <code>INV-YYYY-XXXX</code>. If filled in, it must follow that same format and must be unique.
                                 </div>
                             </div>
 
@@ -296,7 +296,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <?php include '../../components/scripts.php'; ?>
+    <script src="../../../assets/js/lte-theme.js"></script>
+    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
