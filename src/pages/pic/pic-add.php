@@ -37,16 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'email' => $email
         ]));
 
-        // $check_status = count($database->select('pic', 'status', [
-        //     'status' => 'active'
-        // ]));
-
         if ($check_phone > 0) {
             echo '<script>alert("Phone number already exists. Please use a different phone number.")</script>';
         } elseif ($check_email > 0) {
             echo '<script>alert("Email already exists. Please use a different email.")</script>';
-        // } elseif ($check_status > 0 && $status === 'active') {
-        //     echo '<script>alert("There can only be a maximum of one active PIC.")</script>';
         } else {
             $pics = $database->insert('pic', [
                 'name' => $name,
