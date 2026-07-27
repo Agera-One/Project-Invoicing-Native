@@ -14,8 +14,8 @@ $number = 1;
 $total_unpaid = 0;
 $total_overdue = 0;
 
-$invoice_value = $database->sum("invoice_detail", "amount");
-$total_revenue = $database->sum("payment", "amount");
+$invoice_value = $database->sum("invoice_detail", "amount") ?: 0;
+$total_revenue = $database->sum("payment", "amount") ?: 0;
 
 $invoices = $database->select('invoice', [
     '[><]customer' => ['customer_id' => 'id'],
@@ -119,7 +119,6 @@ foreach ($all_invoices as $invoice) {
             flex-shrink: 0;
         }
 
-        /* Finance summary cards */
         .finance-card {
             height: 100%;
             display: flex;
@@ -144,7 +143,6 @@ foreach ($all_invoices as $invoice) {
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: .04em;
-            /* color: var(--bs-secondary-color); */
         }
 
         .finance-card-icon {
@@ -170,7 +168,6 @@ foreach ($all_invoices as $invoice) {
 
         .finance-card-caption {
             font-size: .9rem;
-            /* color: var(--bs-secondary-color); */
         }
 
         .finance-card-footer {
@@ -242,7 +239,6 @@ foreach ($all_invoices as $invoice) {
                                 <div class="finance-card-icon"><i class="bi bi-receipt-cutoff"></i></div>
                             </div>
                             <div class="finance-card-value">Rp<?= number_format($invoice_value, 0, ',', '.') ?></div>
-                            <!-- <div class="finance-card-caption">Total amount from all invoices</div> -->
                             <div class="finance-card-footer">
                                 <a href="../invoice/invoice.php">More info <i class="bi bi-arrow-right"></i></a>
                             </div>
@@ -255,7 +251,6 @@ foreach ($all_invoices as $invoice) {
                                 <div class="finance-card-icon"><i class="bi bi-cash-coin"></i></div>
                             </div>
                             <div class="finance-card-value">Rp<?= number_format($total_revenue, 0, ',', '.') ?></div>
-                            <!-- <div class="finance-card-caption">Total payments received</div> -->
                             <div class="finance-card-footer">
                                 <a href="../revenue/revenue.php">More info <i class="bi bi-arrow-right"></i></a>
                             </div>
@@ -268,7 +263,6 @@ foreach ($all_invoices as $invoice) {
                                 <div class="finance-card-icon"><i class="bi bi-hourglass-split"></i></div>
                             </div>
                             <div class="finance-card-value">Rp<?= number_format($total_unpaid, 0, ',', '.') ?></div>
-                            <!-- <div class="finance-card-caption">Not yet paid off; the due date has not yet passed</div> -->
                             <div class="finance-card-footer">
                                 <a href="../outstanding/outstanding.php">More info <i class="bi bi-arrow-right"></i></a>
                             </div>
@@ -281,7 +275,6 @@ foreach ($all_invoices as $invoice) {
                                 <div class="finance-card-icon"><i class="bi bi-exclamation-triangle"></i></div>
                             </div>
                             <div class="finance-card-value">Rp<?= number_format($total_overdue, 0, ',', '.') ?></div>
-                            <!-- <div class="finance-card-caption">Not yet paid off. The due date has passed.</div> -->
                             <div class="finance-card-footer">
                                 <a href="../overdue/overdue.php">More info <i class="bi bi-arrow-right"></i></a>
                             </div>
@@ -336,7 +329,7 @@ foreach ($all_invoices as $invoice) {
                                                         <td><?= $invoice['customer_name'] ?></td>
                                                         <td><?= $invoice['date'] ?></td>
                                                         <td><?= $invoice['due_date'] ?></td>
-                                                        <td>Rp<?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
+                                                        <td>Rp<?= number_format($invoice['total_bill'], 0, ',', '.') ?></td>
                                                         <?php if ($remaining_unpaid > 0 && $invoice['due_date'] < $today): ?>
                                                             <td class="text-center"><span class="badge text-bg-danger">Overdue</span></td>
                                                         <?php elseif ($item_count == 0): ?>
