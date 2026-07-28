@@ -2,7 +2,10 @@
 session_start();
 require_once '../../connection.php';
 
-if (!isset($_SESSION['user_id'])) {
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
     header("Location: ../auth/login.php");
     exit;
 }
