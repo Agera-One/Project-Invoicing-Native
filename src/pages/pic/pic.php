@@ -23,7 +23,7 @@ $select_columns = [
     'name',
     'phone',
     'email',
-    'status',
+    'is_active',
     'position',
 ];
 
@@ -34,7 +34,6 @@ if ($search !== '') {
         'phone[~]' => $search,
         'email[~]' => $search,
         'position[~]' => $search,
-        'status[~]' => $search,
     ];
 }
 
@@ -132,7 +131,7 @@ $pics = $database->select('pic', $select_columns, $query_options);
                                             <td><?= $pic['phone'] ?></td>
                                             <td><?= $pic['email'] ?></td>
                                             <td><?= $pic['position'] ?></td>
-                                            <?= $pic['status'] == 'active' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
+                                            <?= $pic['is_active'] == '1' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
                                                     <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $pic['id'] ?>">Edit</a>

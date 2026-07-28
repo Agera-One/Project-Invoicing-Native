@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $phone = $_POST['phone'];
     $email = $_POST['email'];
     $position = $_POST['position'];
-    $status = $_POST['status'];
+    $is_active = $_POST['is_active'];
 
     $check_email = count($database->select('pic', 'email', [
         'AND' => [
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'phone' => $phone,
             'email' => $email,
             'position' => $position,
-            'status' => $status
+            'is_active' => $is_active
         ], [
             'id' => $id
         ]);
@@ -116,10 +116,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status PIC</label>
-                                <select name="status" class="form-select" aria-label="Default select example" required>
+                                <select name="is_active" class="form-select" aria-label="Default select example" required>
                                     <option value="" disabled selected>Select status PIC</option>
-                                    <option value="active" <?= ($pic['status'] == 'active') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?= ($pic['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                                    <option value="1" <?= ($pic['is_active'] == '1') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="0" <?= ($pic['is_active'] == '0') ? 'selected' : ''; ?>>Inactive</option>
                                 </select>
                             </div>
                         </div>

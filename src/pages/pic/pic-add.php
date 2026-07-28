@@ -10,14 +10,14 @@ if (!isset($user_id)) {
     exit;
 }
 
-$status = '';
+$is_active = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = $_POST['name'];
     $phone = $_POST['phone'];
     $email = $_POST['email'];
     $position = $_POST['position'];
-    $status = $_POST['status'];
+    $is_active = $_POST['is_active'];
 
     if (strlen($name) > 255) {
         echo '<script>alert("Maximum name length is 255 characters.")</script>';
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'phone' => $phone,
                 'email' => $email,
                 'position' => $position,
-                'status' => $status,
+                'is_active' => $is_active,
                 'company_id' => $company_id
             ]);
 
@@ -112,10 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status PIC</label>
-                                <select name="status" class="form-select" aria-label="Default select example" required>
+                                <select name="is_active" class="form-select" aria-label="Default select example" required>
                                     <option value="" disabled selected>Select status PIC</option>
-                                    <option value="active" <?= ($status == 'active') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="inactive" <?= ($status == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                                    <option value="1" <?= ($is_active == '1') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="0" <?= ($is_active == '0') ? 'selected' : ''; ?>>Inactive</option>
                                 </select>
                             </div>
                         </div>
