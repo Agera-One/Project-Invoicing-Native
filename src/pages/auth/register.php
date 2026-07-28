@@ -34,18 +34,12 @@ if (isset($_POST["register"])) {
         'phone' => $company_phone
     ]));
 
-    $check_company_website = count($database->select('company', 'website', [
-        'website' => $business_website
-    ]));
-
     if ($check_user_email > 0) {
         echo '<script>alert("User email already exists. Please use a different email.")</script>';
     } elseif ($check_company_email > 0) {
         echo '<script>alert("Company email already exists. Please use a different email.")</script>';
     } elseif ($check_company_phone > 0) {
         echo '<script>alert("Company phone already exists. Please use a different phone.")</script>';
-    } elseif ($check_company_website > 0) {
-        echo '<script>alert("Company website already exists. Please use a different website.")</script>';
     } else {
         $company = $database->insert('company', [
             'name' => $company_name,
