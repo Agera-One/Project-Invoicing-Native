@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,11 +11,9 @@ if (!isset($user_id)) {
     exit;
 }
 
-$limit = 10;
-$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($active_page - 1) * $limit;
-
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$where_condition = [];
+$search = $_GET['search'] ?? '';
+$page = $_GET['page'] ?? 1;
 
 $join_structure = [
     '[><]invoice' => ['invoice_id' => 'id'],
@@ -32,20 +31,12 @@ $select_columns = [
     'invoice.invoice_code(invoice_code)'
 ];
 
-$where_condition = [];
-if ($search !== '') {
-    $where_condition['OR'] = [
-        'payment.payment_code[~]' => $search,
-        'invoice.invoice_code[~]' => $search,
-        'customer.name[~]' => $search,
-        'payment.date[~]' => $search
-    ];
-}
-
-$rows = count($database->select("payment", $join_structure, "payment.id", $where_condition));
-$total_page = ceil($rows / $limit);
+$where_condition = search($search, $where_condition, ['payment.payment_code', 'invoice.invoice_code', 'customer.name', 'payment.date']);
+$pagination = pagination($database, $page, 'payment', 'payment.id', $where_condition, $join_structure);
+extract($pagination);
 
 $where_condition['invoice.company_id'] = $company_id;
+
 $query_options = $where_condition;
 $query_options['ORDER'] = ['payment.id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];

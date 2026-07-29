@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -13,11 +14,9 @@ if (!isset($user_id)) {
 use Medoo\Medoo;
 
 $today = date('Y-m-d');
-$limit = 10;
-$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($active_page - 1) * $limit;
-
-$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : '';
+$where_condition = [];
+$keyword = $_GET['keyword'] ?? '';
+$page = $_GET['page'] ?? 1;
 $date_from = isset($_GET['date_from']) ? $_GET['date_from'] : '';
 $date_to = isset($_GET['date_to']) ? $_GET['date_to'] : '';
 
@@ -40,15 +39,6 @@ $select_columns = [
     'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ];
 
-$where_condition = [];
-if ($keyword !== '') {
-    $where_condition['OR'] = [
-        'invoice.invoice_code[~]' => $keyword,
-        'customer.name[~]' => $keyword,
-        'pic.name[~]' => $keyword
-    ];
-}
-
 if (!empty($date_from) && !empty($date_to)) {
     $where_condition['invoice.date[<>]'] = [$date_from, $date_to];
 } elseif (!empty($date_from)) {
@@ -57,12 +47,14 @@ if (!empty($date_from) && !empty($date_to)) {
     $where_condition['invoice.date[<=]'] = $date_to;
 }
 
-$count_options = $where_condition;
-$count_options['GROUP'] = ['invoice.id'];
-$rows = count($database->select("invoice", $join_structure, "invoice.id", $count_options));
-$total_page = ceil($rows / $limit);
+$where_condition['GROUP'] = ['invoice.id'];
+
+$where_condition = search($keyword, $where_condition, ['invoice.invoice_code', 'customer.name', 'pic.name']);
+$pagination = pagination($database, $page, 'invoice', 'invoice.id', $where_condition, $join_structure);
+extract($pagination);
 
 $where_condition['invoice.company_id'] = $company_id;
+
 $query_options = $where_condition;
 $query_options['GROUP'] = 'invoice.id';
 $query_options['ORDER'] = ['invoice.id' => 'DESC'];

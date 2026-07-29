@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -13,11 +14,9 @@ if (!isset($user_id)) {
 use Medoo\Medoo;
 
 $today = date('Y-m-d');
-$limit = 10;
-$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($active_page - 1) * $limit;
-
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$where_condition = [];
+$search = $_GET['search'] ?? '';
+$page = $_GET['page'] ?? 1;
 
 $select_columns = [
     'invoice.id',
@@ -39,21 +38,14 @@ $where_condition = [
     'HAVING' => Medoo::raw('SUM(<invoice_detail.amount>) > (SELECT COALESCE(SUM(payment.amount), 0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
 ];
 
-if ($search !== '') {
-    $where_condition['OR'] = [
-        'invoice.invoice_code[~]' => $search,
-        'customer.name[~]' => $search,
-        'invoice.date[~]' => $search,
-        'invoice.due_date[~]' => $search
-    ];
-}
+$where_condition['GROUP'] = 'invoice.id';
 
-$count_options = $where_condition;
-$count_options['GROUP'] = ['invoice.id', 'customer.name', 'invoice.due_date'];
-$rows = count($database->select('invoice', $join_structure, 'invoice.id', $count_options));
-$total_page = ceil($rows / $limit);
+$where_condition = search($search, $where_condition, ['invoice.invoice_code', 'customer.name', 'invoice.date', 'invoice.due_date']);
+$pagination = pagination($database, $page, 'invoice', 'invoice.id', $where_condition, $join_structure);
+extract($pagination);
 
 $where_condition['invoice.company_id'] = $company_id;
+
 $query_options = $where_condition;
 $query_options['GROUP'] = 'invoice.id';
 $query_options['ORDER'] = ['invoice.id' => 'DESC'];

@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,29 +11,15 @@ if (!isset($user_id)) {
     exit;
 }
 
-$number = 1;
-$limit = 10;
-
-$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($active_page - 1) * $limit;
-
 $where_condition = [];
-$search = isset($_GET['search']) ? $_GET['search'] : '';
+$search = $_GET['search'] ?? '';
+$page = $_GET['page'] ?? 1;
 
-if ($search !== '') {
-    $where_condition['OR'] = [
-        'customer_code[~]' => $search,
-        'name[~]' => $search,
-        'email[~]' => $search,
-        'phone[~]' => $search,
-        'address[~]' => $search,
-    ];
-}
+$where_condition = search($search, $where_condition, ['customer_code', 'name', 'email', 'phone', 'address']);
+$pagination = pagination($database, $page, 'customer', 'id', $where_condition);
+extract($pagination);
 
 $where_condition['company_id'] = $company_id;
-
-$rows = count($database->select("customer", "*", $where_condition));
-$total_page = ceil($rows / $limit);
 
 $query_options = $where_condition;
 $query_options['ORDER'] = ['id' => 'DESC'];

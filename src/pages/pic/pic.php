@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
+include '../../functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,43 +11,21 @@ if (!isset($user_id)) {
     exit;
 }
 
-$number = 1;
-$limit = 10;
-
-$active_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$offset = ($active_page - 1) * $limit;
-
-$search = isset($_GET['search']) ? $_GET['search'] : '';
-
-$select_columns = [
-    'id',
-    'name',
-    'phone',
-    'email',
-    'is_active',
-    'position',
-];
-
 $where_condition = [];
-if ($search !== '') {
-    $where_condition['OR'] = [
-        'name[~]' => $search,
-        'phone[~]' => $search,
-        'email[~]' => $search,
-        'position[~]' => $search,
-    ];
-}
+$search = $_GET['search'] ?? '';
+$page = $_GET['page'] ?? 1;
+
+$where_condition = search($search, $where_condition, ['name', 'email', 'phone', 'position']);
+$pagination = pagination($database, $page, 'pic', 'id', $where_condition);
+extract($pagination);
 
 $where_condition['company_id'] = $company_id;
-
-$rows = count($database->select('pic', $select_columns, $where_condition));
-$total_page = ceil($rows / $limit);
 
 $query_options = $where_condition;
 $query_options['ORDER'] = ['pic.id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];
 
-$pics = $database->select('pic', $select_columns, $query_options);
+$pics = $database->select('pic', '*', $query_options);
 ?>
 
 <!DOCTYPE html>
