@@ -22,7 +22,7 @@ $customers = $database->select('customer', ['id', 'name'], [
 
 $pics = $database->select('pic', ['id', 'name'], [
     'AND' => [
-        'status' => 'active',
+        'is_active' => 1,
         'company_id' => $company_id
     ]
 ]);
