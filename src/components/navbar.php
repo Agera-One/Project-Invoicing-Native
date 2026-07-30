@@ -1,9 +1,9 @@
 <?php
-  $logged_in_user = $database->get('user', '*', ['id' => $user_id]);
+  $logged_in_user = $db->get('user', '*', ['id' => $user_id]);
 ?>
 
 <head>
-  <link rel="stylesheet" href="../../../assets/css/navbar.css">
+  <link rel="stylesheet" href="../../assets/css/navbar.css">
 </head>
 
 <nav class="app-header navbar navbar-expand custom-navbar">
@@ -40,7 +40,7 @@
             <p><?= $logged_in_user['name'] ?><small>Admin</small></p>
           </li>
           <li class="user-footer">
-            <a href="../auth/logout.php" class="btn btn-outline-danger w-100">
+            <a href="../../pages/auth/logout.php" class="btn btn-outline-danger w-100">
               Logout
             </a>
           </li>
