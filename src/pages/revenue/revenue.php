@@ -62,9 +62,9 @@ $omsets = $database->select('payment', [
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
+        <?php include_once '../../components/navbar.php'; ?>
 
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../components/sidebar.php'; ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
