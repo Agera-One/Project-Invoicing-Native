@@ -55,13 +55,13 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-customer text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
-                            <li class="breadcrumb-customer active" aria-current="page">Customers Management</li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Customers Management</li>
                         </ol>
                     </div>
                 </div>
 
-                <div class="d-flex flex-wrap align-customers-center justify-content-between gap-3 mb-4">
+                <div class="d-flex flex-wrap align-item-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
                         <a href="customer-add.php" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Customer
