@@ -1,10 +1,14 @@
 <?php
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/Pic.php";
+
+$db = (new Database())->getConnection();
+$pic = new Pic($db);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'];
 
-    $total_invoice = $database->count('invoice', [
+    $total_invoice = $db->count('invoice', [
         'pic_id' => $id
     ]);
 
@@ -17,9 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         exit;
     } else {
-        $pics = $database->delete('pic', [
-            'id' => $id
-        ]);
+        $pic->delete($id);
 
         header('Location: pic.php');
         exit();

@@ -1,7 +1,9 @@
 <?php
 session_start();
-require_once '../../connection.php';
-include '../../functions/functions.php';
+require_once "../../config/database.php";
+require_once "../../classes/Invoice.php";
+require_once "../../classes/InvoiceDetail.php";
+require_once '../../src/functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -11,7 +13,9 @@ if (!isset($user_id)) {
     exit;
 }
 
-use Medoo\Medoo;
+$db = (new Database())->getConnection();
+$invoice = new Invoice($db, $company_id);
+$invoice_detail = new InvoiceDetail($db, $company_id);
 
 $today = date('Y-m-d');
 $where_condition = [];
@@ -27,17 +31,7 @@ $join_structure = [
     '[><]pic' => ['pic_id' => 'id'],
 ];
 
-$select_columns = [
-    'invoice.id',
-    'invoice.customer_id',
-    'invoice.invoice_code',
-    'invoice.date',
-    'invoice.due_date',
-    'pic.name(pic_name)',
-    'customer.name(customer_name)',
-    'total_bill' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM invoice_detail WHERE invoice_detail.invoice_id = <invoice.id>)'),
-    'total_payment' => Medoo::raw('(SELECT COALESCE(SUM(amount),0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
-];
+$where_condition['invoice.company_id'] = $company_id;
 
 if (!empty($date_from) && !empty($date_to)) {
     $where_condition['invoice.date[<>]'] = [$date_from, $date_to];
@@ -47,20 +41,10 @@ if (!empty($date_from) && !empty($date_to)) {
     $where_condition['invoice.date[<=]'] = $date_to;
 }
 
-$where_condition['GROUP'] = ['invoice.id'];
-
 $where_condition = search($keyword, $where_condition, ['invoice.invoice_code', 'customer.name', 'pic.name']);
-$pagination = pagination($database, $page, 'invoice', 'invoice.id', $where_condition, $join_structure);
-extract($pagination);
+$pagination = pagination($db, $page, 'invoice', 'invoice.id', $where_condition, $join_structure);
 
-$where_condition['invoice.company_id'] = $company_id;
-
-$query_options = $where_condition;
-$query_options['GROUP'] = 'invoice.id';
-$query_options['ORDER'] = ['invoice.id' => 'DESC'];
-$query_options['LIMIT'] = [$offset, $limit];
-
-$invoices = $database->select('invoice', $join_structure, $select_columns, $query_options);
+$datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset'], $pagination['limit']);
 ?>
 
 <!DOCTYPE html>
@@ -70,8 +54,8 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoices Billing</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -79,9 +63,8 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -161,34 +144,31 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($invoices as $invoice):
-                                        $item_count = $database->count('invoice_detail', [
-                                            'invoice_id' => $invoice['id']
-                                        ]);
-
-                                        $remaining_unpaid = $invoice['total_bill'] - $invoice['total_payment']; ?>
+                                    <?php foreach ($datas as $data):
+                                        $invoice_item = $invoice_detail->invoiceItemCount($data['id']);
+                                        $remaining_unpaid = $data['total_bill'] - $data['total_payment']; ?>
                                         <tr>
-                                            <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
-                                            <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
-                                            <td><?= $invoice['pic_name'] ?></td>
-                                            <td><?= $invoice['customer_name'] ?></td>
-                                            <td><?= $invoice['date'] ?></td>
-                                            <td><?= $invoice['due_date'] ?></td>
-                                            <td>Rp<?= number_format($invoice['total_bill'] ?? 0, 0, ',', '.') ?></td>
-                                            <?php if ($remaining_unpaid > 0 && $invoice['due_date'] < $today): ?>
+                                            <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
+                                            <td class="fw-medium"><?= $data['invoice_code'] ?></td>
+                                            <td><?= $data['pic_name'] ?></td>
+                                            <td><?= $data['customer_name'] ?></td>
+                                            <td><?= $data['date'] ?></td>
+                                            <td><?= $data['due_date'] ?></td>
+                                            <td>Rp<?= number_format($data['total_bill'] ?? 0, 0, ',', '.') ?></td>
+                                            <?php if ($remaining_unpaid > 0 && $data['due_date'] < $today): ?>
                                                 <td class="text-center"><span class="badge text-bg-danger">Overdue</span></td>
-                                            <?php elseif ($item_count == 0): ?>
+                                            <?php elseif ($invoice_item == 0): ?>
                                                 <td class="text-center"><span class="badge text-bg-secondary">No Item</span></td>
-                                            <?php elseif ($invoice['total_payment'] < $invoice['total_bill']): ?>
+                                            <?php elseif ($data['total_payment'] < $data['total_bill']): ?>
                                                 <td class="text-center"><span class="badge text-bg-warning">Unpaid</span></td>
-                                            <?php elseif ($invoice['total_payment'] == $invoice['total_bill']): ?>
+                                            <?php elseif ($data['total_payment'] == $data['total_bill']): ?>
                                                 <td class="text-center"><span class="badge text-bg-success">Paid</span></td>
                                             <?php endif; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-info text-black" href="../invoice-detail/detail.php?invoice_id=<?= $invoice['id'] ?>">Detail</a>
-                                                    <a class="btn btn-sm btn-success" href="invoice-edit.php?id=<?= $invoice['id'] ?>&customer_id=<?= $invoice['customer_id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger" href="invoice-delete.php?id=<?= $invoice['id'] ?>"
+                                                    <a class="btn btn-sm btn-info text-black" href="../invoice-detail/detail.php?invoice_id=<?= $data['id'] ?>">Detail</a>
+                                                    <a class="btn btn-sm btn-success" href="invoice-edit.php?id=<?= $data['id'] ?>&customer_id=<?= $data['customer_id'] ?>&pic_id=<?= $data['pic_id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger" href="invoice-delete.php?id=<?= $data['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</a>
                                                 </div>
                                             </td>
@@ -204,20 +184,20 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
                             <ul class="pagination pagination-sm m-0">
                                 <?php $filter_params = '&keyword=' . urlencode($keyword) . '&date_from=' . urlencode($date_from) . '&date_to=' . urlencode($date_to) . '&search='; ?>
 
-                                <?php if ($active_page > 1): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?= $active_page - 1 ?><?= $filter_params ?>">Previous</a></li>
+                                <?php if ($pagination['active_page'] > 1): ?>
+                                    <li class="page-item"><a class="page-link" href="?page=<?= $pagination['active_page'] - 1 ?><?= $filter_params ?>">Previous</a></li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Previous</span></li>
                                 <?php endif; ?>
 
-                                <?php for ($i = 1; $i <= $total_page; $i++): ?>
-                                    <li class="page-item <?= ($i == $active_page) ? 'active' : '' ?>">
+                                <?php for ($i = 1; $i <= $pagination['total_page']; $i++): ?>
+                                    <li class="page-item <?= ($i == $pagination['active_page']) ? 'active' : '' ?>">
                                         <a class="page-link" href="?page=<?= $i ?><?= $filter_params ?>"><?= $i ?></a>
                                     </li>
                                 <?php endfor; ?>
 
-                                <?php if ($active_page < $total_page): ?>
-                                    <li class="page-item"><a class="page-link" href="?page=<?= $active_page + 1 ?><?= $filter_params ?>">Next</a></li>
+                                <?php if ($pagination['active_page'] < $pagination['total_page']): ?>
+                                    <li class="page-item"><a class="page-link" href="?page=<?= $pagination['active_page'] + 1 ?><?= $filter_params ?>">Next</a></li>
                                 <?php else: ?>
                                     <li class="page-item disabled"><span class="page-link">Next</span></li>
                                 <?php endif; ?>
@@ -230,9 +210,9 @@ $invoices = $database->select('invoice', $join_structure, $select_columns, $quer
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

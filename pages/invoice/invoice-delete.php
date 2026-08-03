@@ -1,14 +1,21 @@
 <?php
-require_once '../../connection.php';
+session_start();
+require_once "../../config/database.php";
+require_once "../../classes/Invoice.php";
+
+$company_id = $_SESSION['company_id'];
+
+$db = (new Database())->getConnection();
+$invoice = new Invoice($db, $company_id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'];
 
-    $total_invoice_detail = $database->count('invoice_detail', [
+    $total_invoice_detail = $db->count('invoice_detail', [
         'invoice_id' => $id
     ]);
 
-    $total_payment = $database->count('payment', [
+    $total_payment = $db->count('payment', [
         'invoice_id' => $id
     ]);
 
@@ -21,9 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         
         exit;
     } else {
-        $invoices = $database->delete('invoice', [
-            'id' => $id
-        ]);
+        $invoice->delete($id);
 
         header('Location: invoice.php');
         exit(); 

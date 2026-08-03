@@ -1,11 +1,11 @@
 <?php
 session_start();
-include "../../config/database.php";
-include "../../classes/Auth.php";
-include '../../src/functions/functions.php';
+require_once "../../config/database.php";
+require_once "../../classes/Auth.php";
+require_once '../../src/functions/functions.php';
 
 $db = (new Database())->getConnection();
-$auth = new Auth($dbh);
+$auth = new Auth($db);
 
 if (isset($_POST["register"])) {
     $user_data = [

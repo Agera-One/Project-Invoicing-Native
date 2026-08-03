@@ -1,7 +1,7 @@
 <?php
 session_start();
-include "../../config/database.php";
-include "../../classes/Auth.php";
+require_once "../../config/database.php";
+require_once "../../classes/Auth.php";
 
 $db = (new Database())->getConnection();
 $auth = new Auth($db);
@@ -17,7 +17,7 @@ if (isset($_POST["login"])) {
             $_SESSION["user_id"] = $user["id"];
             $_SESSION["company_id"] = $user['company_id'];
 
-            header("Location: ../item/item.php");
+            header("Location: ../dashboard/dashboard.php");
             exit();
         } else {
             echo '<script>alert("Incorrect password. Please try again.")</script>';

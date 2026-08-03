@@ -1,7 +1,10 @@
 <?php
 session_start();
-require_once '../../connection.php';
-include '../../functions/functions.php';
+require_once "../../config/database.php";
+require_once "../../classes/Payment.php";
+require_once "../../classes/Invoice.php";
+require_once "../../classes/InvoiceDetail.php";
+require_once '../../src/functions/functions.php';
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -11,62 +14,49 @@ if (!isset($user_id)) {
     exit;
 }
 
-$payment_code = generate_code($database, "payment", "payment_code", "PAY");
+$db = (new Database())->getConnection();
+$payment = new Payment($db, $company_id);
+$invoice = new Invoice($db, $company_id);
+$invoice_detail = new InvoiceDetail($db, $company_id);
 
-use Medoo\Medoo;
+$payment_code = generate_code($db, "payment", "payment_code", "PAY");
 
 $invoice_id  = $_POST['invoice_id'] ?? ($_GET['invoice_id'] ?? '');
 
-$invoices = $database->select('invoice', [
+$join_structure = [
     '[><]customer' => ['customer_id' => 'id'],
-    '[><]invoice_detail' => ['id' => 'invoice_id']
-], [
-    'invoice.id',
-    'invoice.invoice_code',
-    'invoice.customer_id',
-    'invoice.date',
-    'invoice.due_date',
-    'customer.name(customer_name)',
-    'total_bill' => Medoo::raw('SUM(<invoice_detail.amount>)'),
-    'total_amount_paid' => Medoo::raw('(SELECT COALESCE(SUM(payment.amount), 0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
-], [
-    'GROUP' => 'invoice.id',
-    'invoice.company_id' => $company_id
-]);
+    '[>]invoice_detail' => ['id' => 'invoice_id'],
+    '[>]payment' => ['id' => 'invoice_id'],
+    '[><]pic' => ['pic_id' => 'id'],
+];
+
+$where_condition = ['invoice.company_id' => $company_id];
+
+$invoice_data = $invoice->getAll($join_structure, $where_condition);
 
 $selected_invoice = null;
-foreach ($invoices as $invoice) {
-    if ((string)$invoice['id'] === (string)$invoice_id) {
-        $selected_invoice = $invoice;
+foreach ($invoice_data as $data) {
+    if ((string)$data['id'] === (string)$invoice_id) {
+        $selected_invoice = $data;
         break;
     }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $date = $_POST['date'];
-    $amount = (int)$_POST['amount'];
+    $_POST['invoice_id'] = $invoice_id;
+    $_POST['payment_code'] = $payment_code;
 
-    if ($amount < 1) {
+    if ($_POST['amount'] < 1) {
         echo '<script>alert("The minimum amount is 1.")</script>';
     } else {
-        $total_bill_query = $database->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
-        $total_bill = array_sum($total_bill_query) ?? 0;
+        $total_bill = $invoice_detail->sumInvoiceBill($invoice_id);
+        $total_paid = $payment->sumAmountPaid($invoice_id);
+        $remaining_bill = $total_bill - $total_paid;
 
-        $total_paid_query = $database->select('payment', 'amount', ['invoice_id' => $invoice_id]);
-        $total_already_paid = array_sum($total_paid_query) ?? 0;
-
-        $remaining_bill = $total_bill - $total_already_paid;
-
-        if ($amount > $remaining_bill) {
-            echo '<script>alert("Failed! Payment amount (Rp ' . number_format($amount, 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
+        if ($_POST['amount'] > $remaining_bill) {
+            echo '<script>alert("Failed! Payment amount (Rp ' . number_format($_POST['amount'], 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
         } else {
-            $database->insert('payment', [
-                'invoice_id' => $invoice_id,
-                'payment_code' => $payment_code,
-                'date' => $date,
-                'amount' => $amount,
-                'created_by' => $_SESSION['user_id']
-            ]);
+            $payment->create($_POST);
 
             header("Location: payment.php");
             exit();
@@ -83,15 +73,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Payment</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -118,19 +107,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <label class="form-label">Choose Invoice <span class="text-danger">*</span></label>
                                 <select name="invoice_id" id="invoice-select" class="form-select" aria-label="Default select example" required>
                                     <option value="" disabled <?= $selected_invoice ? '' : 'selected' ?>>Select invoice</option>
-                                    <?php foreach ($invoices as $invoice):
-                                        $remaining = $invoice['total_bill'] - $invoice['total_amount_paid']; ?>
+                                    <?php foreach ($invoice_data as $data):
+                                        $remaining = $data['total_bill'] - $data['total_amount_paid']; ?>
                                         <option
-                                            value="<?= $invoice['id'] ?>"
-                                            data-code="<?= htmlspecialchars($invoice['invoice_code']) ?>"
-                                            data-customer="<?= htmlspecialchars($invoice['customer_name']) ?>"
-                                            data-date="<?= htmlspecialchars($invoice['date']) ?>"
-                                            data-due-date="<?= htmlspecialchars($invoice['due_date']) ?>"
-                                            data-total="<?= (int) $invoice['total_bill'] ?>"
-                                            data-paid="<?= (int) $invoice['total_amount_paid'] ?>"
+                                            value="<?= $data['id'] ?>"
+                                            data-code="<?= htmlspecialchars($data['invoice_code']) ?>"
+                                            data-customer="<?= htmlspecialchars($data['customer_name']) ?>"
+                                            data-date="<?= htmlspecialchars($data['date']) ?>"
+                                            data-due-date="<?= htmlspecialchars($data['due_date']) ?>"
+                                            data-total="<?= (int) $data['total_bill'] ?>"
+                                            data-paid="<?= (int) $data['total_amount_paid'] ?>"
                                             data-remaining="<?= (int) $remaining ?>"
-                                            <?= ($invoice_id == $invoice['id']) ? 'selected' : ''; ?>>
-                                            <?= $invoice['invoice_code'] . ' -- ' . $invoice['customer_name'] ?>
+                                            <?= ($invoice_id == $data['id']) ? 'selected' : ''; ?>>
+                                            <?= $data['invoice_code'] ?>
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -181,15 +170,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <i class="bi bi-upc-scan me-2"></i><span><?= $payment_code ?></span>
                                     </div>
                                 </div>
-                                <input type="hidden" name="payment$payment_code" required="" value="<?= $payment_code ?>">
                             </div>
-                            <div class="mb-3">
+                            <div class="mb-3"> 
                                 <label class="form-label">Payment Date</label>
-                                <input value="<?= $date ?? date('Y-m-d'); ?>" name="date" type="date" class="form-control" required>
+                                <input value="<?= date('Y-m-d'); ?>" name="date" type="date" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Amount Paid</label>
-                                <input value="<?= $amount ?? ''; ?>" name="amount" id="amount-input" type="number" min="1" class="form-control" required>
+                                <input name="amount" id="amount-input" type="number" min="1" class="form-control" required>
                                 <div class="form-text" id="amount-hint">
                                     <?= $selected_invoice ? 'Max: Rp' . number_format(($selected_invoice['total_bill'] - $selected_invoice['total_amount_paid']), 0, ',', '.') : '' ?>
                                 </div>
@@ -205,10 +193,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../../assets/js/payment.js"></script>
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/payment.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

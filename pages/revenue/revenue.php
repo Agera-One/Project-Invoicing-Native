@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/Payment.php";
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,39 +11,12 @@ if (!isset($user_id)) {
     exit;
 }
 
-use Medoo\Medoo;
+$db = (new Database())->getConnection();
+$payment = new Payment($db, $company_id);
 
 $number = 1;
 $period = $_GET['period'] ?? 'daily';
-
-if ($period === 'daily') {
-    $periodKeyExpr   = "DATE(<payment.date>)";
-    $periodLabelExpr = "DATE_FORMAT(<payment.date>, '%W, %d %M %Y')";
-    $limit           = 7;
-} elseif ($period === 'weekly') {
-    $periodKeyExpr   = "YEARWEEK(<payment.date>, 1)";
-    $periodLabelExpr = "CONCAT('Week ', WEEK(MIN(<payment.date>), 1), ' (', DATE_FORMAT(MIN(<payment.date>), '%M'), ')')";
-    $limit           = 5;
-} else {
-    $periodKeyExpr   = "DATE_FORMAT(<payment.date>, '%Y-%m')";
-    $periodLabelExpr = "DATE_FORMAT(<payment.date>, '%Y-%m')";
-    $limit           = 6;
-}
-
-$omsets = $database->select('payment', [
-    '[><]invoice' => ['invoice_id' => 'id']
-], [
-    'period_key' => Medoo::raw($periodKeyExpr),
-    'period' => Medoo::raw($periodLabelExpr),
-    'total_invoice' => Medoo::raw('COUNT(DISTINCT <payment.invoice_id>)'),
-    'total_payment' => Medoo::raw('COUNT(<payment.id>)'),
-    'revenue' => Medoo::raw('SUM(<payment.amount>)')
-], [
-    'GROUP' => 'period_key',
-    'ORDER' => ['period_key' => 'DESC'],
-    'invoice.company_id' => $company_id,
-    'LIMIT' => $limit
-]);
+$omsets = $payment->sumRevenuePeriod($period, $company_id);
 ?>
 
 <!DOCTYPE html>
@@ -52,19 +26,18 @@ $omsets = $database->select('payment', [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revenue Overview</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/css/report.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
-    <link rel="stylesheet" href="../../../assets/css/report.css">
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -137,9 +110,9 @@ $omsets = $database->select('payment', [
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

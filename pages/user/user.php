@@ -1,7 +1,11 @@
 <?php
 session_start();
-require_once '../../connection.php';
-include '../../functions/functions.php';
+require_once "../../config/database.php";
+require_once "../../classes/User.php";
+require_once '../../src/functions/functions.php';
+
+$db = (new Database())->getConnection();
+$user = new User($db);
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -12,20 +16,19 @@ if (!isset($user_id)) {
 }
 
 $where_condition = [];
+$where_condition['company_id'] = $company_id;
 $search = $_GET['search'] ?? '';
 $page = $_GET['page'] ?? 1;
 
 $where_condition = search($search, $where_condition, ['name', 'email', 'created_at', 'updated_at']);
-$pagination = pagination($database, $page, 'user', 'id', $where_condition);
+$pagination = pagination($db, $page, 'user', 'id', $where_condition);
 extract($pagination);
-
-$where_condition['company_id'] = $company_id;
 
 $query_options = $where_condition;
 $query_options['ORDER'] = ['id' => 'DESC'];
 $query_options['LIMIT'] = [$offset, $limit];
 
-$users = $database->select('user', '*', $query_options);
+$datas = $user->getAll($query_options);
 ?>
 
 <!DOCTYPE html>
@@ -35,8 +38,8 @@ $users = $database->select('user', '*', $query_options);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Management</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -44,9 +47,8 @@ $users = $database->select('user', '*', $query_options);
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -100,19 +102,19 @@ $users = $database->select('user', '*', $query_options);
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($users as $user):
-                                        $updated_at = new DateTime($user['updated_at']); ?>
+                                    <?php foreach ($datas as $data):
+                                        $updated_at = new DateTime($data['updated_at']); ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$offset ?></th>
-                                            <td><?= $user['name'] ?></td>
-                                            <td><?= $user['email'] ?></td>
-                                            <td><?= date('d F Y', strtotime($user['created_at'])) ?></td>
+                                            <td><?= $data['name'] ?></td>
+                                            <td><?= $data['email'] ?></td>
+                                            <td><?= date('d F Y', strtotime($data['created_at'])) ?></td>
                                             <td><?= $updated_at->format('d F Y H:i') ?></td>
-                                            <?= ($user['id'] == $user_id) ? '<td class="text-center"><span class="badge text-bg-success"> Online </span></td>' : '<td class="text-center"><span class="badge text-bg-secondary"> Offline </span></td>'; ?>
+                                            <?= ($data['id'] == $user_id) ? '<td class="text-center"><span class="badge text-bg-success"> Online </span></td>' : '<td class="text-center"><span class="badge text-bg-secondary"> Offline </span></td>'; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="user-edit.php?id=<?= $user['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="user-delete.php?id=<?= $user['id'] ?>"
+                                                    <a class="btn btn-sm btn-success px-3" href="user-edit.php?id=<?= $data['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="user-delete.php?id=<?= $data['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                                                 </div>
                                             </td>
@@ -155,9 +157,9 @@ $users = $database->select('user', '*', $query_options);
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

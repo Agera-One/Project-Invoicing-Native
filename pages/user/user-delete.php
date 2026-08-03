@@ -1,6 +1,10 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/User.php";
+
+$db = (new Database())->getConnection();
+$user = new User($db);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'];
@@ -14,9 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         exit;
     } else {
-        $users = $database->delete('user', [
-            'id' => $id
-        ]);
+        $user->delete($id);
 
         header('Location: user.php');
         exit();

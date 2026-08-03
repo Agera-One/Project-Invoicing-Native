@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/Item.php";
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,71 +11,19 @@ if (!isset($user_id)) {
     exit;
 }
 
-use Medoo\Medoo;
+$db = (new Database())->getConnection();
+$item = new Item($db);
 
 $number = 1;
 
 $allowed_periods = ['all', 'yearly', 'monthly', 'weekly'];
 $period = $_GET['period'] ?? 'all';
-if (!in_array($period, $allowed_periods)) {
-    $period = 'all';
-}
-
-$where = [
-    'GROUP' => 'item.id',
-    'ORDER' => [
-        'total_unit_sold' => 'DESC'
-    ],
-    'item.company_id' => $company_id,
-    'LIMIT' => 10
-];
-
 $period_label = 'All Time';
 
-switch ($period) {
-    case 'weekly':
-        $start = date('Y-m-d', strtotime('monday this week'));
-        $end   = date('Y-m-d', strtotime('sunday this week'));
-        $where['invoice.date[>=]'] = $start;
-        $where['invoice.date[<=]'] = $end;
-        $period_label = 'This Week';
-        break;
-
-    case 'monthly':
-        $start = date('Y-m-01');
-        $end   = date('Y-m-t');
-        $where['invoice.date[>=]'] = $start;
-        $where['invoice.date[<=]'] = $end;
-        $period_label = 'This Month';
-        break;
-
-    case 'yearly':
-        $start = date('Y-01-01');
-        $end   = date('Y-12-31');
-        $where['invoice.date[>=]'] = $start;
-        $where['invoice.date[<=]'] = $end;
-        $period_label = 'This Year';
-        break;
-
-    case 'all':
-    default:
-        $period_label = 'All Time';
-        break;
-}
-
-$top_products = $database->select('item', [
-    '[><]invoice_detail' => [
-        'id' => 'item_id'
-    ],
-    '[><]invoice' => [
-        'invoice_detail.invoice_id' => 'id'
-    ]
-], [
-    'item.name(item_name)',
-    'item.price',
-    'total_unit_sold' => Medoo::raw('SUM(<invoice_detail.quantity>)'),
-    'total_sales' => Medoo::raw('SUM(<invoice_detail.amount>)')
-], $where);
+$validated = $item->validatorPeriod($period, $period_label);
+$where_condition = $validated['where_condition'];
+$period_label = $validated['period_label'];
+$top_products = $item->getBestSeller($where_condition, $company_id);
 ?>
 
 <!DOCTYPE html>
@@ -84,19 +33,18 @@ $top_products = $database->select('item', [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Best Selling Products</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/css/report.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
-    <link rel="stylesheet" href="../../../assets/css/report.css">
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -176,9 +124,9 @@ $top_products = $database->select('item', [
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

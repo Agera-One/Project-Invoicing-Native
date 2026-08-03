@@ -2,10 +2,12 @@
 session_start();
 require_once "../../config/database.php";
 require_once "../../classes/Item.php";
-include '../../src/functions/functions.php';
 
 $db = (new Database())->getConnection();
 $item = new Item($db);
+
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
@@ -17,15 +19,11 @@ $id = $_GET['id'];
 $data = $item->find($id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $datas = [
-        'name' => $_POST['name'],
-        'price' => $_POST['price']
-    ];
-
-    if ($datas['price'] < 1) {
+    
+    if ($_POST['price'] < 1) {
         echo '<script>alert("The minimum price is 1.")</script>';
     } else {
-        $item->update($id, $datas);
+        $item->update($id, $_POST);
 
         header("Location: item.php");
         exit();

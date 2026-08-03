@@ -1,6 +1,13 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/Pic.php";
+
+$db = (new Database())->getConnection();
+$pic = new Pic($db);
+
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
@@ -9,27 +16,20 @@ if (!isset($_SESSION['user_id'])) {
 
 $id = $_GET['id'];
 
-$pic = $database->get('pic', '*', [
-    'id' => $id
-]);
+$data = $pic->find($id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $phone = $_POST['phone'];
-    $email = $_POST['email'];
-    $position = $_POST['position'];
-    $is_active = $_POST['is_active'];
 
-    $email_exists = record_exists($database, 'pic', 'email', [
+    $email_exists = $db->has('pic', [
         'AND' => [
-            'email' => $email,
+            'email' => $_POST['email'],
             'id[!]' => $id
         ]
     ]);
 
-    $phone_exists = record_exists($database, 'pic', 'phone', [
+    $phone_exists = $db->has('pic', [
         'AND' => [
-            'phone' => $phone,
+            'phone' => $_POST['phone'],
             'id[!]' => $id
         ]
     ]);
@@ -38,26 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo '<script>alert("Email already exists")</script>';
     } elseif ($phone_exists) {
         echo '<script>alert("phone already exists")</script>';
-    } elseif ($check_email > 0) {
-        echo '<script>alert("Email already exists. Please use a different email.")</script>';
-    } elseif ($check_phone > 0) {
-        echo '<script>alert("phone already exists. Please use a different phone.")</script>';
-    } elseif (strlen($name) > 255) {
+    } elseif (strlen($_POST['name']) > 255) {
         echo '<script>alert("Maximum name length is 255 characters.")</script>';
-    } elseif (strlen($phone) > 15) {
+    } elseif (strlen($_POST['phone']) > 15) {
         echo '<script>alert("Maximum phone length is 15 characters.")</script>';
-    } elseif (strlen($email) > 50) {
+    } elseif (strlen($_POST['email']) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
     } else {
-        $pics = $database->update('pic', [
-            'name' => $name,
-            'phone' => $phone,
-            'email' => $email,
-            'position' => $position,
-            'is_active' => $is_active
-        ], [
-            'id' => $id
-        ]);
+        $pic->update($id, $_POST);
 
         header("Location: pic.php");
         exit();
@@ -72,14 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit PIC</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../components/navbar.php'; ?>
-
-        <?php include '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -104,26 +92,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Name</label>
-                                <input value="<?= $pic['name'] ?>" name="name" type="text" class="form-control" required>
+                                <input value="<?= $data['name'] ?>" name="name" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Phone</label>
-                                <input value="<?= $pic['phone'] ?>" name="phone" type="tel" class="form-control" required>
+                                <input value="<?= $data['phone'] ?>" name="phone" type="tel" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Email</label>
-                                <input value="<?= $pic['email'] ?>" name="email" type="email" class="form-control" required>
+                                <input value="<?= $data['email'] ?>" name="email" type="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Position</label>
-                                <input value="<?= $pic['position'] ?>" name="position" type="text" class="form-control" required>
+                                <input value="<?= $data['position'] ?>" name="position" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Status PIC</label>
                                 <select name="is_active" class="form-select" aria-label="Default select example" required>
                                     <option value="" disabled selected>Select status PIC</option>
-                                    <option value="1" <?= ($pic['is_active'] == '1') ? 'selected' : ''; ?>>Active</option>
-                                    <option value="0" <?= ($pic['is_active'] == '0') ? 'selected' : ''; ?>>Inactive</option>
+                                    <option value="1" <?= ($data['is_active'] == '1') ? 'selected' : ''; ?>>Active</option>
+                                    <option value="0" <?= ($data['is_active'] == '0') ? 'selected' : ''; ?>>Inactive</option>
                                 </select>
                             </div>
                         </div>
@@ -137,9 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>
