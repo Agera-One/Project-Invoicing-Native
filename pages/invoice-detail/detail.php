@@ -14,7 +14,7 @@ if (!isset($user_id)) {
 $db = (new Database())->getConnection();
 $invoice_detail = new InvoiceDetail($db, $company_id);
 
-$invoice_id = $_GET['invoice_id'];
+$invoice_id = $_GET['invoice_id'];  
 $datas = $invoice_detail->getAll($invoice_id);
 $invoice_details = [];
 
@@ -93,7 +93,7 @@ foreach ($invoice_details as $invoice_detail) {
                                 <div class="row mb-4">
                                     <div class="col-sm-6">
                                         <?php if ($invoice['company_logo']) : ?>
-                                            <img src="../../../storage/<?= $invoice['company_logo'] ?>" alt="<?= $invoice['company_name']; ?>"
+                                            <img src="../../storage/<?= $invoice['company_logo'] ?>" alt="<?= $invoice['company_name']; ?>"
                                                 style="max-height: 100px; width: auto;"
                                                 class="mb-4">
                                             <h2 class="h4 text-primary fw-semibold"><?= $invoice['company_name'] ?></h2>
