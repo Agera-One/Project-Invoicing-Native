@@ -21,9 +21,9 @@ $period = $_GET['period'] ?? 'all';
 $period_label = 'All Time';
 
 $validated = $item->validatorPeriod($period, $period_label);
-$where_condition = $validated['where_condition'];
 $period_label = $validated['period_label'];
-$top_products = $item->getBestSeller($where_condition, $company_id);
+
+$top_products = $item->getBestSeller($validated['where_condition'], $company_id);
 ?>
 
 <!DOCTYPE html>
