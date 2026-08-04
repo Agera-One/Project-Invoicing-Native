@@ -69,7 +69,7 @@ class Item {
     }
 
     public function validatorPeriod($period, $period_label) {
-        $where_condition = []; // inisialisasi di awal, penting untuk case 'all'
+        $where_condition = [];
 
         switch ($period) {
             case 'weekly':
