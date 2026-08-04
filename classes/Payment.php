@@ -75,7 +75,7 @@ class Payment
         return array_sum($total_paid_query) ?? 0;
     }
 
-    public function sumRevenuePeriod($period, $company_id) {
+    public function validatorPeriod($period) {
         if ($period === 'daily') {
             $periodKeyExpr   = "DATE(<payment.date>)";
             $periodLabelExpr = "DATE_FORMAT(<payment.date>, '%W, %d %M %Y')";
@@ -90,6 +90,14 @@ class Payment
             $limit           = 6;
         }
 
+        return [
+            'periodKeyExpr' => $periodKeyExpr,
+            'periodLabelExpr' => $periodLabelExpr,
+            'limit' => $limit,
+        ];
+    }
+
+    public function sumRevenuePeriod($periodKeyExpr, $periodLabelExpr, $company_id, $limit) {
         return $this->db->select('payment', [
             '[><]invoice' => ['invoice_id' => 'id']
         ], [
