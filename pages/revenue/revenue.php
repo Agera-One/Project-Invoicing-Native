@@ -16,7 +16,8 @@ $payment = new Payment($db, $company_id);
 
 $number = 1;
 $period = $_GET['period'] ?? 'daily';
-$omsets = $payment->sumRevenuePeriod($period, $company_id);
+$validate = $payment->validatorPeriod($period);
+$omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['periodLabelExpr'], $company_id, $validate['limit']);
 ?>
 
 <!DOCTYPE html>
