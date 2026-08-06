@@ -1,0 +1,202 @@
+<?php
+session_start();
+require_once "../../config/database.php";
+require_once "../../classes/Payment.php";
+require_once "../../classes/Invoice.php";
+require_once "../../classes/InvoiceDetail.php";
+require_once '../../src/functions/functions.php';
+
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
+    header("Location: ../auth/login.php");
+    exit;
+}
+
+$db = (new Database())->getConnection();
+$payment = new Payment($db, $company_id);
+$invoice = new Invoice($db, $company_id);
+$invoice_detail = new InvoiceDetail($db, $company_id);
+
+$payment_code = generate_code($db, "payment", "payment_code", "PAY");
+
+$invoice_id  = $_POST['invoice_id'] ?? ($_GET['invoice_id'] ?? '');
+
+$join_structure = [
+    '[><]customer' => ['customer_id' => 'id'],
+    '[>]invoice_detail' => ['id' => 'invoice_id'],
+    '[>]payment' => ['id' => 'invoice_id'],
+    '[><]pic' => ['pic_id' => 'id'],
+];
+
+$where_condition = ['invoice.company_id' => $company_id];
+
+$invoice_data = $invoice->getAll($join_structure, $where_condition);
+
+$selected_invoice = null;
+foreach ($invoice_data as $data) {
+    if ((string)$data['id'] === (string)$invoice_id) {
+        $selected_invoice = $data;
+        break;
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $_POST['invoice_id'] = $invoice_id;
+    $_POST['payment_code'] = $payment_code;
+
+    if ($_POST['amount'] < 1) {
+        echo '<script>alert("The minimum amount is 1.")</script>';
+    } else {
+        $total_bill = $invoice_detail->sumInvoiceBill($invoice_id);
+        $total_paid = $payment->sumAmountPaid($invoice_id);
+        $remaining_bill = $total_bill - $total_paid;
+
+        if ($_POST['amount'] > $remaining_bill) {
+            echo '<script>alert("Failed! Payment amount (Rp ' . number_format($_POST['amount'], 0, ',', '.') . ') exceeds the remaining balance due (Rp ' . number_format($remaining_bill, 0, ',', '.') . ').")</script>';
+        } else {
+            $payment->create($_POST);
+
+            header("Location: payment.php");
+            exit();
+        }
+    }
+}
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Payment</title>
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+</head>
+
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
+
+        <main class="app-main py-4">
+            <div class="container-fluid px-4">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <h3 class="fw-bold h4 m-0 text-white">Add Payment</h3>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-end">
+                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="../payment/payment.php">Payment Transactions</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Add Payment</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="card card-primary card-outline mb-4">
+                    <div class="card-header">
+                        <div class="card-title">Form Payment Invoice</div>
+                    </div>
+                    <form action="" method="POST">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Choose Invoice <span class="text-danger">*</span></label>
+                                <select name="invoice_id" id="invoice-select" class="form-select" aria-label="Default select example" required>
+                                    <option value="" disabled <?= $selected_invoice ? '' : 'selected' ?>>Select invoice</option>
+                                    <?php foreach ($invoice_data as $data):
+                                        $remaining = $data['total_bill'] - $data['total_amount_paid']; ?>
+                                        <option
+                                            value="<?= $data['id'] ?>"
+                                            data-code="<?= htmlspecialchars($data['invoice_code']) ?>"
+                                            data-customer="<?= htmlspecialchars($data['customer_name']) ?>"
+                                            data-date="<?= htmlspecialchars($data['date']) ?>"
+                                            data-due-date="<?= htmlspecialchars($data['due_date']) ?>"
+                                            data-total="<?= (int) $data['total_bill'] ?>"
+                                            data-paid="<?= (int) $data['total_amount_paid'] ?>"
+                                            data-remaining="<?= (int) $remaining ?>"
+                                            <?= ($invoice_id == $data['id']) ? 'selected' : ''; ?>>
+                                            <?= $data['invoice_code'] ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="bg-body-secondary bg-opacity-10 border rounded-2 p-3 mb-3" id="invoice-summary-card" style="<?= $selected_invoice ? '' : 'display:none;' ?>">
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Invoice Code</span>
+                                    <span class="fw-semibold" id="summary-code"><?= $selected_invoice['invoice_code'] ?? '-' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Customer</span>
+                                    <span class="fw-semibold" id="summary-customer"><?= $selected_invoice['customer_name'] ?? '-' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Invoice Date</span>
+                                    <span id="summary-date"><?= $selected_invoice['date'] ?? '-' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Due Date</span>
+                                    <span id="summary-due-date"><?= $selected_invoice['due_date'] ?? '-' ?></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Total Bill</span>
+                                    <span id="summary-total">
+                                        Rp<?= number_format($selected_invoice['total_bill'] ?? 0, 0, ',', '.') ?>
+                                    </span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Amount Paid</span>
+                                    <span id="summary-paid">
+                                        Rp<?= number_format($selected_invoice['total_amount_paid'] ?? 0, 0, ',', '.') ?>
+                                    </span>
+                                </div>
+                                <hr class="my-2">
+                                <div class="d-flex justify-content-between align-items-center py-1">
+                                    <span class="text-muted">Remaining Unpaid</span>
+                                    <span class="fw-bold fs-4 text-danger" id="summary-remaining">
+                                        Rp<?= number_format(($selected_invoice['total_bill'] ?? 0) - ($selected_invoice['total_amount_paid'] ?? 0), 0, ',', '.') ?>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Payment Code</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="form-control-plaintext fs-5 fw-bold text-primary bg-body-secondary border rounded px-3 py-2 mb-0">
+                                        <i class="bi bi-upc-scan me-2"></i><span><?= $payment_code ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3"> 
+                                <label class="form-label">Payment Date</label>
+                                <input value="<?= date('Y-m-d'); ?>" name="date" type="date" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Amount Paid</label>
+                                <input name="amount" id="amount-input" type="number" min="1" class="form-control" required>
+                                <div class="form-text" id="amount-hint">
+                                    <?= $selected_invoice ? 'Max: Rp' . number_format(($selected_invoice['total_bill'] - $selected_invoice['total_amount_paid']), 0, ',', '.') : '' ?>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <a href="payment.php" class="btn btn-danger">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../assets/js/payment.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+</body>
+
+</html>

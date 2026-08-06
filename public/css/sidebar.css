@@ -1,0 +1,77 @@
+.app-sidebar {
+    background-color: #1a1d20 !important;
+    border-right: 1px solid #2b3035 !important;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+.app-sidebar .sidebar-brand {
+    background-color: #15171a !important;
+    border-bottom: 1px solid #2b3035 !important;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+}
+
+.app-sidebar .brand-text {
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em;
+}
+
+.app-sidebar .nav-header {
+    color: #adb5bd !important;
+    font-size: 0.7rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
+    padding: 1.25rem 1.5rem 0.5rem 1.5rem !important;
+}
+
+.app-sidebar .nav-item {
+    padding: 0 0.75rem;
+    margin-bottom: 3px;
+}
+
+.app-sidebar .nav-link {
+    border-left: 3px solid transparent;
+}
+
+.app-sidebar .nav-link:hover {
+    color: #ffffff !important;
+    background-color: #2b3035 !important;
+}
+
+.app-sidebar .nav-link.active {
+    background: #2b3035;
+    border-left: 3px solid #9ca3af;
+    color: #fff;
+}
+
+.app-sidebar .nav-icon {
+    color: #ced4da !important;
+    margin-right: 0.6rem;
+    font-size: 1.1rem !important;
+}
+
+.app-sidebar .nav-link:hover .nav-icon,
+.app-sidebar .nav-link.active .nav-icon {
+    color: #ffffff !important;
+}
+
+.nav-treeview {
+    padding-left: 1rem;
+}
+
+.nav-treeview .nav-link {
+    font-size: .84rem !important;
+}
+
+.nav-arrow {
+    margin-left: auto;
+    transition: .25s;
+}
+
+.menu-open>.nav-link .nav-arrow {
+    transform: rotate(90deg);
+}

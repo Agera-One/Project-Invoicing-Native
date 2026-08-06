@@ -1,0 +1,52 @@
+body {
+    background-color: #222e3c;
+}
+
+.app-main {
+    background-color: #2c3034 !important;
+    color: #ffffff;
+}
+
+.custom-dark-card {
+    background-color: #212529 !important;
+    border: 1px solid #373b3e !important;
+    border-radius: 6px;
+    margin-bottom: 24px;
+}
+
+.custom-dark-card .card-header {
+    border-bottom: 1px solid #373b3e !important;
+    padding: 12px 20px;
+}
+
+.custom-dark-card .card-title {
+    color: #ced4da;
+    font-size: 1rem;
+}
+
+.custom-dark-card .card-body {
+    padding: 20px;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+.info-value {
+    color: #adb5bd;
+    margin-bottom: 15px;
+}
+
+.btn-custom-warning {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #000000 !important;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.btn-custom-warning:hover {
+    background-color: #e0a800 !important;
+}
