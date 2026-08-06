@@ -7,9 +7,9 @@ class Routes {
         $router->setDefaultMethod('showLoginForm');
 
         $router->get('/login', ['AuthController', 'showLoginForm']);
-        $router->post('/login', ['AuthController', 'login']);
+        $router->post('/login/store', ['AuthController', 'login']);
         $router->get('/register', ['AuthController', 'showRegisterForm']);
-        $router->post('/register', ['AuthController', 'register']);
+        $router->post('/register/store', ['AuthController', 'register']);
 
         $router->run();
     }
