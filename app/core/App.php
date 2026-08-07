@@ -1,8 +1,8 @@
 <?php
 
 class App {
-    private $controller = 'AuthController';
-    private $method = 'showLoginForm';
+    private $controller = 'ErrorController';
+    private $method = 'index';
     private $params = [];
     private const DEFAULT_GET = 'GET';
     private const DEFAULT_POST = 'POST';
@@ -56,9 +56,11 @@ class App {
                 $this->controller = new $this->controller;
                 $execute = 1;
 
-                if (isset($handler['handler'][1]) && method_exists($this->controller, $url[1])) {
+                if (isset($handler['handler'][1])) {
                     $this->method = $handler['handler'][1];
-                    unset($url[1]);
+                    if (isset($url[1])) {
+                        unset($url[1]);
+                    }
                 }
             }
         }

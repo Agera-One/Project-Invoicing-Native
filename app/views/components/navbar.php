@@ -1,9 +1,5 @@
-<?php
-$logged_in_user = $db->get('user', '*', ['id' => $user_id]);
-?>
-
 <head>
-  <link rel="stylesheet" href="<?= BASEURL ?>/css/navbar.css">
+  <link rel="stylesheet" href="<?= BASEURL . 'public/css/navbar.css' ?>">
 </head>
 
 <nav class="app-header navbar navbar-expand custom-navbar">
@@ -29,7 +25,7 @@ $logged_in_user = $db->get('user', '*', ['id' => $user_id]);
             class="user-image rounded-circle shadow"
             alt="User">
           <span class="d-none d-md-inline">
-            <?= $logged_in_user['name'] ?>
+            <?= $current_user['name'] ?>
           </span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end profile-dropdown">
@@ -37,10 +33,10 @@ $logged_in_user = $db->get('user', '*', ['id' => $user_id]);
             <img
               src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=160"
               alt="User">
-            <p><?= $logged_in_user['name'] ?><small>Admin</small></p>
+            <p><?= $current_user['name'] ?><small>Admin</small></p>
           </li>
           <li class="user-footer">
-            <a href="../../pages/auth/logout.php" class="btn btn-outline-danger w-100">
+            <a href="<?= BASEURL . 'logout' ?>" class="btn btn-outline-danger w-100">
               Logout
             </a>
           </li>

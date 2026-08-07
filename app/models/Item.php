@@ -1,17 +1,13 @@
 <?php
 use Medoo\Medoo;
 
-class Item {
-    private $db;
-
-    public function __construct($db)
-    {
-        $this->db = $db;
+class Item extends BaseModel {
+    public function __construct() {
+        parent::__construct();
     }
 
-    public function getAll($where_condition = [], $offset = '', $limit = '')
-    {
-        return $this->db->select('item', '*', [
+    public function getAll($where_condition = [], $offset = '', $limit = '') {
+        return $this->getConnection()->select('item', '*', [
             ...$where_condition,
             'ORDER' => ['id' => 'DESC'],
             'LIMIT' => [$offset, $limit]
@@ -19,22 +15,22 @@ class Item {
     }
 
     public function find($id) {
-        return $this->db->get('item', '*', [
+        return $this->getConnection()->get('item', '*', [
             'id' => $id
         ]);
     }
 
     public function create($data) {
-        return $this->db->insert('item', [
+        return $this->getConnection()->insert('item', [
             'ref_no' => $data['ref_no'],
             'name' => $data['name'],
             'price' => $data['price'],
-            'company_id' => $data['company_id']
+            'company_id' => $this->companyId
         ]);
     }
 
     public function update($id, $data) {
-        return $this->db->update('item', [
+        return $this->getConnection()->update('item', [
             'name' => $data['name'],
             'price' => $data['price']
         ], [
@@ -43,13 +39,13 @@ class Item {
     }
 
     public function delete($id) {
-        return $this->db->delete('item', [
+        return $this->getConnection()->delete('item', [
             'id' => $id
         ]);
     }
 
-    public function getTopItem($company_id) {
-        return $this->db->select('item', [
+    public function getTopItem() {
+        return $this->getConnection()->select('item', [
             '[><]invoice_detail' => [
                 'id' => 'item_id'
             ]
@@ -63,7 +59,7 @@ class Item {
             'ORDER' => [
                 'total_unit_sold' => 'DESC'
             ],
-            'item.company_id' => $company_id,
+            'item.company_id' => $this->companyId,
             'LIMIT' => 5
         ]);
     }
@@ -108,8 +104,8 @@ class Item {
         ];
     }
 
-    public function getBestSeller($where_condition, $company_id) {
-        return $this->db->select('item', [
+    public function getBestSeller($where_condition) {
+        return $this->getConnection()->select('item', [
             '[><]invoice_detail' => [
                 'id' => 'item_id'
             ],
@@ -127,7 +123,7 @@ class Item {
             'ORDER' => [
                 'total_unit_sold' => 'DESC'
             ],
-            'item.company_id' => $company_id,
+            'item.company_id' => $this->companyId,
             'LIMIT' => 10
         ]);
     }

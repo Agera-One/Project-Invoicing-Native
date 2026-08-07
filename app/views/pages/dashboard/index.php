@@ -1,36 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Invoice.php";
-require_once "../../classes/Payment.php";
-require_once "../../classes/Item.php";
-require_once "../../classes/InvoiceDetail.php";
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$db = (new Database())->getConnection();
-$invoice = new Invoice($db, $company_id);
-$payment = new Payment($db, $company_id);
-$item = new Item($db);
-$invoice_detail = new InvoiceDetail($db, $company_id);
-
-$number = 1;
-$today = date('Y-m-d');
-
-$invoice_value = $invoice->sumInvoiceValue();
-$total_revenue = $payment->sumRevenue();
-$datas = $invoice->getAllCompact();
-$top_item = $item->getTopItem($company_id);
-$sum_unpaid_overdue = $invoice->sumUnpaidOverdue($today);
-extract($sum_unpaid_overdue);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,18 +5,18 @@ extract($sum_unpaid_overdue);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/dashboard.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
-    <link rel="stylesheet" href="../../assets/css/dashboard.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -151,22 +118,22 @@ extract($sum_unpaid_overdue);
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($datas as $data):
-                                                    $invoice_item = $invoice_detail->invoiceItemCount($data['id']);
-                                                    $remaining_unpaid = $data['total_bill'] - $data['total_payment']; ?>
+                                                <?php foreach ($invoices as $invoice):
+                                                    $invoice_item = $invoice_detail->invoiceItemCount($invoice['id']);
+                                                    $remaining_unpaid = $invoice['total_bill'] - $invoice['total_payment']; ?>
                                                     <tr>
-                                                        <td class="fw-medium"><?= $data['invoice_code'] ?></td>
-                                                        <td><?= $data['customer_name'] ?></td>
-                                                        <td><?= $data['date'] ?></td>
-                                                        <td><?= $data['due_date'] ?></td>
-                                                        <td>Rp<?= number_format($data['total_bill'], 0, ',', '.') ?></td>
-                                                        <?php if ($remaining_unpaid > 0 && $data['due_date'] < $today): ?>
+                                                        <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
+                                                        <td><?= $invoice['customer_name'] ?></td>
+                                                        <td><?= $invoice['date'] ?></td>
+                                                        <td><?= $invoice['due_date'] ?></td>
+                                                        <td>Rp<?= number_format($invoice['total_bill'], 0, ',', '.') ?></td>
+                                                        <?php if ($remaining_unpaid > 0 && $invoice['due_date'] < $today): ?>
                                                             <td class="text-center"><span class="badge text-bg-danger">Overdue</span></td>
                                                         <?php elseif ($invoice_item == 0): ?>
                                                             <td class="text-center"><span class="badge text-bg-secondary">No Item</span></td>
-                                                        <?php elseif ($data['total_payment'] < $data['total_bill']): ?>
+                                                        <?php elseif ($invoice['total_payment'] < $invoice['total_bill']): ?>
                                                             <td class="text-center"><span class="badge text-bg-warning">Unpaid</span></td>
-                                                        <?php elseif ($data['total_payment'] == $data['total_bill']): ?>
+                                                        <?php elseif ($invoice['total_payment'] == $invoice['total_bill']): ?>
                                                             <td class="text-center"><span class="badge text-bg-success">Paid</span></td>
                                                         <?php endif; ?>
                                                     </tr>
@@ -187,9 +154,9 @@ extract($sum_unpaid_overdue);
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>

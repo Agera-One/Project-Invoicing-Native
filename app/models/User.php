@@ -1,24 +1,24 @@
 <?php
 
-class User {
-    private $db;
-
-    public function __construct($db) {
-        $this->db = $db;
+class User extends BaseModel
+{
+    public function __construct()
+    {
+        parent::__construct();
     }
 
     public function getAll($query_options) {
-        return $this->db->select('user', '*', $query_options);
+        return $this->getConnection()->select('user', '*', $query_options);
     }
 
     public function find($id) {
-        return $this->db->get('user', '*', [
+        return $this->getConnection()->get('user', '*', [
             'id' => $id
         ]);
     }
 
     public function create($data) {
-        return $this->db->insert('user', [
+        return $this->getConnection()->insert('user', [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => password_hash($data["password"], PASSWORD_DEFAULT),
@@ -27,7 +27,7 @@ class User {
     }
 
     public function update($id, $data) {
-        return $this->db->update('user', [
+        return $this->getConnection()->update('user', [
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => password_hash($data["password"], PASSWORD_DEFAULT)
@@ -37,7 +37,7 @@ class User {
     }
 
     public function delete($id) {
-        return $this->db->delete('user', [
+        return $this->getConnection()->delete('user', [
             'id' => $id
         ]);
     }

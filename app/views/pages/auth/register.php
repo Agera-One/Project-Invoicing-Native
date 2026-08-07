@@ -1,57 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Auth.php";
-require_once '../../src/functions/functions.php';
-
-$db = (new Database())->getConnection();
-$auth = new Auth($db);
-
-if (isset($_POST["register"])) {
-    $user_data = [
-        'name'     => $_POST['username'],
-        'email'    => $_POST['email'],
-        'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
-    ];
-
-    $company_data = [
-        'company_name'          => $_POST['company_name'],
-        'business_entity'       => $_POST['business_entity'],
-        'business_sector'       => $_POST['business_sector'],
-        'business_website'      => $_POST['business_website'] === '' ? null : $_POST['business_website'],
-        'business_description'  => $_POST['business_description'] ?? '',
-        'country'               => $_POST['country'],
-        'province'              => $_POST['province'],
-        'city'                  => $_POST['city'],
-        'subdistrict'           => $_POST['subdistrict'],
-        'business_address'      => $_POST['business_address'],
-        'company_email'         => $_POST['company_email'],
-        'company_phone'         => $_POST['company_phone'],
-    ];
-
-    $user_email_exists    = record_exists($db, 'user', 'email', ['email' => $user_data['email']]);
-    $company_email_exists = record_exists($db, 'company', 'email', ['email' => $company_data['company_email']]);
-    $company_phone_exists = record_exists($db, 'company', 'phone', ['phone' => $company_data['company_phone']]);
-
-    if ($user_email_exists) {
-        echo '<script>alert("User email already exists. Please use a different email.")</script>';
-    } elseif ($company_email_exists) {
-        echo '<script>alert("Company email already exists. Please use a different email.")</script>';
-    } elseif ($company_phone_exists) {
-        echo '<script>alert("Company phone already exists. Please use a different phone.")</script>';
-    } else {
-        $datas = $auth->create($user_data, $company_data);
-    
-        if ($datas) {
-            echo '<script>alert("Registration successful. Please log in.")</script>';
-            echo '<script>window.location.href = "login.php";</script>';
-        } else {
-            echo '<script>alert("Error occurred during registration.")</script>';
-        }
-    }
-}
-?>
-
 <!doctype html>
 <html lang="en">
 
@@ -62,7 +8,7 @@ if (isset($_POST["register"])) {
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@4.0.0/dist/css/adminlte.min.css" />
-    <link rel="stylesheet" href="../../assets/css/register.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/register.css' ?>">
 </head>
 
 <body class="register-page bg-body-secondary">
@@ -79,7 +25,7 @@ if (isset($_POST["register"])) {
                 </ol>
 
                 <!-- Form -->
-                <form id="wizard-form" novalidate="" method="POST">
+                <form id="wizard-form" novalidate="" action="<?= BASEURL . 'register/store' ?>" method="POST">
                     <!-- Step 1 -->
                     <fieldset class="wizard-step" data-step="0">
                         <h2 class="h5 mb-3">Create your account</h2>
@@ -224,8 +170,8 @@ if (isset($_POST["register"])) {
         </div>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/js/register.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/register.js' ?>"></script>
 </body>
 
 </html>

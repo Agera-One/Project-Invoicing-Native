@@ -1,19 +1,15 @@
 <?php
 use Medoo\Medoo;
 
-class Payment
+class Payment extends BaseModel
 {
-    private $db;
-    private $company_id;
-
-    public function __construct($db, $company_id)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->company_id = $company_id;
+        parent::__construct();
     }
 
     public function getAll($join, $where_condition, $offset, $limit) {
-        return $this->db->select('payment', $join, [
+        return $this->getConnection()->select('payment', $join, [
             'payment.id',
             'payment.payment_code',
             'payment.date',
@@ -30,13 +26,13 @@ class Payment
     }
 
     public function find($id) {
-        return $this->db->get('payment', '*', [
+        return $this->getConnection()->get('payment', '*', [
             'id' => $id
         ]);
     }
 
     public function create($data) {
-        $this->db->insert('payment', [
+        $this->getConnection()->insert('payment', [
             'invoice_id' => $data['invoice_id'],
             'payment_code' => $data['payment_code'],
             'date' => $data['date'],
@@ -45,7 +41,7 @@ class Payment
     }
 
     public function update($id, $data) {
-        $this->db->update('payment', [
+        $this->getConnection()->update('payment', [
             'invoice_id' => $data['invoice_id'],
             'date' => $data['date'],
             'amount' => $data['amount']
@@ -55,23 +51,23 @@ class Payment
     }
 
     public function delete($id) {
-        return $this->db->delete('payment', [
+        return $this->getConnection()->delete('payment', [
             'id' => $id
         ]);
     }
 
     public function sumRevenue()
     {
-        return $this->db->sum('payment', [
+        return $this->getConnection()->sum('payment', [
             '[><]invoice' => ['invoice_id' => 'id']
         ], 'payment.amount', [
-            'invoice.company_id' => $this->company_id
+            'invoice.company_id' => $this->companyId
         ]) ?: 0;
     }
 
     public function sumAmountPaid($invoice_id)
     {
-        $total_paid_query = $this->db->select('payment', 'amount', ['invoice_id' => $invoice_id]);
+        $total_paid_query = $this->getConnection()->select('payment', 'amount', ['invoice_id' => $invoice_id]);
         return array_sum($total_paid_query) ?? 0;
     }
 
@@ -98,7 +94,7 @@ class Payment
     }
 
     public function sumRevenuePeriod($periodKeyExpr, $periodLabelExpr, $company_id, $limit) {
-        return $this->db->select('payment', [
+        return $this->getConnection()->select('payment', [
             '[><]invoice' => ['invoice_id' => 'id']
         ], [
             'period_key' => Medoo::raw($periodKeyExpr),

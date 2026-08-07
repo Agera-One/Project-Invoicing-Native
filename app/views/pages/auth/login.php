@@ -19,10 +19,10 @@
             <div class="card-body login-card-body">
                 <p class="login-box-msg">Sign in to start your session</p>
 
-                <form action="AuthController/login" method="post">
+                <form action="<?= BASEURL . 'login/store' ?>" method="post">
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginEmail" type="email" class="form-control" placeholder="" name="email" />
+                            <input id="loginEmail" type="email" class="form-control" placeholder="" name="email" required />
                             <label for="loginEmail">Email</label>
                         </div>
                         <div class="input-group-text">
@@ -31,7 +31,7 @@
                     </div>
                     <div class="input-group mb-1">
                         <div class="form-floating">
-                            <input id="loginPassword" type="password" class="form-control" placeholder="" name="password" />
+                            <input id="loginPassword" type="password" class="form-control" placeholder="" name="password" required />
                             <label for="loginPassword">Password</label>
                         </div>
                         <div class="input-group-text">
@@ -56,7 +56,7 @@
                 </form>
 
                 <p class="mb-0">
-                    <a href="register.php" class="text-center">
+                    <a href="<?= BASEURL . 'register' ?>" class="text-center">
                         Register a new account
                     </a>
                 </p>
@@ -64,7 +64,7 @@
         </div>
     </div>
 
-    <script src="<?= BASEURL ?>/js/lte-theme.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
 </body>
 
 </html>

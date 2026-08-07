@@ -1,32 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Item.php";
-require_once '../../src/functions/functions.php';
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$db = (new Database())->getConnection();
-$item = new Item($db);
-
-$where_condition = [];
-$where_condition['company_id'] = $company_id;
-
-$search = $_GET['search'] ?? '';
-$page = $_GET['page'] ?? 1;
-
-$where_condition = search($search, $where_condition, ['ref_no', 'name']);
-$pagination = pagination($db, $page, 'item', 'id', $where_condition);
-
-$datas = $item->getAll($where_condition, $pagination['offset'], $pagination['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,8 +5,8 @@ $datas = $item->getAll($where_condition, $pagination['offset'], $pagination['lim
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Items Management</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -43,8 +14,8 @@ $datas = $item->getAll($where_condition, $pagination['offset'], $pagination['lim
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -95,16 +66,16 @@ $datas = $item->getAll($where_condition, $pagination['offset'], $pagination['lim
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($datas as $data): ?>
+                                    <?php foreach ($items as $item): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
-                                            <td class="fw-medium text-white"><?= $data['ref_no'] ?></td>
-                                            <td><?= $data['name'] ?></td>
-                                            <td>Rp<?= number_format($data['price'], 0, ',', '.') ?></td>
+                                            <td class="fw-medium text-white"><?= $item['ref_no'] ?></td>
+                                            <td><?= $item['name'] ?></td>
+                                            <td>Rp<?= number_format($item['price'], 0, ',', '.') ?></td>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="item-edit.php?id=<?= $data['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="item-delete.php?id=<?= $data['id'] ?>"
+                                                    <a class="btn btn-sm btn-success px-3" href="item-edit.php?id=<?= $item['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="item-delete.php?id=<?= $item['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
                                                 </div>
                                             </td>
@@ -115,15 +86,15 @@ $datas = $item->getAll($where_condition, $pagination['offset'], $pagination['lim
                         </div>
                     </div>
 
-                    <?php include_once '../../src/components/pagination.php' ?>
+                    <?php include_once __DIR__ . '/../../components/pagination.php' ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>

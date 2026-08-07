@@ -2,19 +2,15 @@
 
 use Medoo\Medoo;
 
-class InvoiceDetail
+class InvoiceDetail extends BaseModel
 {
-    private $db;
-    private $company_id;
-
-    public function __construct($db, $company_id)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->company_id = $company_id;
+        parent::__construct();
     }
 
     public function getAll($invoice_id) {
-        return $this->db->select('invoice_detail', [
+        return $this->getConnection()->select('invoice_detail', [
             '[>]invoice' => ['invoice_id' => 'id'],
             '[>]customer' => ['invoice.customer_id' => 'id'],
             '[>]pic' => ['invoice.pic_id' => 'id'],
@@ -44,13 +40,13 @@ class InvoiceDetail
     }
 
     public function find($id) {
-        return $this->db->get('invoice_detail', '*', [
+        return $this->getConnection()->get('invoice_detail', '*', [
             'id' => $id
         ]);
     }
 
     public function create($data) {
-        return $this->db->insert('invoice_detail', [
+        return $this->getConnection()->insert('invoice_detail', [
             'invoice_id' => $data['invoice_id'],
             'item_id' => $data['item_id'],
             'quantity' => $data['quantity'],
@@ -60,7 +56,7 @@ class InvoiceDetail
     }
 
     public function update($id, $data) {
-        $this->db->update('invoice_detail', [
+        $this->getConnection()->update('invoice_detail', [
             'invoice_id' => $data['invoice_id'],
             'item_id' => $data['item_id'],
             'quantity' => $data['quantity'],
@@ -72,20 +68,20 @@ class InvoiceDetail
     }
 
     public function delete($id) {
-        $this->db->delete('invoice_detail', [
+        $this->getConnection()->delete('invoice_detail', [
             'id' => $id
         ]);
     }
 
     public function invoiceItemCount($id)
     {
-        return $this->db->count('invoice_detail', [
+        return $this->getConnection()->count('invoice_detail', [
             'invoice_id' => $id
         ]);
     }
 
     public function sumInvoiceBill($invoice_id) {
-        $total_bill_query = $this->db->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
+        $total_bill_query = $this->getConnection()->select('invoice_detail', 'amount', ['invoice_id' => $invoice_id]);
         return array_sum($total_bill_query) ?? 0;
     }
 }

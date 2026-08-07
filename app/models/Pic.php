@@ -1,17 +1,15 @@
 <?php
 
-class Pic
+class Pic extends BaseModel
 {
-    private $db;
-
-    public function __construct($db)
+    public function __construct()
     {
-        $this->db = $db;
+        parent::__construct();
     }
 
     public function getAll($where_condition = [], $offset = '', $limit = '')
     {
-        return $this->db->select('pic', '*', [
+        return $this->getConnection()->select('pic', '*', [
             ...$where_condition,
             'ORDER' => ['id' => 'DESC'],
             'LIMIT' => [$offset, $limit]
@@ -20,14 +18,14 @@ class Pic
 
     public function find($id)
     {
-        return $this->db->get('pic', '*', [
+        return $this->getConnection()->get('pic', '*', [
             'id' => $id
         ]);
     }
 
     public function create($datas)
     {
-        return $this->db->insert('pic', [
+        return $this->getConnection()->insert('pic', [
             'name' => $datas['name'],
             'phone' => $datas['phone'],
             'email' => $datas['email'],
@@ -39,7 +37,7 @@ class Pic
 
     public function update($id, $datas)
     {
-        return $this->db->update('pic', [
+        return $this->getConnection()->update('pic', [
             'name' => $datas['name'],
             'phone' => $datas['phone'],
             'email' => $datas['email'],
@@ -52,7 +50,7 @@ class Pic
 
     public function delete($id)
     {
-        return $this->db->delete('pic', [
+        return $this->getConnection()->delete('pic', [
             'id' => $id
         ]);
     }

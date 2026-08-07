@@ -1,14 +1,13 @@
 <?php
 
-class Customer {
-    private $db;
-
-    public function __construct($db) {
-        $this->db = $db;
+class Customer extends BaseModel {
+    public function __construct()
+    {
+        parent::__construct();
     }
 
     public function getAll($where_condition = [], $offset = '', $limit = '') {
-        return $this->db->select('customer', '*', [
+        return $this->getConnection()->select('customer', '*', [
             ...$where_condition,
             'ORDER' => ['id' => 'DESC'],
             'LIMIT' => [$offset, $limit]
@@ -16,13 +15,13 @@ class Customer {
     }
 
     public function find($id) {
-        return $this->db->get('customer', '*', [
+        return $this->getConnection()->get('customer', '*', [
             'id' => $id
         ]);
     }
 
     public function create($data) {
-        return $this->db->insert('customer', [
+        return $this->getConnection()->insert('customer', [
             'customer_code' => $data['customer_code'],
             'name' => $data['name'],
             'email' => $data['email'],
@@ -33,7 +32,7 @@ class Customer {
     }
 
     public function update($id, $data) {
-        return $this->db->update('customer', [
+        return $this->getConnection()->update('customer', [
             'name' => $data['name'],
             'email' => $data['email'],
             'phone' => $data['phone'],
@@ -44,7 +43,7 @@ class Customer {
     }
 
     public function delete($id) {
-        return $this->db->delete('customer', [
+        return $this->getConnection()->delete('customer', [
             'id' => $id
         ]);
     }
