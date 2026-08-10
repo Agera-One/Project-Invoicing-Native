@@ -1,36 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Item.php";
-
-$db = (new Database())->getConnection();
-$item = new Item($db);
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$id = $_GET['id'];
-
-$data = $item->find($id);
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    if ($_POST['price'] < 1) {
-        echo '<script>alert("The minimum price is 1.")</script>';
-    } else {
-        $item->update($id, $_POST);
-
-        header("Location: item.php");
-        exit();
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,13 +5,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../src/components/navbar.php' ?>
-        <?php include '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -54,8 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
-                            <li class="breadcrumb-item text-decoration-none"><a href="../item/item.php">Items Management</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'item' ?>">Items Management</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Edit Item</li>
                         </ol>
                     </div>
@@ -65,23 +33,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="card-header">
                         <div class="card-title">Edit Item</div>
                     </div>
-                    <form action="" method="POST">
+                    <form id="itemForm" action="<?= BASEURL . 'item/update/' . $id ?>" method="POST">
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="exampleInputEmail1" class="form-label">Reference Number</label>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="form-control-plaintext fs-5 fw-bold text-primary bg-body-secondary border rounded px-3 py-2 mb-0">
-                                        <i class="bi bi-upc-scan me-2"></i><span id="noFakturText"><?= $data['ref_no'] ?></span>
+                                        <i class="bi bi-upc-scan me-2"></i><span id="noFakturText"><?= $ref_no ?></span>
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Name</label>
-                                <input name="name" value="<?= $data['name'] ?>" type="text" class="form-control">
+                                <input id="name" name="name" value="<?= $name ?>" type="text" class="form-control">
+                                <div class="invalid-feedback" id="nameError"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Price</label>
-                                <input name="price" value="<?= $data['price'] ?>" type="number" class="form-control">
+                                <input id="price" name="price" value="<?= $price ?>" type="number" class="form-control">
+                                <div class="invalid-feedback" id="priceError"></div>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -94,9 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/item.js' ?>"></script>
 </body>
 
 </html>

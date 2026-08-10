@@ -38,7 +38,7 @@
                         </a>
                     </div>
                     <div class="col-md-4 d-flex align-items-end gap-2">
-                        <form action="<?= BASEURL . 'item' ?>" method="GET" class="flex-grow-1">
+                        <form action="" method="GET" class="flex-grow-1">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted">
                                     <i class="bi bi-search"></i>
