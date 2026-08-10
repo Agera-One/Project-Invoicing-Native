@@ -77,8 +77,12 @@ class App {
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
-    private function getUrl() {
-        $url = rtrim($_SERVER['QUERY_STRING'], '/');
+    private function getUrl()
+    {
+        $queryString = $_SERVER['QUERY_STRING'] ?? '';
+        $routePart = explode('&', $queryString, 2)[0];
+
+        $url = rtrim($routePart, '/');
         $url = filter_var($url, FILTER_SANITIZE_URL);
         $url = explode('/', $url);
         return $url;
