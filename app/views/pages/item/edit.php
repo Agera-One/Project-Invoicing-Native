@@ -56,7 +56,7 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-success">Update</button>
-                            <a href="item.php" class="btn btn-danger">Cancel</a>
+                            <a href="<?= BASEURL . 'item' ?>" class="btn btn-danger">Cancel</a>
                         </div>
                     </form>
                 </div>
