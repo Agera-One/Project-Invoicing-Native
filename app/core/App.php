@@ -79,10 +79,10 @@ class App {
 
     private function getUrl()
     {
-        $queryString = $_SERVER['QUERY_STRING'] ?? '';
-        $routePart = explode('&', $queryString, 2)[0];
+        $query_string = $_SERVER['QUERY_STRING'] ?? '';
+        $route_part = explode('&', $query_string, 2)[0];
 
-        $url = rtrim($routePart, '/');
+        $url = rtrim($route_part, '/');
         $url = filter_var($url, FILTER_SANITIZE_URL);
         $url = explode('/', $url);
         return $url;

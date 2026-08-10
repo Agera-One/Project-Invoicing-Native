@@ -25,7 +25,7 @@
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Items Management</li>
                         </ol>
                     </div>
@@ -33,12 +33,12 @@
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="item-add.php" class="btn btn-primary shadow-sm">
+                        <a href="<?= BASEURL . 'item/add' ?>" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Item
                         </a>
                     </div>
                     <div class="col-md-4 d-flex align-items-end gap-2">
-                        <form action="" method="GET" class="flex-grow-1">
+                        <form action="<?= BASEURL . 'item' ?>" method="GET" class="flex-grow-1">
                             <div class="input-group">
                                 <span class="input-group-text bg-transparent border-end-0 text-muted">
                                     <i class="bi bi-search"></i>
@@ -46,7 +46,7 @@
                                 <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off" value="<?= $search ?? ''; ?>">
                             </div>
                         </form>
-                        <a href="item.php" class="btn btn-outline-secondary w-25">
+                        <a href="<?= BASEURL . 'item' ?>" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -74,8 +74,8 @@
                                             <td>Rp<?= number_format($item['price'], 0, ',', '.') ?></td>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="item-edit.php?id=<?= $item['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="item-delete.php?id=<?= $item['id'] ?>"
+                                                    <a class="btn btn-sm btn-success px-3" href="<?= BASEURL . 'item/edit' ?>/<?= $item['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="<?= BASEURL . 'item/delete' ?>/<?= $item['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
                                                 </div>
                                             </td>
