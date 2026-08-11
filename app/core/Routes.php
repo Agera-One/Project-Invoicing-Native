@@ -36,9 +36,9 @@ class Routes {
         
         $router->get('/pic', ['PicController', 'index']);
         $router->get('/pic/add', ['PicController', 'add']);
-        $router->post('/pic/store', ['PicController', 'store']);
+        $router->post('/pic/add', ['PicController', 'add']);
         $router->get('/pic/edit', ['PicController', 'edit']);
-        $router->post('/pic/update', ['PicController', 'update']);
+        $router->post('/pic/edit', ['PicController', 'edit']);
         $router->get('/pic/delete', ['PicController', 'delete']);
 
         $router->run();
