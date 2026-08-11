@@ -1,32 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Pic.php";
-require_once '../../src/functions/functions.php';
-
-$db = (new Database())->getConnection();
-$pic = new Pic($db);
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$where_condition = [];
-$where_condition['company_id'] = $company_id;
-
-$search = $_GET['search'] ?? '';
-$page = $_GET['page'] ?? 1;
-
-$where_condition = search($search, $where_condition, ['name', 'email', 'phone', 'position']);
-$pagination = pagination($db, $page, 'pic', 'id', $where_condition);
-
-$datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,8 +5,8 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Person in Charge (PIC)</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -43,8 +14,8 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -54,7 +25,7 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Person in Charge (PIC)</li>
                         </ol>
                     </div>
@@ -62,7 +33,7 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
 
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="pic-add.php" class="btn btn-primary shadow-sm">
+                        <a href="<?= BASEURL . 'pic/add' ?>" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New PIC
                         </a>
                     </div>
@@ -76,10 +47,10 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
                                 <input name="search" id="table-filter" type="search"
                                     class="form-control border-start-0 ps-0" placeholder="Filter rows…"
                                     aria-label="Filter rows" autofocus autocomplete="off"
-                                    value="<?= $_GET['search'] ?? '' ?>">
+                                    value="<?= $search ?? '' ?>">
                             </div>
                         </form>
-                        <a href="pic.php" class="btn btn-outline-secondary w-25">
+                        <a href="<?= BASEURL . 'pic' ?>" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -101,18 +72,18 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($datas as $data): ?>
+                                    <?php foreach ($pics as $pic): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
-                                            <td><?= $data['name'] ?></td>
-                                            <td><?= $data['phone'] ?></td>
-                                            <td><?= $data['email'] ?></td>
-                                            <td><?= $data['position'] ?></td>
-                                            <?= $data['is_active'] == '1' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
+                                            <td><?= $pic['name'] ?></td>
+                                            <td><?= $pic['phone'] ?></td>
+                                            <td><?= $pic['email'] ?></td>
+                                            <td><?= $pic['position'] ?></td>
+                                            <?= $pic['is_active'] == '1' ? '<td class="text-center"><span class="badge text-bg-success"> Active </span></td>' : '<td class="text-center"><span class="badge text-bg-danger"> Inactive </span></td>' ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success px-3" href="pic-edit.php?id=<?= $data['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger px-2" href="pic-delete.php?id=<?= $data['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
+                                                    <a class="btn btn-sm btn-success px-3" href="<?= BASEURL . 'pic/edit' ?>/<?= $pic['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger px-2" href="<?= BASEURL . 'pic/delete' ?>/<?= $pic['id'] ?>" onclick="return confirm('Are you sure you want to delete this pic?');">Delete</a>
                                                 </div>
                                             </td>
                                         </tr>
@@ -122,15 +93,15 @@ $datas = $pic->getAll($where_condition, $pagination['offset'], $pagination['limi
                         </div>
                     </div>
 
-                    <?php include_once '../../src/components/pagination.php' ?>
+                    <?php include_once __DIR__ . '/../../components/pagination.php' ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>
