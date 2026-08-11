@@ -26,6 +26,20 @@ class Routes {
         $router->get('/item/edit', ['ItemController', 'edit']);
         $router->post('/item/update', ['ItemController', 'update']);
         $router->get('/item/delete', ['ItemController', 'delete']);
+        
+        $router->get('/customer', ['CustomerController', 'index']);
+        $router->get('/customer/add', ['CustomerController', 'add']);
+        $router->post('/customer/add', ['CustomerController', 'add']);
+        $router->get('/customer/edit', ['CustomerController', 'edit']);
+        $router->post('/customer/edit', ['CustomerController', 'edit']);
+        $router->get('/customer/delete', ['CustomerController', 'delete']);
+        
+        $router->get('/pic', ['PicController', 'index']);
+        $router->get('/pic/add', ['PicController', 'add']);
+        $router->post('/pic/store', ['PicController', 'store']);
+        $router->get('/pic/edit', ['PicController', 'edit']);
+        $router->post('/pic/update', ['PicController', 'update']);
+        $router->get('/pic/delete', ['PicController', 'delete']);
 
         $router->run();
     }
