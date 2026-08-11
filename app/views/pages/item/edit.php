@@ -33,7 +33,7 @@
                     <div class="card-header">
                         <div class="card-title">Edit Item</div>
                     </div>
-                    <form id="itemForm" action="<?= BASEURL . 'item/update/' . $id ?>" method="POST">
+                    <form id="itemForm" action="" method="POST">
                         <div class="card-body">
                             <div class="mb-3">
                                 <label for="exampleInputEmail1" class="form-label">Reference Number</label>
