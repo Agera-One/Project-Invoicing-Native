@@ -1,32 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Customer.php";
-require_once '../../src/functions/functions.php';
-
-$db = (new Database())->getConnection();
-$customer = new Customer($db);
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$where_condition = [];
-$where_condition['company_id'] = $company_id;
-
-$search = $_GET['search'] ?? '';
-$page = $_GET['page'] ?? 1;
-
-$where_condition = search($search, $where_condition, ['customer_code', 'name', 'email', 'phone', 'address']);
-$pagination = pagination($db, $page, 'customer', 'id', $where_condition);
-
-$datas = $customer->getAll($where_condition, $pagination['offset'], $pagination['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,8 +5,8 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -44,8 +15,8 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include '../../src/components/navbar.php' ?>
-        <?php include '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -55,7 +26,7 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Customers Management</li>
                         </ol>
                     </div>
@@ -63,7 +34,7 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
 
                 <div class="d-flex flex-wrap align-item-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="customer-add.php" class="btn btn-primary shadow-sm">
+                        <a href="<?= BASEURL . 'customer/add' ?>" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Customer
                         </a>
                         <a href="../document/export-csv.php" class="btn btn-outline-secondary">
@@ -85,7 +56,7 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
                                 <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off" value="<?= $_GET['search'] ?? ''; ?>">
                             </div>
                         </form>
-                        <a href="customer.php" class="btn btn-outline-secondary w-25">
+                        <a href="<?= BASEURL . 'customer' ?>" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -107,18 +78,18 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($datas as $data): ?>
+                                    <?php foreach ($customers as $customer): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
-                                            <td class="fw-medium"><?= $data['customer_code'] ?></td>
-                                            <td><?= $data['name'] ?></td>
-                                            <td><?= $data['email'] ?></td>
-                                            <td><?= $data['phone'] ?></td>
-                                            <td><?= $data['address'] ?></td>
+                                            <td class="fw-medium"><?= $customer['customer_code'] ?></td>
+                                            <td><?= $customer['name'] ?></td>
+                                            <td><?= $customer['email'] ?></td>
+                                            <td><?= $customer['phone'] ?></td>
+                                            <td><?= $customer['address'] ?></td>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success" href="customer-edit.php?id=<?= $data['id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger" href="customer-delete.php?id=<?= $data['id'] ?>"
+                                                    <a class="btn btn-sm btn-success" href="<?= BASEURL . 'customer/edit' ?>/<?= $customer['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger" href="<?= BASEURL . 'customer/delete' ?>/<?= $customer['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this customer?');">Delete</a>
                                                 </div>
                                             </td>
@@ -129,16 +100,16 @@ $datas = $customer->getAll($where_condition, $pagination['offset'], $pagination[
                         </div>
                     </div>
 
-                    <?php include_once '../../src/components/pagination.php' ?>
+                    <?php include_once __DIR__ . '/../../components/pagination.php' ?>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>
