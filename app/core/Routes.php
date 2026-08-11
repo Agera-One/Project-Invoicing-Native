@@ -22,9 +22,9 @@ class Routes {
 
         $router->get('/item', ['ItemController', 'index']);
         $router->get('/item/add', ['ItemController', 'add']);
-        $router->post('/item/store', ['ItemController', 'store']);
+        $router->post('/item/add', ['ItemController', 'add']);
         $router->get('/item/edit', ['ItemController', 'edit']);
-        $router->post('/item/update', ['ItemController', 'update']);
+        $router->post('/item/edit', ['ItemController', 'edit']);
         $router->get('/item/delete', ['ItemController', 'delete']);
         
         $router->get('/customer', ['CustomerController', 'index']);
