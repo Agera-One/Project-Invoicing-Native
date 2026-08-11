@@ -73,7 +73,6 @@ class AuthController extends BaseController {
 
         if ($user_email_exists) {
             echo '<script>alert("User email already exists. Please use a different email.")</script>';
-            $this->redirect('/login');
         } elseif ($company_email_exists) {
             echo '<script>alert("Company email already exists. Please use a different email.")</script>';
         } elseif ($company_phone_exists) {
