@@ -5,22 +5,18 @@ document.getElementById("customerForm")
     const name = document.getElementById("name");
     const email = document.getElementById("email");
     const phone = document.getElementById("phone");
-    const address = document.getElementById("address");
 
     const nameError = document.getElementById("nameError");
     const emailError = document.getElementById("emailError");
     const phoneError = document.getElementById("phoneError");
-    const addressError = document.getElementById("addressError");
 
     name.classList.remove("is-invalid");
     email.classList.remove("is-invalid");
     phone.classList.remove("is-invalid");
-    address.classList.remove("is-invalid");
 
     nameError.textContent = "";
     emailError.textContent = "";
     phoneError.textContent = "";
-    addressError.textContent = "";
 
     if (name.value.length > 255) {
       nameError.textContent = "Maximum name length is 255 characters.";
