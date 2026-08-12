@@ -11,7 +11,7 @@ class Routes {
             $router->setDefaultController('AuthController');
             $router->setDefaultMethod('showLoginForm');
         }
-
+        
         $router->get('/login', ['AuthController', 'showLoginForm']);
         $router->post('/login/store', ['AuthController', 'login']);
         $router->get('/register', ['AuthController', 'showRegisterForm']);
@@ -40,6 +40,27 @@ class Routes {
         $router->get('/pic/edit', ['PicController', 'edit']);
         $router->post('/pic/edit', ['PicController', 'edit']);
         $router->get('/pic/delete', ['PicController', 'delete']);
+
+        $router->get('/outstanding', ['OutstandingController', 'index']);
+        $router->get('/overdue', ['OverdueController', 'index']);
+
+        $router->get('/revenue', ['RevenueController', 'index']);
+        $router->get('/best-seller', ['BestSellerController', 'index']);
+        
+        $router->get('/company', ['CompanyController', 'index']);
+        $router->get('/company/info', ['CompanyController', 'editInfo']);
+        $router->post('/company/info', ['CompanyController', 'editInfo']);
+        $router->get('/company/contact', ['CompanyController', 'editContact']);
+        $router->post('/company/contact', ['CompanyController', 'editContact']);
+        $router->post('/company/logo', ['CompanyController', 'uploadLogo']);
+        $router->post('/company/signature', ['CompanyController', 'uploadSignature']);
+
+        $router->get('/user', ['UserController', 'index']);
+        $router->get('/user/add', ['UserController', 'add']);
+        $router->post('/user/add', ['UserController', 'add']);
+        $router->get('/user/edit', ['UserController', 'edit']);
+        $router->post('/user/edit', ['UserController', 'edit']);
+        $router->get('/user/delete', ['UserController', 'delete']);
 
         $router->run();
     }
