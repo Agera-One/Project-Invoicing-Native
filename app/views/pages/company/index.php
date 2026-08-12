@@ -1,22 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Company.php";
-
-$db = (new Database())->getConnection();
-$company = new Company($db);
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$datas = $company->find('*', $company_id);
-?>
-
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="dark">
 
@@ -24,16 +5,16 @@ $datas = $company->find('*', $company_id);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Profile Settings</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
-    <link rel="stylesheet" href="../../assets/css/company.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/company.css' ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4 min-vh-100">
             <div class="container-fluid px-4">
@@ -43,7 +24,7 @@ $datas = $company->find('*', $company_id);
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Company Profile Settings</li>
                         </ol>
                     </div>
@@ -61,63 +42,63 @@ $datas = $company->find('*', $company_id);
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="info-label">Company Name</div>
-                                                <div class="info-value"><?= $datas['name'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $name ?? '-' ?></div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Business Entity</div>
-                                                <div class="info-value"><?= $datas['business_entity'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $business_entity ?? '-' ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="info-label">Business Sector</div>
-                                                <div class="info-value"><?= $datas['sector'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $sector ?? '-' ?></div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Business Website</div>
-                                                <div class="info-value"><?= empty($datas['website']) ? '-' : $datas['website'] ?></div>
+                                                <div class="info-value"><?= empty($website) ? '-' : $website ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="info-label">Business Description</div>
-                                                <div class="info-value"><?= empty($datas['description']) ? '-' : $datas['description'] ?></div>
+                                                <div class="info-value"><?= empty($description) ? '-' : $description ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="info-label">Country</div>
-                                                <div class="info-value"><?= $datas['country'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $country ?? '-' ?></div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Province</div>
-                                                <div class="info-value"><?= $datas['province'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $province ?? '-' ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-6">
                                                 <div class="info-label">City/Regency</div>
-                                                <div class="info-value"><?= $datas['city'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $city ?? '-' ?></div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="info-label">Subdistrict</div>
-                                                <div class="info-value"><?= $datas['subdistrict'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $subdistrict ?? '-' ?></div>
                                             </div>
                                         </div>
 
                                         <div class="row">
                                             <div class="col-12 mb-2">
                                                 <div class="info-label">Business Address</div>
-                                                <div class="info-value mb-0"><?= $datas['address'] ?? '-' ?></div>
+                                                <div class="info-value mb-0"><?= $address ?? '-' ?></div>
                                             </div>
                                         </div>
 
                                         <div class="text-end">
-                                            <a href="company-edit.php?info&id=<?= $datas['id'] ?>" class="btn btn-custom-warning btn-sm px-3">
+                                            <a href="<?= BASEURL . 'company/info' ?>" class="btn btn-custom-warning btn-sm px-3">
                                                 <i class="bi bi-pencil-square me-1"></i> Change
                                             </a>
                                         </div>
@@ -134,17 +115,17 @@ $datas = $company->find('*', $company_id);
                                         <div class="row">
                                             <div class="col-12">
                                                 <div class="info-label">Company Email</div>
-                                                <div class="info-value"><?= $datas['email'] ?? '-' ?></div>
+                                                <div class="info-value"><?= $email ?? '-' ?></div>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col-12 mb-2">
                                                 <div class="info-label">Company Phone Number</div>
-                                                <div class="info-value mb-0"><?= $datas['phone'] ?? '-' ?></div>
+                                                <div class="info-value mb-0"><?= $phone ?? '-' ?></div>
                                             </div>
                                         </div>
                                         <div class="text-end">
-                                            <a href="company-edit.php?contact&id=<?= $datas['id'] ?>" class="btn btn-custom-warning btn-sm px-3">
+                                            <a href="<?= BASEURL . 'company/contact' ?>" class="btn btn-custom-warning btn-sm px-3">
                                                 <i class="bi bi-pencil-square me-1"></i> Change
                                             </a>
                                         </div>
@@ -159,15 +140,15 @@ $datas = $company->find('*', $company_id);
                                         <div class="row g-3">
                                             <div class="col-6 text-center">
                                                 <div class="text-muted small mb-2">Company Logo</div>
-                                                <form action="company-upload.php?id=<?= $datas['id'] ?>" method="POST" enctype="multipart/form-data" id="form-logo">
+                                                <form action="<?= BASEURL . 'company/logo' ?>" method="POST" enctype="multipart/form-data" id="form-logo">
                                                     <input type="file" id="logo-input" name="logo" accept=".png,.jpg,.jpeg,.svg" class="d-none" onchange="document.getElementById('form-logo').submit();">
                                                     <div class="border border-dashed rounded p-4 text-center cursor-pointer bg-dark d-flex flex-column align-items-center justify-content-center"
                                                         style="border-style: dashed !important; border-color: #6c757d !important; min-height: 140px; cursor: pointer;"
                                                         onclick="document.getElementById('logo-input').click();">
 
-                                                        <?php if (!empty($datas['logo'])) : ?>
-                                                            <img src="../../../storage/<?= htmlspecialchars($datas['logo']) ?>" class="img-fluid rounded mb-2" style="max-height: 60px; object-fit: contain;">
-                                                            <span class="text-muted small text-truncate w-100 px-2"><?= htmlspecialchars($datas['logo']) ?></span>
+                                                        <?php if (!empty($logo)) : ?>
+                                                            <img src="<?= BASEURL . 'public/uploads/company/logo/' ?><?= htmlspecialchars($logo) ?>" class="img-fluid rounded mb-2" style="max-height: 60px; object-fit: contain;">
+                                                            <span class="text-muted small text-truncate w-100 px-2"><?= htmlspecialchars($logo) ?></span>
                                                         <?php else : ?>
                                                             <i class="bi bi-cloud-arrow-up text-secondary h2 mb-2"></i>
                                                             <span class="text-secondary small">Select a logo (1:1)</span>
@@ -179,17 +160,17 @@ $datas = $company->find('*', $company_id);
 
                                             <div class="col-6 text-center">
                                                 <div class="text-muted small mb-2">Signature</div>
-                                                <form action="company-upload.php?id=<?= $datas['id'] ?>" method="POST" enctype="multipart/form-data" id="form-signature">
+                                                <form action="<?= BASEURL . 'company/signature' ?>" method="POST" enctype="multipart/form-data" id="form-signature">
                                                     <input type="file" id="signature-input" name="signature" accept=".png,.jpg,.jpeg" class="d-none" onchange="document.getElementById('form-signature').submit();">
                                                     <div class="border border-dashed rounded p-4 text-center cursor-pointer bg-dark d-flex flex-column align-items-center justify-content-center"
                                                         style="border-style: dashed !important; border-color: #6c757d !important; min-height: 140px; cursor: pointer;"
                                                         onclick="document.getElementById('signature-input').click();">
 
-                                                        <?php if (!empty($datas['signature'])) : ?>
+                                                        <?php if (!empty($signature)) : ?>
                                                             <div class="bg-white p-1 rounded mb-2 d-flex align-items-center justify-content-center" style="width: 100%; max-width: 120px; height: 60px;">
-                                                                <img src="../../../storage/<?= htmlspecialchars($datas['signature']) ?>" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                                                                <img src="<?= BASEURL . 'public/uploads/company/signature/' ?><?= htmlspecialchars($signature) ?>" class="img-fluid" style="max-height: 100%; object-fit: contain;">
                                                             </div>
-                                                            <span class="text-muted small text-truncate w-100 px-2"><?= htmlspecialchars($datas['signature']) ?></span>
+                                                            <span class="text-muted small text-truncate w-100 px-2"><?= htmlspecialchars($signature) ?></span>
                                                         <?php else : ?>
                                                             <i class="bi bi-pencil text-secondary h3 mb-2"></i>
                                                             <span class="text-secondary small">Select a signature (PNG)</span>
@@ -214,10 +195,10 @@ $datas = $company->find('*', $company_id);
         </main>
     </div>
 
-    <script src="../../assets/js/company.js"></script>
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/company.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>
