@@ -1,46 +1,3 @@
-<?php
-
-use Medoo\Medoo;
-
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Invoice.php";
-require_once '../../src/functions/functions.php';
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$db = (new Database())->getConnection();
-$invoice = new Invoice($db, $company_id);
-
-$today = date('Y-m-d');
-$where_condition = [];
-$search = $_GET['search'] ?? '';
-$page = $_GET['page'] ?? 1;
-
-$join_structure = [
-    '[><]customer' => ['customer_id' => 'id'],
-    '[><]invoice_detail' => ['id' => 'invoice_id'],
-    '[><]pic' => ['pic_id' => 'id'],
-];
-
-$where_condition = [
-    'invoice.company_id' => $company_id,
-    'invoice.due_date[<]' => $today,
-    'HAVING' => Medoo::raw('SUM(<invoice_detail.amount>) > (SELECT COALESCE(SUM(payment.amount), 0) FROM payment WHERE payment.invoice_id = <invoice.id>)')
-];
-
-$where_condition = search($search, $where_condition, ['invoice.invoice_code', 'customer.name', 'invoice.date', 'invoice.due_date']);
-$pagination = pagination($db, $page, 'invoice', 'invoice.id', $where_condition, $join_structure);
-
-$datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset'], $pagination['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -48,8 +5,8 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overdue Invoices</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -57,8 +14,8 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -68,7 +25,7 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Overdue Invoices</li>
                         </ol>
                     </div>
@@ -84,10 +41,10 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
                                 <input name="search" id="table-filter" type="search"
                                     class="form-control border-start-0 ps-0" placeholder="Filter rows…"
                                     aria-label="Filter rows" autofocus autocomplete="off"
-                                    value="<?= $_GET['search'] ?? '' ?>">
+                                    value="<?= $search ?? '' ?>">
                             </div>
                         </form>
-                        <a href="overdue.php" class="btn btn-outline-secondary w-25">
+                        <a href="<?= BASEURL . 'overdue' ?>" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -111,19 +68,19 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($datas as $data):
-                                        $remaining_unpaid = $data['total_bill'] - $data['total_amount_paid'] ?>
+                                    <?php foreach ($invoices as $invoice):
+                                        $remaining_unpaid = $invoice['total_bill'] - $invoice['total_amount_paid'] ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
-                                            <td class="fw-medium"><?= $data['invoice_code'] ?></td>
-                                            <td><?= $data['customer_name'] ?></td>
-                                            <td><?= $data['date'] ?></td>
-                                            <td><?= $data['due_date'] ?></td>
-                                            <td>Rp<?= number_format($data['total_bill'], 0, ',', '.') ?></td>
-                                            <td>Rp<?= number_format($data['total_amount_paid'], 0, ',', '.') ?></td>
+                                            <td class="fw-medium"><?= $invoice['invoice_code'] ?></td>
+                                            <td><?= $invoice['customer_name'] ?></td>
+                                            <td><?= $invoice['date'] ?></td>
+                                            <td><?= $invoice['due_date'] ?></td>
+                                            <td>Rp<?= number_format($invoice['total_bill'], 0, ',', '.') ?></td>
+                                            <td>Rp<?= number_format($invoice['total_amount_paid'], 0, ',', '.') ?></td>
                                             <td class="text-danger">Rp<?= number_format($remaining_unpaid, 0, ',', '.') ?></td>
                                             <td>
-                                                <a class="btn btn-sm btn-success" href="../payment/payment-add.php?invoice_id=<?= $data['id'] ?>">Pay</a>
+                                                <a class="btn btn-sm btn-success" href="../payment/payment-add.php?invoice_id=<?= $invoice['id'] ?>">Pay</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
@@ -132,16 +89,16 @@ $datas = $invoice->getAll($join_structure, $where_condition, $pagination['offset
                         </div>
                     </div>
 
-                    <?php include_once '../../src/components/pagination.php' ?>
+                    <?php include_once __DIR__ . '/../../components/pagination.php' ?>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>
