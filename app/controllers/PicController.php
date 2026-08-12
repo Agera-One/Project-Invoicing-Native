@@ -66,7 +66,7 @@ class PicController extends BaseController
 
     public function edit($id)
     {
-        $data = $this->pic->find($id);
+        $datas = $this->pic->find($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_exists = $this->db->has('pic', [
@@ -85,16 +85,16 @@ class PicController extends BaseController
 
             if ($email_exists) {
                 echo '<script>alert("Email already exists")</script>';
-                $this->view('pic/edit', $data);
+                $this->view('pic/edit', $datas);
             } elseif ($phone_exists) {
                 echo '<script>alert("phone already exists")</script>';
-                $this->view('pic/edit', $data);
+                $this->view('pic/edit', $datas);
             } else {
                 $this->pic->update($id, $_POST);
                 $this->redirect(BASEURL . 'pic');
             }
         } else {
-            $this->view('pic/edit', $data);
+            $this->view('pic/edit', $datas);
         }
     }
 

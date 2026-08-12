@@ -5,8 +5,8 @@ class AuthController extends BaseController {
     private $company;
 
     public function __construct() {
-        $this->auth = $this->model('Auth');
-        $this->company = $this->model('Company');
+        $this->auth = $this->model('auth');
+        $this->company = $this->model('company');
     }
 
     public function showLoginForm() {

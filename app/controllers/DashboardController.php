@@ -10,10 +10,10 @@ class DashboardController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->invoice = $this->model('Invoice');
-        $this->payment = $this->model('Payment');
-        $this->item = $this->model('Item');
-        $this->invoiceDetail = $this->model('InvoiceDetail');
+        $this->invoice = $this->model('invoice');
+        $this->payment = $this->model('payment');
+        $this->item = $this->model('item');
+        $this->invoiceDetail = $this->model('invoicedetail');
     }
 
     public function index()
@@ -26,7 +26,7 @@ class DashboardController extends BaseController
         $top_item = $this->item->getTopItem();
         $sum_unpaid_overdue = $this->invoice->sumUnpaidOverdue($today);
 
-        $data = [
+        $datas = [
             'number' => $number,
             'today' => $today,
             'invoice_value' => $invoice_value,
@@ -38,6 +38,6 @@ class DashboardController extends BaseController
             'invoice_detail' => $this->invoiceDetail,
         ];
 
-        $this->view('dashboard/index', $data);
+        $this->view('dashboard/index', $datas);
     }
 }

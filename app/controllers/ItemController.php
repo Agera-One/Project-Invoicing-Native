@@ -6,7 +6,7 @@ class ItemController extends BaseController {
 
     public function __construct() {
         parent::__construct();
-        $this->item = $this->model('Item');
+        $this->item = $this->model('item');
         $this->db = $this->item->getConnection();
     }
 
@@ -44,13 +44,13 @@ class ItemController extends BaseController {
     }
 
     public function edit($id) {
-        $data = $this->item->find($id);
+        $datas = $this->item->find($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->item->update($id, $_POST);
             $this->redirect(BASEURL . 'item');
         } else {
-            $this->view('item/edit', $data);
+            $this->view('item/edit', $datas);
         }
     }
 

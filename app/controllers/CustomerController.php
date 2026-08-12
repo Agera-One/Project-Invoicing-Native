@@ -66,7 +66,7 @@ class CustomerController extends BaseController
 
     public function edit($id)
     {
-        $data = $this->customer->find($id);
+        $datas = $this->customer->find($id);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email_exists = $this->db->has('customer', [
@@ -85,16 +85,16 @@ class CustomerController extends BaseController
 
             if ($email_exists) {
                 echo '<script>alert("Email already exists")</script>';
-                $this->view('customer/edit', $data);
+                $this->view('customer/edit', $datas);
             } elseif ($phone_exists) {
                 echo '<script>alert("phone already exists")</script>';
-                $this->view('customer/edit', $data);
+                $this->view('customer/edit', $datas);
             } else {
                 $this->customer->update($id, $_POST);
                 $this->redirect(BASEURL . 'customer');
             }
         } else {
-            $this->view('customer/edit', $data);
+            $this->view('customer/edit', $datas);
         }
     }
 
