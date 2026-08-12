@@ -1,25 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Payment.php";
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$db = (new Database())->getConnection();
-$payment = new Payment($db, $company_id);
-
-$number = 1;
-$period = $_GET['period'] ?? 'daily';
-$validate = $payment->validatorPeriod($period);
-$omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['periodLabelExpr'], $company_id, $validate['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -27,9 +5,9 @@ $omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['peri
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Revenue Overview</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
-    <link rel="stylesheet" href="../../assets/css/report.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/report.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -37,8 +15,8 @@ $omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['peri
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -48,7 +26,7 @@ $omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['peri
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Revenue Overview</li>
                         </ol>
                     </div>
@@ -111,9 +89,9 @@ $omsets = $payment->sumRevenuePeriod($validate['periodKeyExpr'], $validate['peri
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>
