@@ -7,7 +7,7 @@
     <title>Add Invoice Item</title>
     <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
     <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
-</head> 
+</head>
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
@@ -33,8 +33,8 @@
                 <div class="card card-primary card-outline mb-4">
                     <div class="card-header">
                         <div class="card-title">Add Some Item</div>
-                    </div>  
-                    <form action="" method="POST">
+                    </div>
+                    <form action="" method="POST" id="itemDetailForm">
                         <div class="card-body">
                             <div class="mb-3">
                                 <input name="invoice_id" value="<?= $invoice_id ?>" type="hidden">
@@ -51,11 +51,13 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Quantity</label>
-                                    <input value="<?= $_POST['quantity'] ?? ''; ?>" name="quantity" type="number" class="form-control" required>
+                                    <input value="<?= $_POST['quantity'] ?? ''; ?>" name="quantity" id="quantity" type="number" class="form-control" required>
+                                    <div id="quantityError" class="invalid-feedback"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Unit Price</label>
-                                    <input value="<?= $_POST['unit_price'] ?? ''; ?>" name="unit_price" type="number" class="form-control">
+                                    <input value="<?= $_POST['unit_price'] ?? ''; ?>" name="unit_price" id="unit_price" type="number" class="form-control">
+                                    <div id="unitPriceError" class="invalid-feedback"></div>
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -71,6 +73,7 @@
     <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
     <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
     <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/detail.js' ?>"></script>
 </body>
 
 </html>

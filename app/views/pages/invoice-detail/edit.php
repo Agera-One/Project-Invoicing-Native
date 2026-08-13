@@ -34,7 +34,7 @@
                     <div class="card-header">
                         <div class="card-title">Edit Detail</div>
                     </div>
-                    <form action="" method="POST">
+                    <form action="" method="POST" id="itemDetailForm">
                         <div class="card-body">
                             <div class="mb-3">
                                 <input name="invoice_id" value="<?= $invoice_id ?>" type="hidden">
@@ -50,11 +50,13 @@
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Quantity</label>
-                                    <input value="<?= $detail_data['quantity'] ?? ''; ?>" name="quantity" type="number" class="form-control" required>
+                                    <input value="<?= $detail_data['quantity'] ?? ''; ?>" name="quantity" id="quantity" type="number" class="form-control" required>
+                                    <div id="quantityError" class="invalid-feedback"></div>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Unit Price</label>
-                                    <input value="<?= $detail_data['unit_price'] ?? ''; ?>" name="unit_price" type="number" class="form-control">
+                                    <input value="<?= $detail_data['unit_price'] ?? ''; ?>" name="unit_price" id="unit_price" type="number" class="form-control">
+                                    <div id="unitPriceError" class="invalid-feedback"></div>
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -70,6 +72,7 @@
     <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
     <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
     <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/detail.js' ?>"></script>
 </body>
 
 </html>
