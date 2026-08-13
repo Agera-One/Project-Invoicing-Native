@@ -117,7 +117,7 @@
                                             <?php endif; ?>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-info text-black" href="<?= BASEURL . 'detail' ?>/<?= $invoice['id'] ?>">Detail</a>
+                                                    <a class="btn btn-sm btn-info text-black" href="<?= BASEURL . 'invoice/detail' ?>/<?= $invoice['id'] ?>">Detail</a>
                                                     <a class="btn btn-sm btn-success" href="<?= BASEURL . 'invoice/edit' ?>/<?= $invoice['id'] ?>">Edit</a>
                                                     <a class="btn btn-sm btn-danger" href="<?= BASEURL . 'invoice/delete' ?>/<?= $invoice['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this invoice?');">Delete</a>

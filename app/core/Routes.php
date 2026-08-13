@@ -48,6 +48,13 @@ class Routes {
         $router->post('/invoice/edit', ['InvoiceController', 'edit']);
         $router->get('/invoice/delete', ['InvoiceController', 'delete']);
 
+        $router->get('/invoice/detail', ['DetailController', 'index']);
+        $router->get('/detail/add', ['DetailController', 'add']);
+        $router->post('/detail/add', ['DetailController', 'add']);
+        $router->get('/detail/edit', ['DetailController', 'edit']);
+        $router->post('/detail/edit', ['DetailController', 'edit']);
+        $router->get('/detail/delete', ['DetailController', 'delete']);
+
         $router->get('/outstanding', ['OutstandingController', 'index']);
         $router->get('/overdue', ['OverdueController', 'index']);
 
