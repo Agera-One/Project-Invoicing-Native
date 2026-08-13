@@ -40,6 +40,13 @@ class Routes {
         $router->get('/pic/edit', ['PicController', 'edit']);
         $router->post('/pic/edit', ['PicController', 'edit']);
         $router->get('/pic/delete', ['PicController', 'delete']);
+        
+        $router->get('/invoice', ['InvoiceController', 'index']);
+        $router->get('/invoice/add', ['InvoiceController', 'add']);
+        $router->post('/invoice/add', ['InvoiceController', 'add']);
+        $router->get('/invoice/edit', ['InvoiceController', 'edit']);
+        $router->post('/invoice/edit', ['InvoiceController', 'edit']);
+        $router->get('/invoice/delete', ['InvoiceController', 'delete']);
 
         $router->get('/outstanding', ['OutstandingController', 'index']);
         $router->get('/overdue', ['OverdueController', 'index']);

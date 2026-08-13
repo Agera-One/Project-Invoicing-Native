@@ -14,3 +14,24 @@ invoiceDate.addEventListener("change", function () {
 
   dueDate.value = `${year}-${month}-${day}`;
 });
+
+document.getElementById("invoiceForm").addEventListener("submit", function (e) {
+  let valid = true;
+
+  invoiceDate.classList.remove("is-invalid");
+  dueDate.classList.remove("is-invalid");
+
+  invoiceDateError.textContent = "";
+  dueDateError.textContent = "";
+
+  if (dueDate.value < invoiceDate.value) {
+    dueDateError.textContent =
+      "The due date must not be earlier than the invoice date.";
+    dueDate.classList.add("is-invalid");
+    valid = false;
+  }
+
+  if (!valid) {
+    e.preventDefault();
+  }
+});
