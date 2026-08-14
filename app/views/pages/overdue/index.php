@@ -80,7 +80,7 @@
                                             <td>Rp<?= number_format($invoice['total_amount_paid'], 0, ',', '.') ?></td>
                                             <td class="text-danger">Rp<?= number_format($remaining_unpaid, 0, ',', '.') ?></td>
                                             <td>
-                                                <a class="btn btn-sm btn-success" href="../payment/payment-add.php?invoice_id=<?= $invoice['id'] ?>">Pay</a>
+                                                <a class="btn btn-sm btn-success" href="<?= BASEURL . 'payment/add' ?>/<?= $invoice['id'] ?>">Pay</a>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>

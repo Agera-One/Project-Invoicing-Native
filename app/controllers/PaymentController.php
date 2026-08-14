@@ -43,11 +43,11 @@ class PaymentController extends BaseController
         $this->view('payment/index', $datas);
     }
 
-    public function add()
+    public function add($get_invoice_id = '')
     {
         $payment_code = $this->payment->generateCode($this->db, "payment", "payment_code", "PAY");
 
-        $invoice_id  = $_POST['invoice_id'] ?? ($_GET['invoice_id'] ?? '');
+        $invoice_id  = $_POST['invoice_id'] ?? $get_invoice_id;
 
         $join_structure = [
             '[><]customer' => ['customer_id' => 'id'],
