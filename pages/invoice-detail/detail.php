@@ -1,6 +1,7 @@
 <?php
 session_start();
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/InvoiceDetail.php";
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -10,45 +11,20 @@ if (!isset($user_id)) {
     exit;
 }
 
+$db = (new Database())->getConnection();
+$invoice_detail = new InvoiceDetail($db, $company_id);
+
 $invoice_id = $_GET['invoice_id'];
-
-$details = $database->select('invoice', [
-    '[>]customer' => ['customer_id' => 'id'],
-    '[>]pic' => ['pic_id' => 'id'],
-    '[>]invoice_detail' => ['id' => 'invoice_id'],
-    '[>]item' => ['invoice_detail.item_id' => 'id'],
-    '[><]company' => ['company_id' => 'id'],
-], [
-    'invoice.id(invoice_id)',
-    'invoice.invoice_code',
-    'invoice.date',
-    'invoice.due_date',
-    'customer.name(customer_name)',
-    'pic.name(pic_name)',
-    'invoice_detail.id(detail_id)',
-    'invoice_detail.unit_price',
-    'invoice_detail.quantity',
-    'invoice_detail.amount',
-    'item.id(item_id)',
-    'item.name',
-    'company.name(company_name)',
-    'company.email(company_email)',
-    'company.province(company_province)',
-    'company.subdistrict(company_subdistrict)',
-    'company.logo(company_logo)' ?? '',
-], [
-    'invoice.id' => $invoice_id
-]);
-
+$datas = $invoice_detail->getAll($invoice_id);
 $invoice_details = [];
 
-foreach ($details as $detail) {
-    $invoice_details[] = $detail;
+foreach ($datas as $data) {
+    $invoice_details[] = $data;
 }
 
 $invoice = $invoice_details[0];
-
 $total_bill = 0;
+
 foreach ($invoice_details as $invoice_detail) {
     $total_bill += $invoice_detail['amount'];
 }
@@ -61,8 +37,8 @@ foreach ($invoice_details as $invoice_detail) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice Details</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -70,9 +46,8 @@ foreach ($invoice_details as $invoice_detail) {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../components/navbar.php'; ?>
-
-        <?php include_once '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -214,9 +189,9 @@ foreach ($invoice_details as $invoice_detail) {
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

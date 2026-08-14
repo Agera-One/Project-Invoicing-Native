@@ -1,14 +1,18 @@
 <?php
-require_once '../../connection.php';
+require_once "../../config/database.php";
+require_once "../../classes/Customer.php";
+
+$db = (new Database())->getConnection();
+$customer = new Customer($db);
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $id = $_GET['id'];
 
-    $total_invoice = $database->count('invoice', [
+    $total_invoice = $db->count('invoice', [
         'customer_id' => $id
     ]);
 
-    $total_payment = $database->count('payment', [
+    $total_payment = $db->count('payment', [
         'customer_id' => $id
     ]);
 
@@ -21,9 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         exit;
     } else {
-        $customers = $database->delete('customer', [
-            'id' => $id
-        ]);
+        $customer->delete($id);
     
         header('Location: customer.php');
         exit();

@@ -1,7 +1,11 @@
 <?php
 session_start();
-require_once '../../connection.php';
-require_once '../../functions/functions.php';
+require_once "../../config/database.php";
+require_once "../../classes/Customer.php";
+require_once '../../src/functions/functions.php';
+
+$db = (new Database())->getConnection();
+$customer = new Customer($db);
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -11,36 +15,27 @@ if (!isset($user_id)) {
     exit;
 }
 
-$customer_code = generate_code($database, "customer", "customer_code", "CUST");
+$customer_code = generate_code($db, "customer", "customer_code", "CUST");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $phone  = $_POST['phone'];
-    $address = $_POST['address'];
+    $_POST['customer_code'] = $customer_code;
+    $_POST['company_id'] = $company_id;
 
-    $email_exists = record_exists($database, 'customer', 'email', ['email' => $email]);
-    $phone_exists = record_exists($database, 'customer', 'phone', ['phone' => $phone]);
+    $email_exists = $db->has('customer', ['email' => $_POST['email']]);
+    $phone_exists = $db->has('customer', ['phone' => $_POST['phone']]);
 
     if ($email_exists) {
         echo '<script>alert("Email already exists")</script>';
     } elseif ($phone_exists) {
         echo '<script>alert("Phone number already exists")</script>';
-    } elseif (strlen($name) > 255) {
+    } elseif (strlen($_POST['name']) > 255) {
         echo '<script>alert("Maximum name length is 255 characters.")</script>';
-    } elseif (strlen($email) > 50) {
+    } elseif (strlen($_POST['email']) > 50) {
         echo '<script>alert("Maximum email length is 50 characters.")</script>';
-    } elseif (strlen($phone) > 20) {
+    } elseif (strlen($_POST['phone']) > 20) {
         echo '<script>alert("Maximum phone length is 20 characters.")</script>';
     } else {
-        $database->insert('customer', [
-            'customer_code' => $customer_code,
-            'name' => $name,
-            'email' => $email,
-            'phone' => $phone,
-            'address' => $address,
-            'company_id' => $company_id
-        ]);
+        $customer->create($_POST);
 
         header("Location: customer.php");
         exit();
@@ -56,15 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../components/navbar.php'; ?>
+        <?php include '../../src/components/navbar.php'; ?>
 
-        <?php include_once '../../components/sidebar.php'; ?>
+        <?php include '../../src/components/sidebar.php'; ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -94,23 +89,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <i class="bi bi-upc-scan me-2"></i><span><?= $customer_code ?></span>
                                     </div>
                                 </div>
-                                <input type="hidden" name="customer_code" required="" value="<?= $customer_code ?>">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Name</label>
-                                <input value="<?= $name ?? ''; ?>" name="name" type="text" class="form-control" required>
+                                <input value="<?= $_POST['name'] ?? ''; ?>" name="name" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
-                                <input value="<?= $email ?? ''; ?>" name="email" type="email" class="form-control" required>
+                                <input value="<?= $_POST['email'] ?? ''; ?>" name="email" type="email" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Phone</label>
-                                <input value="<?= $phone ?? ''; ?>" name="phone" type="tel" class="form-control" required>
+                                <input value="<?= $_POST['phone'] ?? ''; ?>" name="phone" type="tel" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Address</label>
-                                <input value="<?= $address ?? ''; ?>" name="address" type="text" class="form-control" required>
+                                <input value="<?= $_POST['address'] ?? ''; ?>" name="address" type="text" class="form-control" required>
                             </div>
                         </div>
                         <div class="card-footer">
@@ -123,9 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

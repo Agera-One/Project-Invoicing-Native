@@ -1,17 +1,27 @@
 <?php
 session_start();
-require_once '../../connection.php';
-require_once '../../functions/functions.php';
+require_once "../../config/database.php";
+require_once '../../src/functions/functions.php';
 
-function is_customer_code_taken_by_other($database, $customer_code, $checkCondition)
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+
+if (!isset($user_id)) {
+header("Location: ../auth/login.php");
+exit;
+}
+
+$db = (new Database())->getConnection();
+
+function is_customer_code_taken_by_other($db, $customer_code, $checkCondition)
 {
-    $owner_id = $database->get('customer', 'id', ['customer_code' => $customer_code]);
+    $owner_id = $db->get('customer', 'id', ['customer_code' => $customer_code]);
 
     if ($owner_id === null) {
         return false;
     }
 
-    $current_id = $database->get('customer', 'id', $checkCondition);
+    $current_id = $db->get('customer', 'id', $checkCondition);
 
     return $owner_id != $current_id;
 }
@@ -122,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $checkCondition = !empty($email) ? ["email" => $email] : ["name" => $name];
 
                     if (empty($customer_code)) {
-                        $customer_code = generate_code($database, "customer", "customer_code", "INV");
+                        $customer_code = generate_code($db, "customer", "customer_code", "INV");
                         $used_codes_this_batch[] = $customer_code;
                     } else {
                         if (!preg_match('/^INV-\d{4}-\d{4}$/', $customer_code)) {
@@ -141,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             continue;
                         }
 
-                        if (is_customer_code_taken_by_other($database, $customer_code, $checkCondition)) {
+                        if (is_customer_code_taken_by_other($db, $customer_code, $checkCondition)) {
                             $skipped_rows[] = [
                                 'row'    => $row_number,
                                 'reason' => "CUSTOMER CODE \"{$customer_code}\" is already used by another customer.",
@@ -152,10 +162,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $used_codes_this_batch[] = $customer_code;
                     }
 
-                    $is_customer_exist = $database->has("customer", $checkCondition);
+                    $is_customer_exist = $db->has("customer", $checkCondition);
 
                     if ($is_customer_exist) {
-                        $database->update("customer", [
+                        $db->update("customer", [
                             'customer_code'    => $customer_code,
                             'name'             => $name,
                             'phone'            => $phone,
@@ -163,7 +173,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ], $checkCondition);
                         $updated_count++;
                     } else {
-                        $database->insert("customer", [
+                        $db->insert("customer", [
                             'customer_code'    => $customer_code,
                             'name'             => $name,
                             'email'            => !empty($email) ? $email : null,
@@ -199,8 +209,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Customer Data</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -209,9 +219,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../components/navbar.php'; ?>
-
-        <?php include_once '../../components/sidebar.php'; ?>
+        <?php include_once '../../src/components/navbar.php' ?>
+        <?php include_once '../../src/components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -296,9 +305,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

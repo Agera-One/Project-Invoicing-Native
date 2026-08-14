@@ -1,8 +1,8 @@
 <?php
-function generate_code($database, $table, $column, $prefix) {
+function generate_code($db, $table, $column, $prefix) {
     $date = date("Y");
 
-    $last = $database->get($table, [$column], [
+    $last = $db->get($table, [$column], [
         $column . "[~]" => "{$prefix}-{$date}-%",
         "ORDER" => [
             "id" => "DESC"
@@ -31,7 +31,7 @@ function search($search, $where_condition, $columns)
     return $where_condition;
 }
 
-function pagination($database, $page, $table, $column, $where_condition, $join = [])
+function pagination($db, $page, $table, $column, $where_condition, $join = [])
 {
     $limit = 10;
 
@@ -39,25 +39,15 @@ function pagination($database, $page, $table, $column, $where_condition, $join =
     $offset = ($active_page - 1) * $limit;
 
     if (!empty($join)) {
-        $rows = $database->count($table, $join, $column, $where_condition);
+        $count_where = $where_condition;
+        $count_where['GROUP'] = $column;
+        $matching = $db->select($table, $join, [$column], $count_where);
+        $rows = count($matching);
     } else {
-        $rows = $database->count($table, $column, $where_condition);
+        $rows = $db->count($table, $column, $where_condition);
     }
-    
+
     $total_page = ceil($rows / $limit);
 
-    return [
-        'limit'        => $limit,
-        'active_page'  => $active_page,
-        'offset'       => $offset,
-        'where'        => $where_condition,
-        'total_page'   => $total_page,
-        'rows'         => $rows,
-    ];
-}
-
-function record_exists($database, $table, $column, $where_condition) {
-    $is_exists = $database->has($table, $column, $where_condition);
-
-    return $is_exists ? true : false;
+    return compact('limit', 'active_page', 'offset', 'where_condition', 'total_page', 'rows');
 }

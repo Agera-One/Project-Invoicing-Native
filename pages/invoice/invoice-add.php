@@ -1,7 +1,15 @@
 <?php
 session_start();
+<<<<<<< HEAD
 require_once '../../connection.php';
 require_once '../../functions/functions.php';
+=======
+require_once "../../config/database.php";
+require_once "../../classes/Invoice.php";
+require_once "../../classes/Customer.php";
+require_once "../../classes/Pic.php";
+require_once '../../src/functions/functions.php';
+>>>>>>> 9251107 (Uodate project)
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -11,16 +19,19 @@ if (!isset($user_id)) {
     exit;
 }
 
-$invoice_code = generate_code($database, "invoice", "invoice_code", "INV");
+$db = (new Database())->getConnection();
+$invoice = new Invoice($db, $company_id);
+$customer = new Customer($db);
+$pic = new Pic($db);
 
-$pic_id = '';
-$customer_id = '';
+$invoice_code = generate_code($db, "invoice", "invoice_code", "INV");
 
-$customers = $database->select('customer', ['id', 'name'], [
-    'company_id' => $company_id
-]);
+$pic_id = $_POST['pic_id'] ?? '';
+$customer_id = $_POST['customer_id'] ?? '';
 
-$pics = $database->select('pic', ['id', 'name'], [
+$customer_data = $customer->getAll(['company_id' => $company_id]);
+
+$pic_data = $pic->getAll([
     'AND' => [
         'is_active' => 1,
         'company_id' => $company_id
@@ -28,27 +39,13 @@ $pics = $database->select('pic', ['id', 'name'], [
 ]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $pic_id = $_POST['pic_id'];
-    $customer_id = $_POST['customer_id'];
-    $date = $_POST['date'];
-    $due_date = $_POST['due_date'];
+    $_POST['invoice_code'] = $invoice_code;
+    $_POST['company_id'] = $company_id;
 
-    if ($due_date < $date) {
+    if ($_POST['due_date'] < $_POST['date']) {
         echo '<script>alert("The due date must not be earlier than the invoice date")</script>';
     } else {
-        $insert = $database->insert('invoice', [
-            'pic_id' => $pic_id,
-            'customer_id' => $customer_id,
-            'invoice_code' => $invoice_code,
-            'date' => $date,
-            'due_date' => $due_date,
-            'company_id' => $company_id,
-            'created_by' => $_SESSION['user_id']
-        ]);
-
-        if (!$insert) {
-            echo '<script>alert("No company data found. Please add your company information before creating an invoice.")</script>';
-        }
+        $invoice->create($_POST);
 
         header("Location: invoice.php");
         exit();
@@ -64,15 +61,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add New Invoice</title>
-    <link rel="stylesheet" href="../../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
+    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
+<<<<<<< HEAD
         <?php include_once '../../components/navbar.php'; ?>
 
         <?php include_once '../../components/sidebar.php'; ?>
+=======
+        <?php include '../../src/components/navbar.php' ?>
+        <?php include '../../src/components/sidebar.php' ?>
+>>>>>>> 9251107 (Uodate project)
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -103,14 +105,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                             <i class="bi bi-upc-scan me-2"></i><span><?= $invoice_code ?></span>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="invoice_code" required="" value="<?= $invoice_code ?>">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">PIC Name</label>
                                     <select name="pic_id" class="form-select" aria-label="Default select example" required>
                                         <option value="" disabled selected>Select PIC name</option>
-                                        <?php foreach ($pics as $pic): ?>
-                                            <option value="<?= $pic['id']; ?>" <?= ($pic_id == $pic['id']) ? 'selected' : ''; ?>>
+                                        <?php foreach ($pic_data as $pic): ?>
+                                            <option value="<?= $pic['id'] ?>" <?= ($pic_id == $pic['id']) ? 'selected' : ''; ?>>
                                                 <?= $pic['name']; ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -120,8 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <label class="form-label">Customer Name</label>
                                     <select name="customer_id" class="form-select" aria-label="Default select example" required>
                                         <option value="" disabled selected>Select customer name</option>
-                                        <?php foreach ($customers as $customer): ?>
-                                            <option value="<?= $customer['id']; ?>" <?= ($customer_id == $customer['id']) ? 'selected' : ''; ?>>
+                                        <?php foreach ($customer_data as $customer): ?>
+                                            <option value="<?= $customer['id'] ?>" <?= ($customer_id == $customer['id']) ? 'selected' : ''; ?>>
                                                 <?= $customer['name']; ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -129,11 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Date</label>
-                                    <input id="invoice_date" value="<?= $date ?? date('Y-m-d') ?>" name="date" type="date" class="form-control" required>
+                                    <input id="invoice_date" value="<?= $_POST['date'] ?? date('Y-m-d') ?>" name="date" type="date" class="form-control" required>
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Due Date</label>
-                                    <input id="due_date" value="<?= $due_date ?? date('Y-m-d', strtotime('+7 days')) ?>" name="due_date" type="date" class="form-control" required>
+                                    <input id="due_date" value="<?= $_POST['due_date'] ?? date('Y-m-d', strtotime('+7 days')) ?>" name="due_date" type="date" class="form-control" required>
                                 </div>
                             </div>
                             <div class="card-footer">
@@ -147,10 +148,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </main>
     </div>
 
-    <script src="../../../assets/js/invoice.js"></script>
-    <script src="../../../assets/js/lte-theme.js"></script>
-    <script src="../../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="../../assets/js/lte-theme.js"></script>
+    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
+    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
 </body>
 
 </html>

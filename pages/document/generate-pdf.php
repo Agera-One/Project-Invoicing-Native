@@ -1,50 +1,26 @@
 <?php
-require_once '../../connection.php';
+session_start();
+require_once "../../config/database.php";
+require_once "../../classes/InvoiceDetail.php";
 
+$db = (new Database())->getConnection();
+$invoice_detail = new InvoiceDetail($db, $_SESSION['company_id']);
 $number = 1;
 
 $invoice_id = $_GET['invoice_id'];
 
-$details = $database->select('invoice', [
-    '[>]customer' => ['customer_id' => 'id'],
-    '[>]pic' => ['pic_id' => 'id'],
-    '[>]invoice_detail' => ['id' => 'invoice_id'],
-    '[>]item' => ['invoice_detail.item_id' => 'id'],
-    '[><]company' => ['company_id' => 'id'],
-], [
-    'invoice.id(invoice_id)',
-    'invoice.invoice_code',
-    'invoice.date',
-    'invoice.due_date',
-    'customer.name(customer_name)',
-    'pic.name(pic_name)',
-    'company.signature(company_signature)',
-    'invoice_detail.id',
-    'invoice_detail.unit_price',
-    'invoice_detail.quantity',
-    'invoice_detail.amount',
-    'item.id(item_id)',
-    'item.name',
-    'company.name(company_name)',
-    'company.email(company_email)',
-    'company.province(company_province)',
-    'company.subdistrict(company_subdistrict)',
-    'company.logo(company_logo)',
-], [
-    'invoice.id' => $invoice_id
-]);
-
+$datas = $invoice_detail->getAll($invoice_id);
 $invoice_details = [];
 
-foreach ($details as $detail) {
-    $invoice_details[] = $detail;
+foreach ($datas as $data) {
+$invoice_details[] = $data;
 }
 
 $invoice = $invoice_details[0];
-
 $total_bill = 0;
+
 foreach ($invoice_details as $invoice_detail) {
-    $total_bill += $invoice_detail['amount'];
+$total_bill += $invoice_detail['amount'];
 }
 
 function image_to_base64($relative_path)

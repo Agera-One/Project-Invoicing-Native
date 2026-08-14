@@ -2,7 +2,7 @@
 session_start();
 require_once "../../config/database.php";
 require_once "../../classes/Item.php";
-include '../../src/functions/functions.php';
+require_once '../../src/functions/functions.php';
 
 $db = (new Database())->getConnection();
 $item = new Item($db);
@@ -15,19 +15,15 @@ if (!isset($_SESSION['user_id'])) {
 $ref_no = generate_code($db, "item", "ref_no", "REF");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $datas = [
-        'ref_no' => $ref_no,
-        'name' => $_POST['name'],
-        'price' => $_POST['price'],
-        'company_id' => $company_id
-    ];
+    $_POST['ref_no'] = $ref_no;
+    $_POST['company_id'] = $company_id;
 
-    if ($datas['price'] < 1) {
+    if ($_POST['price'] < 1) {
         echo '<script>alert("The minimum price is 1.")</script>';
-    } elseif (strlen($name) > 255) {
+    } elseif (strlen($_POST['name']) > 255) {
         echo '<script>alert("Maximum name length is 255 characters.")</script>';
     } else {
-        $item->create($datas);
+        $item->create($_POST);
 
         header("Location: item.php");
         exit();
@@ -83,11 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Name</label>
-                                <input value="<?= $datas['name'] ?? ''; ?>" name="name" type="text" class="form-control" required>
+                                <input value="<?= $_POST['name'] ?? ''; ?>" name="name" type="text" class="form-control" required>
                             </div>
                             <div class="mb-3">
                                 <label for="exampleInputPassword1" class="form-label">Price</label>
-                                <input value="<?= $datas['price'] ?? ''; ?>" name="price" type="number" class="form-control" required>
+                                <input value="<?= $_POST['price'] ?? ''; ?>" name="price" type="number" class="form-control" required>
                             </div>
                         </div>
                         <div class="card-footer">
