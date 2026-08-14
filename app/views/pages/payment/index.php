@@ -1,36 +1,3 @@
-<?php
-session_start();
-require_once "../../config/database.php";
-require_once "../../classes/Payment.php";
-require_once '../../src/functions/functions.php';
-
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
-    header("Location: ../auth/login.php");
-    exit;
-}
-
-$db = (new Database())->getConnection();
-$payment = new Payment($db, $company_id);
-
-$where_condition = [];
-$where_condition['invoice.company_id'] = $company_id;
-$search = $_GET['search'] ?? '';
-$page = $_GET['page'] ?? 1;
-
-$join_structure = [
-    '[><]invoice' => ['invoice_id' => 'id'],
-    '[>]customer' => ['invoice.customer_id' => 'id']
-];
-
-$where_condition = search($search, $where_condition, ['payment.payment_code', 'invoice.invoice_code', 'customer.name', 'payment.date']);
-$pagination = pagination($db, $page, 'payment', 'payment.id', $where_condition, $join_structure);
-
-$datas = $payment->getAll($join_structure, $where_condition, $pagination['offset'], $pagination['limit']);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -38,8 +5,8 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment Transactions</title>
-    <link rel="stylesheet" href="../../assets/admin-lte/dist/css/adminlte.min.css">
-    <link rel="stylesheet" href="../../assets/bootstrap-5.3.8-dist/css/bootstrap.css">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/adminlte.min.css' ?>">
+    <link rel="stylesheet" href="<?= BASEURL . 'public/css/bootstrap.css' ?>">
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.4.0/dist/css/tabulator_bootstrap5.min.css"
         crossorigin="anonymous" />
@@ -48,8 +15,8 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-        <?php include_once '../../src/components/navbar.php' ?>
-        <?php include_once '../../src/components/sidebar.php' ?>
+        <?php include_once __DIR__ . '/../../components/navbar.php' ?>
+        <?php include_once __DIR__ . '/../../components/sidebar.php' ?>
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
@@ -59,7 +26,7 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
                     </div>
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-end">
-                            <li class="breadcrumb-item text-decoration-none"><a href="../dashboard/dashboard.php">Dashboard</a></li>
+                            <li class="breadcrumb-item text-decoration-none"><a href="<?= BASEURL . 'dashboard' ?>">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Payment Transactions</li>
                         </ol>
                     </div>
@@ -67,7 +34,7 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
 
                 <div class="d-flex flex-wrap align-Payments-center justify-content-between gap-3 mb-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="payment-add.php" class="btn btn-primary shadow-sm">
+                        <a href="<?= BASEURL . 'payment/add' ?>" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Payment
                         </a>
                     </div>
@@ -81,7 +48,7 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
                                 <input name="search" id="table-filter" type="search" class="form-control border-start-0 ps-0" placeholder="Filter rows…" aria-label="Filter rows" autofocus autocomplete="off" value="<?= $_GET['search'] ?? ''; ?>">
                             </div>
                         </form>
-                        <a href="payment.php" class="btn btn-outline-secondary w-25">
+                        <a href="<?= BASEURL . 'payment' ?>" class="btn btn-outline-secondary w-25">
                             <i class="bi bi-arrow-counterclockwise"></i>
                         </a>
                     </div>
@@ -103,18 +70,18 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($datas as $data): ?>
+                                    <?php foreach ($payments as $payment): ?>
                                         <tr>
                                             <th scope="row" class="ps-4 text-muted fw-normal"><?= ++$pagination['offset'] ?></th>
-                                            <td class="fw-medium"><?= $data['payment_code'] ?></td>
-                                            <td><?= $data['invoice_code'] ?></td>
-                                            <td><?= $data['customer_name'] ?></td>
-                                            <td><?= $data['date'] ?></td>
-                                            <td>Rp<?= number_format($data['amount'], 0, ',', '.') ?></td>
+                                            <td class="fw-medium"><?= $payment['payment_code'] ?></td>
+                                            <td><?= $payment['invoice_code'] ?></td>
+                                            <td><?= $payment['customer_name'] ?></td>
+                                            <td><?= $payment['date'] ?></td>
+                                            <td>Rp<?= number_format($payment['amount'], 0, ',', '.') ?></td>
                                             <td class="pe-4">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm btn-success" href="payment-edit.php?id=<?= $data['id'] ?>&customer_id=<?= $data['customer_id'] ?>&invoice_id=<?= $data['invoice_id'] ?>">Edit</a>
-                                                    <a class="btn btn-sm btn-danger" href="payment-delete.php?id=<?= $data['id'] ?>"
+                                                    <a class="btn btn-sm btn-success" href="<?= BASEURL . 'payment/edit' ?>/<?= $payment['id'] ?>">Edit</a>
+                                                    <a class="btn btn-sm btn-danger" href="<?= BASEURL . 'payment/delete' ?>/<?= $payment['id'] ?>"
                                                         onclick="return confirm('Are you sure you want to delete this payment?');">Delete</a>
                                                 </div>
                                             </td>
@@ -125,15 +92,15 @@ $datas = $payment->getAll($join_structure, $where_condition, $pagination['offset
                         </div>
                     </div>
 
-                    <?php include_once '../../src/components/pagination.php' ?>
+                    <?php include_once __DIR__ . '/../../components/pagination.php' ?>
                 </div>
             </div>
         </main>
     </div>
 
-    <script src="../../assets/js/lte-theme.js"></script>
-    <script src="../../assets/admin-lte/dist/js/adminlte.js"></script>
-    <script src="../../assets/bootstrap-5.3.8-dist/js/bootstrap.bundle.js"></script>
+    <script src="<?= BASEURL . 'public/js/lte-theme.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/adminlte.js' ?>"></script>
+    <script src="<?= BASEURL . 'public/js/bootstrap.bundle.js' ?>"></script>
 </body>
 
 </html>

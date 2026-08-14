@@ -55,6 +55,13 @@ class Routes {
         $router->post('/detail/edit', ['DetailController', 'edit']);
         $router->get('/detail/delete', ['DetailController', 'delete']);
 
+        $router->get('/payment', ['PaymentController', 'index']);
+        $router->get('/payment/add', ['PaymentController', 'add']);
+        $router->post('/payment/add', ['PaymentController', 'add']);
+        $router->get('/payment/edit', ['PaymentController', 'edit']);
+        $router->post('/payment/edit', ['PaymentController', 'edit']);
+        $router->get('/payment/delete', ['PaymentController', 'delete']);
+
         $router->get('/outstanding', ['OutstandingController', 'index']);
         $router->get('/overdue', ['OverdueController', 'index']);
 
