@@ -1,15 +1,10 @@
 <?php
 session_start();
-<<<<<<< HEAD
-require_once '../../connection.php';
-require_once '../../functions/functions.php';
-=======
 require_once "../../config/database.php";
 require_once "../../classes/Invoice.php";
 require_once "../../classes/Customer.php";
 require_once "../../classes/Pic.php";
 require_once '../../src/functions/functions.php';
->>>>>>> 9251107 (Uodate project)
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -67,14 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-<<<<<<< HEAD
-        <?php include_once '../../components/navbar.php'; ?>
-
-        <?php include_once '../../components/sidebar.php'; ?>
-=======
         <?php include '../../src/components/navbar.php' ?>
         <?php include '../../src/components/sidebar.php' ?>
->>>>>>> 9251107 (Uodate project)
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">

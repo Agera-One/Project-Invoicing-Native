@@ -43,14 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-<<<<<<< HEAD:src/pages/item/item-edit.php
         <?php include_once '../../components/navbar.php'; ?>
-
         <?php include_once '../../components/sidebar.php'; ?>
-=======
-        <?php include '../../src/components/navbar.php' ?>
-        <?php include '../../src/components/sidebar.php' ?>
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item-edit.php
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
