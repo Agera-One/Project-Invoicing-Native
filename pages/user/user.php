@@ -1,11 +1,7 @@
 <?php
 session_start();
 require_once '../../connection.php';
-<<<<<<< HEAD:src/pages/user/user.php
 require_once '../../functions/functions.php';
-=======
-include '../../functions/functions.php';
->>>>>>> 72f1f68 (Refactor project to OOP):pages/user/user.php
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];

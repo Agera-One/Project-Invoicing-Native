@@ -54,13 +54,10 @@ function pagination($database, $page, $table, $column, $where_condition, $join =
         'total_page'   => $total_page,
         'rows'         => $rows,
     ];
-<<<<<<< HEAD
-=======
 }
 
 function record_exists($database, $table, $column, $where_condition) {
     $is_exists = $database->has($table, $column, $where_condition);
 
     return $is_exists ? true : false;
->>>>>>> 72f1f68 (Refactor project to OOP)
 }

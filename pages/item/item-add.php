@@ -1,21 +1,13 @@
 <?php
 session_start();
-<<<<<<< HEAD:src/pages/item/item-add.php
-require_once '../../connection.php';
-require_once '../../functions/functions.php';
-=======
-require "../../config/database.php";
-require "../../classes/Item.php";
+require_once "../../config/database.php";
+require_once "../../classes/Item.php";
 include '../../src/functions/functions.php';
 
 $db = (new Database())->getConnection();
 $item = new Item($db);
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item-add.php
 
-$user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
-
-if (!isset($user_id)) {
+if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit;
 }
@@ -57,14 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-<<<<<<< HEAD:src/pages/item/item-add.php
-        <?php include_once '../../components/navbar.php'; ?>
-
-        <?php include_once '../../components/sidebar.php'; ?>
-=======
         <?php include '../../src/components/navbar.php' ?>
         <?php include '../../src/components/sidebar.php' ?>
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item-add.php
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">

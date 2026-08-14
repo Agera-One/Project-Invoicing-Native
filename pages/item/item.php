@@ -1,16 +1,11 @@
 <?php
 session_start();
-<<<<<<< HEAD:src/pages/item/item.php
-require_once '../../connection.php';
-require_once '../../functions/functions.php';
-=======
 require "../../config/database.php";
 require "../../classes/Item.php";
 include '../../src/functions/functions.php';
 
 $db = (new Database())->getConnection();
 $item = new Item($db);
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item.php
 
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
@@ -22,17 +17,10 @@ if (!isset($user_id)) {
 
 $where_condition = [];
 $search = $_GET['search'] ?? '';
-<<<<<<< HEAD:src/pages/item/item.php
-$page = $_GET['page'] ?? 1; 
-
-$where_condition = search($search, $where_condition, ['ref_no', 'name']);
-$pagination = pagination($database, $page, 'item', 'id', $where_condition);
-=======
 $page = $_GET['page'] ?? 1;
 
 $where_condition = search($search, $where_condition, ['ref_no', 'name']);
 $pagination = pagination($db, $page, 'item', 'id', $where_condition);
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item.php
 extract($pagination);
 
 $where_condition['company_id'] = $company_id;
@@ -60,14 +48,8 @@ $datas = $item->getAll($query_options);
 
 <body class="layout-fixed fixed-header sidebar-expand-lg bg-body-tertiary">
     <div class="app-wrapper">
-<<<<<<< HEAD:src/pages/item/item.php
-        <?php include_once '../../components/navbar.php'; ?>
-
-        <?php include_once '../../components/sidebar.php'; ?>
-=======
         <?php include '../../src/components/navbar.php'; ?>
         <?php include '../../src/components/sidebar.php'; ?>
->>>>>>> 72f1f68 (Refactor project to OOP):pages/item/item.php
 
         <main class="app-main py-4">
             <div class="container-fluid px-4">
