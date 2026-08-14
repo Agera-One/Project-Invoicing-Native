@@ -1,11 +1,11 @@
 <?php
-$company_name = $database->get('company', 'name', ['id' => $company_id]);
+$company_name = $db->get('company', 'name', ['id' => $company_id]);
 ?>
 
 <head>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css" />
-    <link rel="stylesheet" href="../../../assets/css/sidebar.css">
+    <link rel="stylesheet" href="../../assets/css/sidebar.css">
 </head>
 
 <aside class="app-sidebar shadow-sm">
@@ -21,7 +21,7 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
                 data-accordion="false">
 
                 <li class="nav-item">
-                    <a href="../dashboard/dashboard.php" class="nav-link">
+                    <a href="../../pages/dashboard/dashboard.php" class="nav-link">
                         <i class="nav-icon bi bi-grid-1x2"></i>
                         <p>Dashboard</p>
                     </a>
@@ -39,21 +39,21 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="../item/item.php" class="nav-link" data-page="item">
+                            <a href="../../pages/item/item.php" class="nav-link" data-page="item">
                                 <i class="bi bi-box-seam nav-icon"></i>
                                 <p>Items</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../customer/customer.php" class="nav-link" data-page="customer">
+                            <a href="../../pages/customer/customer.php" class="nav-link" data-page="customer">
                                 <i class="bi bi-people nav-icon"></i>
                                 <p>Customers</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../pic/pic.php" class="nav-link" data-page="pic">
+                            <a href="../../pages/pic/pic.php" class="nav-link" data-page="pic">
                                 <i class="bi bi-person-check nav-icon"></i>
                                 <p>Company PIC</p>
                             </a>
@@ -73,28 +73,28 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="../invoice/invoice.php" class="nav-link" data-page="invoice">
+                            <a href="../../pages/invoice/invoice.php" class="nav-link" data-page="invoice">
                                 <i class="bi bi-receipt-cutoff nav-icon"></i>
                                 <p>Invoices</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../payment/payment.php" class="nav-link" data-page="payment">
+                            <a href="../../pages/payment/payment.php" class="nav-link" data-page="payment">
                                 <i class="bi bi-credit-card nav-icon"></i>
                                 <p>Payments</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../outstanding/outstanding.php" class="nav-link" data-page="outstanding">
+                            <a href="../../pages/outstanding/outstanding.php" class="nav-link" data-page="outstanding">
                                 <i class="bi bi-hourglass-split nav-icon text-warning"></i>
                                 <p>Outstanding</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../overdue/overdue.php" class="nav-link" data-page="overdue">
+                            <a href="../../pages/overdue/overdue.php" class="nav-link" data-page="overdue">
                                 <i class="bi bi-exclamation-triangle nav-icon text-warning"></i>
                                 <p>Overdue</p>
                             </a>
@@ -115,14 +115,14 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="../revenue/revenue.php" class="nav-link" data-page="revenue">
+                            <a href="../../pages/revenue/revenue.php" class="nav-link" data-page="revenue">
                                 <i class="bi bi-graph-up-arrow nav-icon"></i>
                                 <p>Revenue</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../best-seller/best-seller.php" class="nav-link" data-page="best-seller">
+                            <a href="../../pages/best-seller/best-seller.php" class="nav-link" data-page="best-seller">
                                 <i class="bi bi-trophy nav-icon"></i>
                                 <p>Best Seller</p>
                             </a>
@@ -143,14 +143,14 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
                     <ul class="nav nav-treeview">
 
                         <li class="nav-item">
-                            <a href="../company/company.php" class="nav-link" data-page="company">
+                            <a href="../../pages/company/company.php" class="nav-link" data-page="company">
                                 <i class="bi bi-building-gear nav-icon"></i>
                                 <p>Company Setting</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="../user/user.php" class="nav-link" data-page="user">
+                            <a href="../../pages/user/user.php" class="nav-link" data-page="user">
                                 <i class="bi bi-person-gear nav-icon"></i>
                                 <p>User Management</p>
                             </a>
@@ -164,4 +164,4 @@ $company_name = $database->get('company', 'name', ['id' => $company_id]);
     </div>
 </aside>
 
-<script src="../../../assets/js/sidebar.js"></script>
+<script src="../../assets/js/sidebar.js"></script>
