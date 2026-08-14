@@ -1,0 +1,149 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+}
+
+.text-primary {
+    color: #0d6efd;
+}
+
+.text-muted {
+    color: #6c757d;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mb-0 {
+    margin-bottom: 0;
+}
+
+table.grid-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.grid-table td {
+    vertical-align: top;
+    border: none;
+}
+
+.section-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: #6c757d;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+table.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+table.items-table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+}
+
+table.items-table td {
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px;
+}
+
+table.items-table th.text-right,
+table.items-table td.text-right {
+    text-align: right;
+}
+
+table.items-table th.text-center,
+table.items-table td.text-center {
+    text-align: center;
+}
+
+.total-box {
+    width: 45%;
+    float: right;
+}
+
+.total-box table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.total-box td {
+    padding: 6px 0;
+    border: none;
+}
+
+.total-box .grand-total {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0d6efd;
+    border-top: 2px solid #dee2e6;
+    padding-top: 10px;
+    margin-top: 5px;
+}
+
+.clearfix {
+    clear: both;
+}
+
+.signature-section {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 60px;
+}
+
+.signature-section td {
+    border: none;
+    vertical-align: top;
+}
+
+.signature-box {
+    width: 45%;
+    text-align: center;
+}
+
+.signature-box .signature-label {
+    color: #6c757d;
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+
+.signature-box .signature-spacer {
+    height: 70px;
+}
+
+.signature-box .signature-image {
+    max-height: 70px;
+    max-width: 90%;
+    display: block;
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.signature-box .signature-line {
+    border-top: 1px solid #333;
+    margin-bottom: 5px;
+}
+
+.signature-box .signature-name {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.signature-box .signature-role {
+    color: #6c757d;
+    font-size: 11px;
+}

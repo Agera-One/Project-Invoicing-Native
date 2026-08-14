@@ -294,7 +294,6 @@ $signature_src = image_to_base64($invoice['company_signature'] ?? null);
                 <?php else: ?>
                     <div class="signature-spacer"></div>
                 <?php endif; ?>
-                <!-- <div class="signature-name"><?= $invoice['pic_name'] ?></div> -->
                 <div class="signature-name"><?= $invoice['company_name'] ?></div>
             </td>
         </tr>
