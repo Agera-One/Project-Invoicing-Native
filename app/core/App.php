@@ -1,45 +1,59 @@
 <?php
 
-class App {
+class App
+{
     private $controller = 'ErrorController';
     private $method = 'index';
     private $params = [];
     private const DEFAULT_GET = 'GET';
     private const DEFAULT_POST = 'POST';
     private $handlers = [];
-    
-    public function setDefaultController($controller) {
+
+    public function setDefaultController($controller)
+    {
         $this->controller = $controller;
     }
 
-    public function setDefaultMethod($method) {
+    public function setDefaultMethod($method)
+    {
         $this->method = $method;
     }
 
-    public function get($uri, $callback) {
+    public function get($uri, $callback)
+    {
         $this->setHandler(self::DEFAULT_GET, $uri, $callback);
     }
 
-    public function post($uri, $callback) {
+    public function post($uri, $callback)
+    {
         $this->setHandler(self::DEFAULT_POST, $uri, $callback);
     }
 
-    private function setHandler(string $method, string $path, $handler) {
-        $this->handlers[$method . $path] = [    
+    private function setHandler(string $method, string $path, $handler)
+    {
+        $this->handlers[$method . $path] = [
             'method' => $method,
             'path' => $path,
             'handler' => $handler
         ];
     }
 
-    public function run() {
+    public function boot()
+    {
+        $routes = new Routes();
+        $routes->register($this);
+        return $this;
+    }
+
+    public function run()
+    {
         $execute = 0;
         $url = $this->getUrl();
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
         foreach ($this->handlers as $handler) {
             $path = explode('/', trim($handler['path'], '/'));
-            
+
             $kurl = (isset($url[0]) ? $url[0] : '') . (isset($url[1]) ? $url[1] : '');
             $kpath = (isset($path[0]) ? $path[0] : '') . (isset($path[1]) ? $path[1] : '');
 

@@ -7,5 +7,5 @@ require_once '../app/core/Autoload.php';
 
 Session::start();
 
-$routes = new Routes();
-$routes->run();
+$app = new App();
+$app->boot()->run();
