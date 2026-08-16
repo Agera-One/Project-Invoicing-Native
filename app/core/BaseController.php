@@ -9,6 +9,10 @@ class BaseController
 
     public function __construct()
     {
+        if (!Session::get('user_id') || !Session::get('company_id')) {
+            $this->redirect('login');
+        }
+
         $this->userId    = Session::get('user_id');
         $this->companyId = Session::get('company_id');
 
