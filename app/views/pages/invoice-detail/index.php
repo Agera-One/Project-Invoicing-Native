@@ -43,12 +43,12 @@
                             </div>
 
                             <div class="d-flex flex-wrap justify-content-lg-end gap-2 d-print-none">
-                                <a href="../document/invoice-print.php?invoice_id=<?= $invoice_id ?>"
+                                <a href="<?= BASEURL . 'detail/print' ?>/<?= $invoice_id ?>"
                                     class="btn btn-outline-secondary" target="_blank">
                                     <i class="bi bi-printer me-1"></i>
                                     Print
                                 </a>
-                                <a href="../document/invoice-download.php?invoice_id=<?= $invoice_id ?>"
+                                <a href="<?= BASEURL . 'detail/download' ?>/<?= $invoice_id ?>"
                                     class="btn btn-outline-secondary">
                                     <i class="bi bi-download me-1"></i>
                                     Download PDF

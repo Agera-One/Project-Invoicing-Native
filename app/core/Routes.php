@@ -54,6 +54,8 @@ class Routes {
         $router->get('/detail/edit', ['DetailController', 'edit']);
         $router->post('/detail/edit', ['DetailController', 'edit']);
         $router->get('/detail/delete', ['DetailController', 'delete']);
+        $router->get('/detail/print', ['DetailController', 'print']);
+        $router->get('/detail/download', ['DetailController', 'download']);
 
         $router->get('/payment', ['PaymentController', 'index']);
         $router->get('/payment/add', ['PaymentController', 'add']);
