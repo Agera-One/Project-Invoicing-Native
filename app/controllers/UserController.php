@@ -60,7 +60,7 @@ class UserController extends BaseController
     public function edit($id)
     {
         $error = false;
-        $datas = $this->user->find($id);
+        $datas = $this->user->find(['id' => $id]);
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (empty($_POST['password']) && empty($_POST['confirm_password'])) {

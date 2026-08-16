@@ -1,12 +1,14 @@
 <?php
 
 class AuthController extends BaseController {
-    private $auth;
+    private $user;
     private $company;
+    private $db;
 
     public function __construct() {
-        $this->auth = $this->model('auth');
+        $this->user = $this->model('user');
         $this->company = $this->model('company');
+        $this->db = $this->user->getConnection();
     }
 
     public function showLoginForm() {
@@ -17,7 +19,7 @@ class AuthController extends BaseController {
         $email    = $_POST["email"] ?? '';
         $password = $_POST["password"] ?? '';
 
-        $user = $this->auth->find($email);
+        $user = $this->user->find(['email' => $email]);
 
         if ($user) {
             if (password_verify($password, $user["password"])) {
@@ -49,15 +51,15 @@ class AuthController extends BaseController {
         $user_data = [
             'name'     => $_POST['username'],
             'email'    => $_POST['email'],
-            'password' => password_hash($_POST['password'], PASSWORD_DEFAULT),
+            'password' => $_POST['password'],
         ];
 
         $company_data = [
             'company_name'          => $_POST['company_name'],
             'business_entity'       => $_POST['business_entity'],
             'business_sector'       => $_POST['business_sector'],
-            'business_website'      => $_POST['business_website'] === '' ? null : $_POST['business_website'],
-            'business_description'  => $_POST['business_description'] ?? '',
+            'business_website'      => $_POST['business_website'],
+            'business_description'  => $_POST['business_description'],
             'country'               => $_POST['country'],
             'province'              => $_POST['province'],
             'city'                  => $_POST['city'],
@@ -67,24 +69,39 @@ class AuthController extends BaseController {
             'company_phone'         => $_POST['company_phone'],
         ];
 
-        $user_email_exists    = $$this->db->has('user', ['email' => $user_data['email']]);
-        $company_email_exists = $$this->db->has('company', ['email' => $company_data['company_email']]);
-        $company_phone_exists = $$this->db->has('company', ['phone' => $company_data['company_phone']]);
+        $user_email_exists    = $this->db->has('user', ['email' => $user_data['email']]);
+        $company_email_exists = $this->db->has('company', ['email' => $company_data['company_email']]);
+        $company_phone_exists = $this->db->has('company', ['phone' => $company_data['company_phone']]);
 
         if ($user_email_exists) {
-            echo '<script>alert("User email already exists. Please use a different email.")</script>';
+            echo 
+            '<script>
+                alert("User email already exists");
+                window.location.href = "' . BASEURL . 'login";
+            </script>';
         } elseif ($company_email_exists) {
-            echo '<script>alert("Company email already exists. Please use a different email.")</script>';
+            echo 
+            '<script>
+                alert("Company email already exists");
+                window.location.href = "' . BASEURL . 'login";
+            </script>';
         } elseif ($company_phone_exists) {
-            echo '<script>alert("Company phone already exists. Please use a different phone.")</script>';
+            echo 
+            '<script>
+                alert("Company phone already exists");
+                window.location.href = "' . BASEURL . 'login";
+            </script>';
         } else {
             $this->company->create($company_data);
-            $company_id = $this->company->id();
-            $data = $this->auth->create($user_data, $company_id);
+            $user_data['company_id'] = $this->company->id();
+            $data = $this->user->create($user_data);
 
             if ($data) {
-                echo '<script>alert("Registration successful. Please log in.")</script>';
-                echo '<script>window.location.href = "login.php";</script>';
+                echo
+                '<script>
+                    alert("Registration successful. Please log in.");
+                    window.location.href = "' . BASEURL . 'login";
+                </script>';
             } else {
                 echo '<script>alert("Error occurred during registration.")</script>';
             }

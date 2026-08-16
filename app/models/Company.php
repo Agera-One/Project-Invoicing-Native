@@ -68,4 +68,9 @@ class Company extends BaseModel {
             'id' => $id
         ]);
     }
+
+    public function id()
+    {
+        return $this->getConnection()->id();
+    }
 }

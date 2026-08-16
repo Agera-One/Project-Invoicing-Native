@@ -11,10 +11,8 @@ class User extends BaseModel
         return $this->getConnection()->select('user', '*', $query_options);
     }
 
-    public function find($id) {
-        return $this->getConnection()->get('user', '*', [
-            'id' => $id
-        ]);
+    public function find($where) {
+        return $this->getConnection()->get('user', '*', $where);
     }
 
     public function create($data) {

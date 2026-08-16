@@ -19,7 +19,7 @@ class BaseController
         $user    = $this->model('User');
         $company = $this->model('Company');
 
-        $this->currentUser         = $user->find($this->userId);
+        $this->currentUser        = $user->find(['id' => $this->userId]);
         $this->currentCompanyName = $company->find('name', $this->companyId);
     }
 
