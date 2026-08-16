@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
       current--;
       show(current);
     } else {
-      window.location.href = "login.php";
+      window.location.href = "login";
     }
   });
 
