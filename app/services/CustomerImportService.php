@@ -18,9 +18,6 @@ class CustomerImportService
         $this->companyId = $companyId;
     }
 
-    /**
-     * @return array{errors: array, skipped: array, imported_count: int, updated_count: int}
-     */
     public function importFromFile(string $filePath): array
     {
         $result = [
@@ -144,9 +141,6 @@ class CustomerImportService
         return null;
     }
 
-    /**
-     * Mengembalikan customer_code final, atau null jika gagal (reason dikirim lewat &$errorOut).
-     */
     private function resolveCustomerCode(array $data, array $usedCodesThisBatch, ?string &$errorOut): ?string
     {
         $customerCode = $data['customer_code'];
