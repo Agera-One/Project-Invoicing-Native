@@ -77,9 +77,9 @@
                                 <label for="file_name" class="form-label fw-semibold text-secondary">Choose CSV File</label>
                                 <input type="file" class="form-control" id="file_name" name="file_name" accept=".csv" required>
                                 <div class="form-text text-muted mt-2">
-                                    Column structure must match the export template: <code>CUSTOMER CODE, NAME, EMAIL, PHONE, ADDRESS</code> (Comma Separated).
+                                    Column structure must match the export template: <code>CUSTOMER CODE, NAME, EMAIL, PHONE, ADDRESS</code>
                                     <br>
-                                    <code>CUSTOMER CODE</code> is optional — leave it blank and one will be generated automatically in the format <code>INV-YYYY-XXXX</code>. If filled in, it must follow that same format and must be unique.
+                                    <code>CUSTOMER CODE</code> is optional — leave it blank and one will be generated automatically in the format <code>CUST-YYYY-XXXX</code>. If filled in, it must follow that same format and must be unique.
                                 </div>
                             </div>
 

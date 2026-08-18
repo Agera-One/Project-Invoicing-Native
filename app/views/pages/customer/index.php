@@ -37,11 +37,11 @@
                         <a href="<?= BASEURL . 'customer/add' ?>" class="btn btn-primary shadow-sm">
                             <i class="bi bi-plus-circle me-1"></i> Add New Customer
                         </a>
-                        <a href="../document/export-csv.php" class="btn btn-outline-secondary">
+                        <a href="<?= BASEURL . 'customer/export' ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-filetype-csv me-1"></i>
                             Export CSV
                         </a>
-                        <a href="../document/import-csv.php" class="btn btn-outline-secondary">
+                        <a href="<?= BASEURL . 'customer/import' ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-filetype-csv me-1"></i>
                             Import CSV
                         </a>
