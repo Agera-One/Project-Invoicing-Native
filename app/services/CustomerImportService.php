@@ -3,8 +3,8 @@
 class CustomerImportService
 {
     private const REQUIRED_HEADER = 'NAME';
-    private const CODE_PREFIX = 'INV';
-    private const CODE_PATTERN = '/^INV-\d{4}-\d{4}$/';
+    private const CODE_PREFIX = 'CUST';
+    private const CODE_PATTERN = '/^CUST-\d{4}-\d{4}$/';
     private const TEMPLATE_COLUMNS = ['CUSTOMER CODE', 'NAME', 'EMAIL', 'PHONE', 'ADDRESS'];
 
     private $customer;
@@ -150,7 +150,7 @@ class CustomerImportService
         }
 
         if (!preg_match(self::CODE_PATTERN, $customerCode)) {
-            $errorOut = "Invalid CUSTOMER CODE format (must be INV-YYYY-XXXX): \"{$customerCode}\".";
+            $errorOut = "Invalid CUSTOMER CODE format (must be CUST-YYYY-XXXX): \"{$customerCode}\".";
             return null;
         }
 
@@ -182,7 +182,7 @@ class CustomerImportService
 
         $checkCondition = $data['email'] !== '' ? ['email' => $data['email']] : ['name' => $data['name']];
 
-        if ($this->customer->has('customer', $checkCondition)) {
+        if ($this->db->has('customer', $checkCondition)) {
             $this->customer->update($customerData, $checkCondition);
             $result['updated_count']++;
         } else {
