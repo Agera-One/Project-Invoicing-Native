@@ -116,8 +116,8 @@ class DetailController extends BaseController
             $total_bill += $invoice_detail['amount'];
         }
 
-        $logo_src = $this->imageToBase64($invoice['company_logo'] ?? null);
-        $signature_src = $this->imageToBase64($invoice['company_signature'] ?? null);
+        $logo_src = $this->imageToBase64($invoice['company_logo'] ?? null, 'logo');
+        $signature_src = $this->imageToBase64($invoice['company_signature'] ?? null, 'signature');
 
         return [
             'number' => 1,
@@ -130,13 +130,13 @@ class DetailController extends BaseController
         ];
     }
 
-    private function imageToBase64($relative_path)
+    private function imageToBase64($relative_path, $subfolder)
     {
         if (empty($relative_path)) {
             return '';
         }
 
-        $full_path = __DIR__ . '/../../public/uploads/company/' . $relative_path;
+        $full_path = __DIR__ . '/../../public/uploads/company/' . $subfolder . '/' . $relative_path;
 
         if (!file_exists($full_path)) {
             return '';
