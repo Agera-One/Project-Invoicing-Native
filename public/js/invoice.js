@@ -1,0 +1,37 @@
+const invoiceDate = document.getElementById("invoice_date");
+const dueDate = document.getElementById("due_date");
+
+invoiceDate.addEventListener("change", function () {
+  if (!this.value) return;
+
+  const date = new Date(this.value);
+
+  date.setDate(date.getDate() + 7);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  dueDate.value = `${year}-${month}-${day}`;
+});
+
+document.getElementById("invoiceForm").addEventListener("submit", function (e) {
+  let valid = true;
+
+  invoiceDate.classList.remove("is-invalid");
+  dueDate.classList.remove("is-invalid");
+
+  invoiceDateError.textContent = "";
+  dueDateError.textContent = "";
+
+  if (dueDate.value < invoiceDate.value) {
+    dueDateError.textContent =
+      "The due date must not be earlier than the invoice date.";
+    dueDate.classList.add("is-invalid");
+    valid = false;
+  }
+
+  if (!valid) {
+    e.preventDefault();
+  }
+});
