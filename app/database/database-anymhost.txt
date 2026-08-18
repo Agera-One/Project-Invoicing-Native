@@ -1,3 +1,0 @@
-database : ugcxuemz_invoicing
-username : ugcxuemz_admin
-password : QR{T=L53*[#SFz-$wQ
